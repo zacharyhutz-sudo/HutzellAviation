@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import PageHero from '../components/PageHero.astro';
+import CallToAction from '../components/CallToAction.astro';
+import Icon from '../components/Icon.astro';
+import { aircraftSpecs } from '../data/site';
+import '../styles/global.css';
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout title="Piper Cherokee Rental Aircraft | Hutzell Aviation" description="Explore the Piper Cherokee planned for Hutzell Aviation aircraft rental and pilot time building in the Athens, Georgia area.">
+  <Header />
+  <main>
+    <PageHero eyebrow="THE AIRCRAFT" title="Piper Cherokee" description="A familiar single-engine platform being prepared for approved renters, local flying, and pilot time building." />
+
+    <section class="section aircraft-detail-section">
+      <div class="container aircraft-detail-grid">
+        <div class="aircraft-showcase reveal">
+          <div class="aircraft-showcase-head"><span>PIPER CHEROKEE</span><span class="draft-pill">Draft aircraft profile</span></div>
+          <svg viewBox="0 0 900 460" role="img" aria-label="Stylized Piper Cherokee"><defs><linearGradient id="aircraftSky" x1="0" y1="0" x2="900" y2="460"><stop stop-color="#f6f8f9"/><stop offset="1" stop-color="#dceaf1"/></linearGradient></defs><rect width="900" height="460" rx="30" fill="url(#aircraftSky)"/><path d="M86 292H322L380 250H482L548 292H790L834 319H529L490 400H427L447 319H350L312 365H251L280 319H91L47 306L86 292Z" fill="#fff" stroke="#082B45" stroke-width="9" stroke-linejoin="round"/><path d="M388 251L407 177H444L454 250" fill="#2F6F94" stroke="#082B45" stroke-width="9" stroke-linejoin="round"/><path d="M111 321H772" stroke="#D99A2B" stroke-width="7" stroke-linecap="round"/><circle cx="346" cy="354" r="20" fill="#082B45"/><circle cx="549" cy="354" r="20" fill="#082B45"/><path d="M70 405H826" stroke="#082B45" stroke-opacity=".15" stroke-width="3" stroke-dasharray="16 16"/></svg>
+          <p>Replace this illustration with a high-resolution side profile of the actual aircraft.</p>
+        </div>
+        <div class="aircraft-detail-copy reveal reveal-delay"><p class="eyebrow"><span></span> RENTAL PLATFORM</p><h2>Aircraft details renters need before they apply.</h2><p class="lead">This page separates confirmed facts from placeholders so the site does not accidentally publish incorrect aircraft specifications.</p><div class="spec-grid">{aircraftSpecs.map((spec) => <div><span>{spec.label}</span><strong>{spec.value}</strong></div>)}</div></div>
+      </div>
+    </section>
+
+    <section class="section requirements-section">
+      <div class="container requirements-grid">
+        <div class="section-heading reveal"><p class="eyebrow light"><span></span> RENTER REQUIREMENTS</p><h2>Approval before access.</h2><p>Final requirements must follow the aircraft insurance policy and Tyler’s rental agreement. The site is ready for those exact rules once confirmed.</p></div>
+        <div class="requirement-cards"><article class="reveal"><Icon name="document" size={26} /><h3>Pilot documentation</h3><p>Certificate, medical or BasicMed information when applicable, recent experience, and other insurer-required records.</p></article><article class="reveal reveal-1"><Icon name="shield" size={26} /><h3>Renter approval</h3><p>Tyler reviews each application before the renter can reserve the aircraft online.</p></article><article class="reveal reveal-2"><Icon name="plane" size={26} /><h3>Aircraft checkout</h3><p>A familiarization or checkout requirement can be tracked before booking privileges are activated.</p></article></div>
+      </div>
+    </section>
+
+    <section class="section operations-section">
+      <div class="container">
+        <div class="section-heading centered reveal"><p class="eyebrow centered-eyebrow"><span></span> OPERATING INFORMATION <span></span></p><h2>Policies the final aircraft page will publish.</h2></div>
+        <div class="operations-grid"><div><span>01</span><h3>Home airport</h3><p>Aircraft location, access instructions, and normal operating hours.</p></div><div><span>02</span><h3>Fuel policy</h3><p>Wet or dry rate, reimbursement process, and required fuel level on return.</p></div><div><span>03</span><h3>Overnight use</h3><p>Approval process, daily minimums, and return-time expectations.</p></div><div><span>04</span><h3>Squawk reporting</h3><p>A clear process for reporting maintenance or operational concerns.</p></div></div>
+      </div>
+    </section>
+
+    <section class="section gallery-section">
+      <div class="container"><div class="section-heading reveal"><p class="eyebrow"><span></span> AIRCRAFT GALLERY</p><h2>Photography slots are ready.</h2></div><div class="gallery-grid"><div class="gallery-placeholder wide"><Icon name="plane" size={42}/><span>Exterior profile</span></div><div class="gallery-placeholder"><Icon name="gauge" size={34}/><span>Full panel</span></div><div class="gallery-placeholder"><Icon name="plane" size={34}/><span>Cabin and seating</span></div><div class="gallery-placeholder"><Icon name="wrench" size={34}/><span>Engine and cowling</span></div><div class="gallery-placeholder"><Icon name="location" size={34}/><span>Aircraft at home airport</span></div></div></div>
+    </section>
+    <CallToAction title="Want to see when the Cherokee is open?" text="The calendar prototype shows how renters will review available, limited, reserved, and maintenance periods." />
+  </main>
+  <Footer />
+</BaseLayout>

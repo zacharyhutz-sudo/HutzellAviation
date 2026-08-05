@@ -1,90 +1,124 @@
 export const site = {
-  name: 'Hutzell Aviation',
+  name: 'Hutzell Aviation LLC',
+  shortName: 'Hutzell Aviation',
   owner: 'Tyler Hutzell',
-  tagline: 'Training today. Pilots tomorrow.',
+  tagline: 'Build time. Fly on your schedule.',
   location: 'Athens, Georgia',
-  serviceArea: 'Serving aspiring pilots throughout Athens and Northeast Georgia',
+  serviceArea: 'Aircraft rental for qualified pilots in Athens and Northeast Georgia',
   email: 'hello@hutzellaviation.com',
   phoneDisplay: '(706) 555-0148',
   phoneHref: '+17065550148',
   instagram: 'https://instagram.com/hutzellaviation',
 };
 
-export const services = [
+export const navItems = [
+  { label: 'Home', href: '' },
+  { label: 'About', href: 'about/' },
+  { label: 'Aircraft', href: 'aircraft/' },
+  { label: 'Pricing', href: 'pricing/' },
+  { label: 'Availability', href: 'availability/' },
+] as const;
+
+export const pricingPlans = [
   {
-    icon: 'compass',
-    eyebrow: 'START HERE',
-    title: 'Introductory Flight Lesson',
-    description:
-      'Get behind the controls, experience the fundamentals of flight, and learn what the path to becoming a pilot can look like.',
+    name: 'Pay As You Go',
+    hours: 'No minimum',
+    rate: 'Rate coming soon',
+    total: 'Pay after each flight',
+    description: 'A flexible option for occasional renters who do not want to purchase a block in advance.',
+    features: ['No upfront block purchase', 'Reserve approved open time', 'Final billing based on recorded aircraft time'],
+    badge: '',
   },
   {
-    icon: 'certificate',
-    eyebrow: 'BUILD YOUR FOUNDATION',
-    title: 'Private Pilot Training',
-    description:
-      'Personalized, one-on-one instruction designed to build strong habits, practical judgment, and confident aircraft control.',
+    name: '15-Hour Block',
+    hours: '15 prepaid hours',
+    rate: 'Discounted rate coming soon',
+    total: 'Package total coming soon',
+    description: 'A practical starter block for pilots planning to fly consistently over the next several months.',
+    features: ['Lower hourly rate', 'Account hour balance', 'Reservation history and usage ledger'],
+    badge: '',
   },
   {
-    icon: 'refresh',
-    eyebrow: 'KEEP GROWING',
-    title: 'Proficiency & Flight Reviews',
-    description:
-      'Focused instruction for pilots who want to sharpen skills, regain confidence, or prepare for a required flight review.',
+    name: '25-Hour Block',
+    hours: '25 prepaid hours',
+    rate: 'Preferred rate coming soon',
+    total: 'Package total coming soon',
+    description: 'Designed for active time builders who want meaningful savings without committing to the largest package.',
+    features: ['Preferred hourly rate', 'Best fit for regular flying', 'Account hour balance and receipts'],
+    badge: 'Most Popular',
   },
   {
-    icon: 'book',
-    eyebrow: 'UNDERSTAND THE WHY',
-    title: 'Ground Instruction',
-    description:
-      'Clear, practical help with aerodynamics, regulations, weather, navigation, decision-making, and lesson preparation.',
+    name: '50-Hour Block',
+    hours: '50 prepaid hours',
+    rate: 'Best rate coming soon',
+    total: 'Package total coming soon',
+    description: 'The strongest value for serious time builders planning frequent and sustained aircraft use.',
+    features: ['Lowest planned hourly rate', 'Built for high-frequency renters', 'Detailed package transaction ledger'],
+    badge: 'Best Value',
   },
 ] as const;
 
-export const reasons = [
-  {
-    title: 'One instructor. One plan.',
-    text: 'Train with a consistent instructor who understands your goals, learning style, and progress from lesson to lesson.',
-  },
-  {
-    title: 'Flexible, local scheduling.',
-    text: 'Coordinate lesson times around work, school, weather, and aircraft availability in the Athens area.',
-  },
-  {
-    title: 'Confidence built on safety.',
-    text: 'Develop sound habits and decision-making—not just the minimum maneuvers needed to pass a checkride.',
-  },
-];
+export const aircraftSpecs = [
+  { label: 'Aircraft', value: 'Piper Cherokee' },
+  { label: 'Category', value: 'Single-engine land' },
+  { label: 'Seating', value: 'Confirm exact configuration' },
+  { label: 'Engine', value: 'Specification coming soon' },
+  { label: 'Avionics', value: 'Panel details coming soon' },
+  { label: 'Home Airport', value: 'Athens-area location coming soon' },
+] as const;
 
-export const faqs = [
+export const rentalSteps = [
   {
-    question: 'Do I need any experience before my first lesson?',
-    answer:
-      'No. Your first lesson can begin with the basics. Tyler will explain the aircraft, walk through the preflight process, and tailor the flight to your comfort level.',
+    number: '01',
+    title: 'Apply to rent',
+    text: 'Submit your pilot background, contact information, and required documents for review.',
   },
   {
-    question: 'What happens during an introductory flight lesson?',
-    answer:
-      'You will begin with a short ground briefing, help inspect the aircraft, and then fly with Tyler while learning how the controls affect the airplane. Exact lesson length and pricing will be confirmed when scheduling.',
+    number: '02',
+    title: 'Get approved',
+    text: 'Complete the renter approval process and any aircraft checkout required by Hutzell Aviation.',
   },
   {
-    question: 'How often should a student fly?',
-    answer:
-      'Consistency usually helps students retain skills and progress efficiently. The right schedule depends on your availability, budget, weather, and training goals.',
+    number: '03',
+    title: 'Reserve online',
+    text: 'Sign in, select an available time block, and confirm your aircraft reservation.',
   },
   {
-    question: 'Where does training take place?',
+    number: '04',
+    title: 'Fly and reconcile',
+    text: 'After the flight, actual aircraft time is recorded and applied to your package or invoice.',
+  },
+] as const;
+
+export const rentalFaqs = [
+  {
+    question: 'Is Hutzell Aviation a flight school?',
     answer:
-      'Hutzell Aviation serves the Athens, Georgia area. The exact airport, meeting point, and arrival instructions will be provided when your lesson is scheduled.',
+      'No. Hutzell Aviation is being developed as an aircraft-rental company for approved pilots and time builders. The company is not advertising flight instruction through the aircraft.',
   },
   {
-    question: 'What should I bring?',
+    question: 'Who can reserve the aircraft?',
     answer:
-      'Bring a government-issued photo ID, comfortable clothing, closed-toe shoes, sunglasses, and any questions you have. Tyler will let you know if anything else is needed.',
+      'Only approved renters will be able to complete a reservation. Final pilot qualifications, checkout requirements, and operating limitations will be based on the aircraft insurance policy and Hutzell Aviation rental agreement.',
   },
   {
-    question: 'How much does flight training cost?',
+    question: 'Can I see availability before I am approved?',
     answer:
-      'Training cost depends on aircraft time, instructor time, lesson frequency, and individual progress. Contact Hutzell Aviation for current rates and a personalized training estimate.',
+      'Yes. The public calendar can show whether the aircraft is generally available, reserved, or unavailable without displaying another renter’s identity or trip details.',
   },
-];
+  {
+    question: 'How are rental hours charged?',
+    answer:
+      'The final policy is still being confirmed. The booking system is designed to track the scheduled reservation window separately from actual billable aircraft time, such as Hobbs or tach time.',
+  },
+  {
+    question: 'Can I purchase a block of hours?',
+    answer:
+      'Yes. The planned pricing options include pay as you go, 15-hour, 25-hour, and 50-hour packages. Final rates, expiration terms, and refund rules will be published before online purchasing is enabled.',
+  },
+  {
+    question: 'Can an instructor rent the aircraft?',
+    answer:
+      'An instructor may apply as a renter. Any use of the aircraft while providing instruction to another person will require explicit approval under Hutzell Aviation’s insurance and rental policies before it is permitted.',
+  },
+] as const;

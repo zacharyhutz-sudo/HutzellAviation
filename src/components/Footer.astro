@@ -1,24 +1,19 @@
 ---
 import Icon from './Icon.astro';
-import { site } from '../data/site';
+import { navItems, site } from '../data/site';
+const base = import.meta.env.BASE_URL;
 ---
 <footer class="site-footer">
   <div class="container footer-grid">
     <div class="footer-brand">
-      <div class="footer-lockup">
-        <span class="footer-h">H</span>
-        <div><strong>HUTZELL</strong><span>AVIATION</span></div>
-      </div>
+      <div class="footer-logo"><img src={`${base}images/logo-full.png`} alt="Hutzell Aviation" width="260" height="172" /></div>
       <p>{site.serviceArea}.</p>
-      <p class="footer-tagline">{site.tagline}</p>
     </div>
     <div>
       <h3>Explore</h3>
       <nav aria-label="Footer navigation">
-        <a href="#training">Training</a>
-        <a href="#about">About Tyler</a>
-        <a href="#aircraft">Aircraft</a>
-        <a href="#faq">FAQ</a>
+        {navItems.slice(1).map((item) => <a href={`${base}${item.href}`}>{item.label}</a>)}
+        <a href={`${base}apply/`}>Renter Application</a>
       </nav>
     </div>
     <div>
@@ -28,13 +23,13 @@ import { site } from '../data/site';
       <span>{site.location}</span>
     </div>
     <div class="footer-cta">
-      <h3>Ready to begin?</h3>
-      <p>Schedule an introductory flight lesson with Tyler.</p>
-      <a href="#contact">Start your journey <Icon name="arrow" size={18} /></a>
+      <h3>Ready to build time?</h3>
+      <p>Review availability, submit a renter application, and prepare for the approval process.</p>
+      <a href={`${base}availability/`}>View availability <Icon name="arrow" size={18} /></a>
     </div>
   </div>
   <div class="container footer-bottom">
     <p>© {new Date().getFullYear()} Hutzell Aviation LLC. All rights reserved.</p>
-    <p>Flight instruction only. Hutzell Aviation does not provide charter or passenger transportation services.</p>
+    <p>Aircraft rental only. All rentals are subject to approval, insurance requirements, aircraft availability, and the signed rental agreement.</p>
   </div>
 </footer>

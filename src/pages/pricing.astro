@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import PageHero from '../components/PageHero.astro';
+import CallToAction from '../components/CallToAction.astro';
+import Icon from '../components/Icon.astro';
+import { pricingPlans, rentalFaqs } from '../data/site';
+import '../styles/global.css';
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout title="Aircraft Rental Pricing | Hutzell Aviation" description="Compare planned pay-as-you-go, 15-hour, 25-hour, and 50-hour Piper Cherokee rental options from Hutzell Aviation.">
+  <Header />
+  <main>
+    <PageHero eyebrow="RENTAL PRICING" title="Flexible options for occasional flying and serious time building." description="The pricing structure is in place. Final dollar amounts and policy details remain marked as coming soon until Tyler confirms them." />
+
+    <section class="section pricing-section">
+      <div class="container">
+        <div class="draft-notice"><Icon name="document" size={22}/><div><strong>Draft pricing page</strong><span>Replace the “coming soon” fields before enabling package purchases or promoting rates publicly.</span></div></div>
+        <div class="pricing-grid">{pricingPlans.map((plan) => <article class:list={['price-card','reveal',{featured: plan.badge === 'Most Popular'}]}>{plan.badge && <span class="plan-badge">{plan.badge}</span>}<p class="price-hours">{plan.hours}</p><h2>{plan.name}</h2><div class="price-rate"><strong>{plan.rate}</strong><span>{plan.total}</span></div><p>{plan.description}</p><ul>{plan.features.map((feature) => <li><Icon name="check" size={17}/>{feature}</li>)}</ul><a class:list={['button',{ 'button-outline': !plan.badge }]} href={`${base}apply/`}>Apply for Access</a></article>)}</div>
+      </div>
+    </section>
+
+    <section class="section billing-section">
+      <div class="container billing-grid"><div class="section-heading reveal"><p class="eyebrow light"><span></span> HOW BILLING WILL WORK</p><h2>Reservation time and billable flight time are separate.</h2><p>The system is designed so Tyler can block the full scheduled rental period while charging or deducting only the final recorded aircraft time.</p></div><div class="billing-flow reveal reveal-delay"><div><span>1</span><strong>Reserve</strong><p>Example: 9:00 AM–2:00 PM</p></div><div><span>2</span><strong>Fly</strong><p>Actual aircraft time is recorded</p></div><div><span>3</span><strong>Reconcile</strong><p>Apply hours to package or invoice</p></div></div></div>
+    </section>
+
+    <section class="section policy-section">
+      <div class="container"><div class="section-heading centered reveal"><p class="eyebrow centered-eyebrow"><span></span> DETAILS TO FINALIZE <span></span></p><h2>Each rate needs a complete policy.</h2></div><div class="policy-grid"><article><h3>Wet or dry</h3><p>State whether fuel is included and how off-field fuel purchases are handled.</p></article><article><h3>Hobbs or tach</h3><p>Define the meter used to calculate actual billable aircraft time.</p></article><article><h3>Expiration</h3><p>Set a clear expiration and refund policy for prepaid hour blocks.</p></article><article><h3>Cancellation</h3><p>Publish notice windows, no-show fees, and weather exceptions.</p></article></div></div>
+    </section>
+
+    <section class="section faq-section"><div class="container faq-grid"><div class="faq-intro reveal"><p class="eyebrow"><span></span> RENTAL QUESTIONS</p><h2>Important answers before checkout.</h2><p>These draft FAQs keep the site aligned with the rental-only business model.</p></div><div class="faq-list reveal reveal-delay">{rentalFaqs.map((faq, index) => <details open={index === 0}><summary>{faq.question}<span aria-hidden="true"></span></summary><div class="faq-answer"><p>{faq.answer}</p></div></details>)}</div></div></section>
+    <CallToAction />
+  </main>
+  <Footer />
+</BaseLayout>

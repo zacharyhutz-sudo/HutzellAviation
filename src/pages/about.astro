@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import PageHero from '../components/PageHero.astro';
+import CallToAction from '../components/CallToAction.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../data/site';
+import '../styles/global.css';
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout title="About Tyler | Hutzell Aviation" description="Learn about Tyler Hutzell, his ATP training background, and the purpose behind Hutzell Aviation aircraft rental in Athens, Georgia.">
+  <Header />
+  <main>
+    <PageHero eyebrow="ABOUT HUTZELL AVIATION" title="Built by a pilot, for pilots who need access." description="Tyler Hutzell founded Hutzell Aviation to create a simpler, more professional path to renting an aircraft and building flight time in the Athens area." />
+
+    <section class="section">
+      <div class="container biography-grid">
+        <div class="bio-visual reveal">
+          <div class="portrait-placeholder"><div class="portrait-route"></div><span>TH</span><small>Replace with Tyler’s portrait</small></div>
+          <div class="bio-credential"><Icon name="plane" size={25} /><div><strong>ATP-trained pilot</strong><span>Exact training details to be added</span></div></div>
+        </div>
+        <div class="bio-copy reveal reveal-delay">
+          <p class="eyebrow"><span></span> MEET THE OWNER</p>
+          <h2>{site.owner}</h2>
+          <p class="lead">Tyler completed professional flight training through ATP Flight School and understands how important consistent aircraft access can be for pilots working toward career and experience goals.</p>
+          <p>Hutzell Aviation is being developed as an aircraft-rental company—not a flight school. The company’s purpose is to make the rental process clear, give qualified pilots a professional way to review availability, and offer flexible pricing for pilots who plan to fly regularly.</p>
+          <p>The final biography can include Tyler’s ATP location, graduation date, certificates, ratings, total time, and the story of how he acquired the Piper Cherokee.</p>
+          <div class="bio-values"><div><Icon name="shield" size={22} /><span><strong>Responsible access</strong>Approval and policies before booking.</span></div><div><Icon name="calendar" size={22} /><span><strong>Clear scheduling</strong>Availability that renters can understand.</span></div><div><Icon name="gauge" size={22} /><span><strong>Time-builder focused</strong>Packages designed around consistent flying.</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section purpose-section">
+      <div class="container">
+        <div class="section-heading centered reveal"><p class="eyebrow centered-eyebrow light"><span></span> THE COMPANY PURPOSE <span></span></p><h2>Aircraft access without presenting as a flight school.</h2><p>Every section of the site is written around aircraft rental, approved-renter access, and pilot time building.</p></div>
+        <div class="purpose-grid"><article class="reveal"><span>01</span><h3>Dependable access</h3><p>Build a professional reservation process around one well-presented aircraft.</p></article><article class="reveal reveal-1"><span>02</span><h3>Transparent expectations</h3><p>Publish qualifications, policies, pricing terms, and aircraft information clearly.</p></article><article class="reveal reveal-2"><span>03</span><h3>Flexible time building</h3><p>Support both occasional renters and pilots purchasing larger hour blocks.</p></article></div>
+      </div>
+    </section>
+
+    <section class="section gallery-section">
+      <div class="container">
+        <div class="section-heading reveal"><p class="eyebrow"><span></span> PHOTO GALLERY</p><h2>Ready for aircraft and owner photography.</h2><p>These placeholders establish the final layout. Replace them with Tyler, exterior, cockpit, panel, ramp, and in-flight images.</p></div>
+        <div class="gallery-grid"><div class="gallery-placeholder wide"><Icon name="plane" size={42} /><span>Aircraft exterior hero image</span></div><div class="gallery-placeholder"><Icon name="gauge" size={34} /><span>Instrument panel</span></div><div class="gallery-placeholder"><Icon name="user" size={34} /><span>Tyler with aircraft</span></div><div class="gallery-placeholder"><Icon name="location" size={34} /><span>Ramp and airport</span></div><div class="gallery-placeholder"><Icon name="plane" size={34} /><span>In-flight image</span></div></div>
+      </div>
+    </section>
+
+    <CallToAction title="Interested in becoming a renter?" text="Review the aircraft and availability, then send Tyler the information needed to begin the approval process." />
+  </main>
+  <Footer />
+</BaseLayout>

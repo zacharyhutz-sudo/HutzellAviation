@@ -1,0 +1,18 @@
+---
+import Icon from './Icon.astro';
+interface Props {
+  title?: string;
+  text?: string;
+}
+const {
+  title = 'Ready to build time on your schedule?',
+  text = 'Review the current calendar, then submit an application to become an approved Hutzell Aviation renter.',
+} = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+<section class="cta-section">
+  <div class="container cta-shell reveal">
+    <div><p class="eyebrow light"><span></span>NEXT STEPS</p><h2>{title}</h2><p>{text}</p></div>
+    <div class="cta-actions"><a class="button" href={`${base}availability/`}>View Availability <Icon name="calendar" size={19} /></a><a class="button button-ghost" href={`${base}apply/`}>Apply to Rent</a></div>
+  </div>
+</section>

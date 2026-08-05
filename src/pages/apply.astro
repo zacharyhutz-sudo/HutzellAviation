@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import '../styles/global.css';
+---
+<BaseLayout title="Renter Application | Hutzell Aviation" description="Preview the Hutzell Aviation renter application for qualified pilots seeking access to the Piper Cherokee.">
+  <Header />
+  <main>
+    <PageHero eyebrow="RENTER APPLICATION" title="Apply for aircraft access." description="This front-end application establishes the information Tyler will review before activating booking privileges. Secure storage and submission will be connected in the backend phase." />
+
+    <section class="section application-section">
+      <div class="container application-grid">
+        <div class="application-sidebar reveal"><div class="application-step active"><span>1</span><div><strong>Contact information</strong><small>Who you are</small></div></div><div class="application-step"><span>2</span><div><strong>Pilot experience</strong><small>Certificates and time</small></div></div><div class="application-step"><span>3</span><div><strong>Documents</strong><small>Secure uploads later</small></div></div><div class="application-step"><span>4</span><div><strong>Review</strong><small>Tyler approves access</small></div></div><div class="application-help"><Icon name="shield" size={25}/><h3>Approval is required</h3><p>Submitting an application will not automatically authorize use of the aircraft.</p></div></div>
+
+        <form class="renter-form reveal reveal-delay" data-demo-application>
+          <div class="form-notice"><Icon name="wrench" size={21}/><div><strong>Prototype form</strong><span>This version validates in the browser but does not transmit or store personal information.</span></div></div>
+          <fieldset><legend>Contact information</legend><div class="form-grid"><label>Legal first name<input name="firstName" autocomplete="given-name" required /></label><label>Legal last name<input name="lastName" autocomplete="family-name" required /></label><label>Email address<input type="email" name="email" autocomplete="email" required /></label><label>Phone number<input type="tel" name="phone" autocomplete="tel" required /></label><label class="full">Home address<input name="address" autocomplete="street-address" /></label><label>City<input name="city" autocomplete="address-level2" /></label><label>State<input name="state" autocomplete="address-level1" value="Georgia" /></label></div></fieldset>
+          <fieldset><legend>Pilot information</legend><div class="form-grid"><label>Highest certificate<select name="certificate" required><option value="">Choose one</option><option>Student Pilot</option><option>Private Pilot</option><option>Commercial Pilot</option><option>Airline Transport Pilot</option></select></label><label>Primary rental purpose<select name="purpose" required><option value="">Choose one</option><option>Time building</option><option>Local personal flying</option><option>Cross-country flying</option><option>Other</option></select></label><label>Total flight time<input type="number" name="totalTime" min="0" step="0.1" placeholder="Hours" /></label><label>Time in Piper Cherokee<input type="number" name="cherokeeTime" min="0" step="0.1" placeholder="Hours" /></label><label>Last flight review<input type="date" name="flightReview" /></label><label>Medical / BasicMed expiration<input type="date" name="medicalExpiration" /></label><label class="full">Ratings and endorsements<textarea name="ratings" rows="4" placeholder="List relevant ratings, endorsements, and recent experience."></textarea></label></div></fieldset>
+          <fieldset><legend>Documents and acknowledgments</legend><div class="upload-grid"><label class="upload-box"><Icon name="document" size={27}/><strong>Pilot certificate</strong><span>Upload will be enabled with private storage</span><input type="file" disabled /></label><label class="upload-box"><Icon name="document" size={27}/><strong>Medical or BasicMed</strong><span>Upload will be enabled with private storage</span><input type="file" disabled /></label><label class="upload-box"><Icon name="document" size={27}/><strong>Photo identification</strong><span>Upload will be enabled with private storage</span><input type="file" disabled /></label></div><label class="check-row"><input type="checkbox" required /><span>I understand this is an application for review and does not guarantee aircraft access or reservation privileges.</span></label></fieldset>
+          <button class="button" type="submit">Preview Submission <Icon name="arrow" size={19}/></button>
+          <div class="form-success" data-form-success hidden><Icon name="check" size={24}/><div><strong>Prototype validation complete.</strong><span>No information was transmitted. Connect Supabase before accepting real applications.</span></div></div>
+        </form>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>
+<script is:inline>
+  const form = document.querySelector('[data-demo-application]');
+  if (form) form.addEventListener('submit', (event) => { event.preventDefault(); const message = form.querySelector('[data-form-success]'); message.hidden = false; message.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+</script>
