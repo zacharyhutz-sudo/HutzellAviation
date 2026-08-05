@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/global.css';
+---
+<BaseLayout title="Page Not Found | Hutzell Aviation" description="The page you requested could not be found.">
+  <main class="not-found">
+    <div class="container not-found-inner">
+      <p class="eyebrow centered-eyebrow"><span></span> 404 <span></span></p>
+      <h1>That route is not on the flight plan.</h1>
+      <p>The page you requested could not be found.</p>
+      <a class="button" href={import.meta.env.BASE_URL}>Return Home</a>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .not-found { display:grid; min-height:100vh; place-items:center; padding:40px 0; background:#f6f8f9; }
+  .not-found-inner { max-width:760px; text-align:center; }
+  .not-found h1 { font-size:clamp(3rem,8vw,6rem); }
+  .not-found p:not(.eyebrow) { margin-bottom:30px; font-size:1.15rem; }
+</style>

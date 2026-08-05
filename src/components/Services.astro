@@ -1,0 +1,25 @@
+---
+import Icon from './Icon.astro';
+import { services } from '../data/site';
+---
+<section class="section services" id="training">
+  <div class="container">
+    <div class="section-heading centered reveal">
+      <p class="eyebrow centered-eyebrow"><span></span> FLIGHT TRAINING <span></span></p>
+      <h2>A clear path from curiosity to confidence.</h2>
+      <p>Whether you are stepping into a small airplane for the first time or returning to sharpen your skills, every lesson is built around where you are and where you want to go.</p>
+    </div>
+
+    <div class="service-grid">
+      {services.map((service, index) => (
+        <article class={`service-card reveal reveal-${(index % 2) + 1}`}>
+          <div class="service-icon"><Icon name={service.icon} size={27} /></div>
+          <p class="card-eyebrow">{service.eyebrow}</p>
+          <h3>{service.title}</h3>
+          <p>{service.description}</p>
+          <a href="#contact" aria-label={`Ask about ${service.title}`}>Ask about this training <Icon name="arrow" size={18} /></a>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

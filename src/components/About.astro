@@ -1,0 +1,59 @@
+---
+import Icon from './Icon.astro';
+import { reasons, site } from '../data/site';
+---
+<section class="section about-section" id="about">
+  <div class="container about-grid">
+    <div class="about-portrait reveal" aria-label="Tyler Hutzell portrait placeholder">
+      <div class="portrait-card">
+        <div class="portrait-sky">
+          <div class="portrait-initials">TH</div>
+          <svg viewBox="0 0 500 310" aria-hidden="true">
+            <path d="M18 230C153 168 302 217 478 112" fill="none" stroke="rgba(255,255,255,.42)" stroke-width="3" stroke-dasharray="5 12" />
+            <path d="M345 130L398 108L414 69L427 63L422 106L474 92L485 99L429 126L434 167L422 174L403 136L360 153L349 145L370 129L345 130Z" fill="#D99A2B" />
+          </svg>
+        </div>
+        <div class="portrait-label">
+          <span>YOUR INSTRUCTOR</span>
+          <strong>{site.owner}</strong>
+          <p>Certified Flight Instructor</p>
+        </div>
+      </div>
+      <p class="placeholder-note">Replace this stylized placeholder with Tyler’s photo when one is ready.</p>
+    </div>
+
+    <div class="about-copy reveal reveal-delay">
+      <p class="eyebrow"><span></span> MEET YOUR INSTRUCTOR</p>
+      <h2>Patient instruction. Practical experience. Personal attention.</h2>
+      <p class="lead">
+        Tyler Hutzell founded Hutzell Aviation to help aspiring pilots learn in a focused, encouraging environment—while building the experience and judgment that safe flying demands.
+      </p>
+      <p>
+        Every student brings a different background, schedule, and reason for learning to fly. Tyler’s approach is to make each lesson clear and purposeful, connect ground knowledge to real cockpit decisions, and help students understand not only what to do, but why it matters.
+      </p>
+      <div class="credential-row">
+        <div><span><Icon name="certificate" size={22} /></span><strong>Certified Flight Instructor</strong></div>
+        <div><span><Icon name="location" size={22} /></span><strong>Athens-area training</strong></div>
+      </div>
+      <a class="button button-outline" href="#contact">Contact Tyler <Icon name="arrow" size={20} /></a>
+    </div>
+  </div>
+</section>
+
+<section class="why-section section-small">
+  <div class="container">
+    <div class="why-intro reveal">
+      <p class="eyebrow light"><span></span> WHY HUTZELL AVIATION</p>
+      <h2>Training that stays personal.</h2>
+    </div>
+    <div class="why-grid">
+      {reasons.map((reason, index) => (
+        <article class="why-card reveal" style={`--index:${index + 1}`}>
+          <span class="why-number">0{index + 1}</span>
+          <h3>{reason.title}</h3>
+          <p>{reason.text}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

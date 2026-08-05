@@ -1,0 +1,26 @@
+---
+import Icon from './Icon.astro';
+import { site } from '../data/site';
+---
+<section class="contact-section" id="contact">
+  <div class="container contact-shell reveal">
+    <div class="contact-copy">
+      <p class="eyebrow light"><span></span> READY WHEN YOU ARE</p>
+      <h2>Take the first step toward the cockpit.</h2>
+      <p>Tell Tyler a little about your goals and availability. He will follow up with current rates, aircraft details, and the next available lesson times.</p>
+      <div class="contact-actions">
+        <a class="button" href={`mailto:${site.email}?subject=Flight%20Training%20Inquiry`}>Email Tyler <Icon name="arrow" size={20} /></a>
+        <a class="button button-ghost" href={`tel:${site.phoneHref}`}>Call {site.phoneDisplay}</a>
+      </div>
+    </div>
+    <div class="contact-card">
+      <h3>Hutzell Aviation</h3>
+      <ul>
+        <li><span><Icon name="mail" size={20} /></span><div><small>EMAIL</small><a href={`mailto:${site.email}`}>{site.email}</a></div></li>
+        <li><span><Icon name="phone" size={20} /></span><div><small>PHONE</small><a href={`tel:${site.phoneHref}`}>{site.phoneDisplay}</a></div></li>
+        <li><span><Icon name="location" size={20} /></span><div><small>SERVICE AREA</small><strong>{site.location}</strong></div></li>
+      </ul>
+      <p class="contact-note">Current rates, airport details, and aircraft availability are confirmed directly when scheduling.</p>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,52 @@
+---
+import { site } from '../data/site';
+const base = import.meta.env.BASE_URL;
+---
+<div class="announcement">
+  <div class="container announcement-inner">
+    <span>Personalized flight instruction in the Athens, Georgia area</span>
+    <a href={`tel:${site.phoneHref}`}>Call {site.phoneDisplay}</a>
+  </div>
+</div>
+<header class="site-header" data-header>
+  <div class="container header-inner">
+    <a class="brand" href="#top" aria-label="Hutzell Aviation home">
+      <span class="brand-mark-wrap">
+        <img src={`${base}images/logo-mark.png`} alt="" width="110" height="50" />
+      </span>
+      <span class="brand-words">
+        <strong>HUTZELL</strong>
+        <span>AVIATION</span>
+      </span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" data-nav-toggle>
+      <span class="sr-only">Open navigation</span>
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav id="primary-nav" class="primary-nav" aria-label="Primary navigation" data-nav>
+      <a href="#training">Training</a>
+      <a href="#about">About Tyler</a>
+      <a href="#aircraft">Aircraft</a>
+      <a href="#faq">FAQ</a>
+      <a href="#contact" class="button button-small">Schedule a Lesson</a>
+    </nav>
+  </div>
+</header>
+
+<script is:inline>
+  const toggle = document.querySelector('[data-nav-toggle]');
+  const nav = document.querySelector('[data-nav]');
+  if (toggle && nav) {
+    toggle.addEventListener('click', () => {
+      const open = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!open));
+      nav.classList.toggle('is-open', !open);
+    });
+    nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
+      toggle.setAttribute('aria-expanded', 'false');
+      nav.classList.remove('is-open');
+    }));
+  }
+</script>

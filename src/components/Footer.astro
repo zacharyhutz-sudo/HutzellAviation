@@ -1,0 +1,40 @@
+---
+import Icon from './Icon.astro';
+import { site } from '../data/site';
+---
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <div class="footer-lockup">
+        <span class="footer-h">H</span>
+        <div><strong>HUTZELL</strong><span>AVIATION</span></div>
+      </div>
+      <p>{site.serviceArea}.</p>
+      <p class="footer-tagline">{site.tagline}</p>
+    </div>
+    <div>
+      <h3>Explore</h3>
+      <nav aria-label="Footer navigation">
+        <a href="#training">Training</a>
+        <a href="#about">About Tyler</a>
+        <a href="#aircraft">Aircraft</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+    </div>
+    <div>
+      <h3>Contact</h3>
+      <a href={`mailto:${site.email}`}>{site.email}</a>
+      <a href={`tel:${site.phoneHref}`}>{site.phoneDisplay}</a>
+      <span>{site.location}</span>
+    </div>
+    <div class="footer-cta">
+      <h3>Ready to begin?</h3>
+      <p>Schedule an introductory flight lesson with Tyler.</p>
+      <a href="#contact">Start your journey <Icon name="arrow" size={18} /></a>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <p>© {new Date().getFullYear()} Hutzell Aviation LLC. All rights reserved.</p>
+    <p>Flight instruction only. Hutzell Aviation does not provide charter or passenger transportation services.</p>
+  </div>
+</footer>
