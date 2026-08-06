@@ -7,7 +7,9 @@ import CallToAction from '../components/CallToAction.astro';
 import Icon from '../components/Icon.astro';
 import { aircraftSpecs } from '../data/site';
 import '../styles/global.css';
-const base = import.meta.env.BASE_URL;
+const aircraftExterior = 'https://upload.wikimedia.org/wikipedia/commons/8/8b/Piper_PA-28_Cherokee_-_G-BCPG_-_2_October_2025.jpg';
+const aircraftCockpit = 'https://upload.wikimedia.org/wikipedia/commons/2/29/Cockpit_of_Piper_PA-28-151_%28G-BOYH%29_at_Bristol_Airport%2C_England_15May2016_arp.jpg';
+const aircraftLanding = 'https://upload.wikimedia.org/wikipedia/commons/2/24/Piper_PA-28_Cherokee_Landing_03.JPG';
 ---
 <BaseLayout title="Piper Cherokee Rental Aircraft | Hutzell Aviation" description="Explore the Piper Cherokee planned for Hutzell Aviation aircraft rental and pilot time building in the Athens, Georgia area.">
   <Header />
@@ -16,11 +18,11 @@ const base = import.meta.env.BASE_URL;
 
     <section class="section aircraft-detail-section">
       <div class="container aircraft-detail-grid">
-        <div class="aircraft-showcase reveal">
-          <div class="aircraft-showcase-head"><span>PIPER CHEROKEE</span><span class="draft-pill">Draft aircraft profile</span></div>
-          <svg viewBox="0 0 900 460" role="img" aria-label="Stylized Piper Cherokee"><defs><linearGradient id="aircraftSky" x1="0" y1="0" x2="900" y2="460"><stop stop-color="#f6f8f9"/><stop offset="1" stop-color="#dceaf1"/></linearGradient></defs><rect width="900" height="460" rx="30" fill="url(#aircraftSky)"/><path d="M86 292H322L380 250H482L548 292H790L834 319H529L490 400H427L447 319H350L312 365H251L280 319H91L47 306L86 292Z" fill="#fff" stroke="#082B45" stroke-width="9" stroke-linejoin="round"/><path d="M388 251L407 177H444L454 250" fill="#2F6F94" stroke="#082B45" stroke-width="9" stroke-linejoin="round"/><path d="M111 321H772" stroke="#D99A2B" stroke-width="7" stroke-linecap="round"/><circle cx="346" cy="354" r="20" fill="#082B45"/><circle cx="549" cy="354" r="20" fill="#082B45"/><path d="M70 405H826" stroke="#082B45" stroke-opacity=".15" stroke-width="3" stroke-dasharray="16 16"/></svg>
-          <p>Replace this illustration with a high-resolution side profile of the actual aircraft.</p>
-        </div>
+        <figure class="aircraft-showcase reveal">
+          <div class="aircraft-showcase-head"><span>PIPER CHEROKEE</span><span class="draft-pill">Representative photo</span></div>
+          <img class="aircraft-showcase-photo" src={aircraftExterior} alt="Representative Piper PA-28 Cherokee parked on an airfield" width="4259" height="2842" decoding="async" />
+          <figcaption>Filler photography of a Piper PA-28 Cherokee. Replace this image with the actual Hutzell Aviation aircraft when those photos are available.</figcaption>
+        </figure>
         <div class="aircraft-detail-copy reveal reveal-delay"><p class="eyebrow"><span></span> RENTAL PLATFORM</p><h2>Aircraft details renters need before they apply.</h2><p class="lead">This page separates confirmed facts from placeholders so the site does not accidentally publish incorrect aircraft specifications.</p><div class="spec-grid">{aircraftSpecs.map((spec) => <div><span>{spec.label}</span><strong>{spec.value}</strong></div>)}</div></div>
       </div>
     </section>
@@ -40,9 +42,19 @@ const base = import.meta.env.BASE_URL;
     </section>
 
     <section class="section gallery-section">
-      <div class="container"><div class="section-heading reveal"><p class="eyebrow"><span></span> AIRCRAFT GALLERY</p><h2>Photography slots are ready.</h2></div><div class="gallery-grid"><div class="gallery-placeholder wide"><Icon name="plane" size={42}/><span>Exterior profile</span></div><div class="gallery-placeholder"><Icon name="gauge" size={34}/><span>Full panel</span></div><div class="gallery-placeholder"><Icon name="plane" size={34}/><span>Cabin and seating</span></div><div class="gallery-placeholder"><Icon name="wrench" size={34}/><span>Engine and cowling</span></div><div class="gallery-placeholder"><Icon name="location" size={34}/><span>Aircraft at home airport</span></div></div></div>
+      <div class="container">
+        <div class="section-heading reveal"><p class="eyebrow"><span></span> AIRCRAFT GALLERY</p><h2>Representative Piper Cherokee photography.</h2><p>These public-domain filler images show the type of photography the finished page needs. They are not photos of the specific Hutzell Aviation aircraft.</p></div>
+        <div class="gallery-grid">
+          <figure class="gallery-photo wide"><img src={aircraftExterior} alt="Representative Piper PA-28 Cherokee exterior" width="4259" height="2842" loading="lazy" decoding="async" /><figcaption>Exterior profile</figcaption></figure>
+          <figure class="gallery-photo"><img src={aircraftCockpit} alt="Representative Piper PA-28 cockpit" width="3852" height="2564" loading="lazy" decoding="async" /><figcaption>Panel and avionics</figcaption></figure>
+          <figure class="gallery-photo"><img src={aircraftLanding} alt="Representative Piper PA-28 Cherokee landing" width="1600" height="1200" loading="lazy" decoding="async" /><figcaption>Aircraft in operation</figcaption></figure>
+          <figure class="gallery-photo aircraft-detail-crop"><img src={aircraftExterior} alt="Representative Piper Cherokee fuselage and wing detail" width="4259" height="2842" loading="lazy" decoding="async" /><figcaption>Fuselage and wing detail</figcaption></figure>
+          <figure class="gallery-photo cockpit-detail-crop"><img src={aircraftCockpit} alt="Representative Piper PA-28 instrument detail" width="3852" height="2564" loading="lazy" decoding="async" /><figcaption>Instrument detail</figcaption></figure>
+        </div>
+      </div>
     </section>
-    <CallToAction title="Want to see when the Cherokee is open?" text="The live calendar lets renters review open time, existing reservations, and maintenance periods before requesting an aircraft window." />
+
+    <CallToAction title="Ready to review open time?" text="Check the public calendar, then apply to become an approved renter when the aircraft and policies are finalized." />
   </main>
   <Footer />
 </BaseLayout>

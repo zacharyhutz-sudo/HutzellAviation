@@ -8,6 +8,9 @@ import Icon from '../components/Icon.astro';
 import { site } from '../data/site';
 import '../styles/global.css';
 const base = import.meta.env.BASE_URL;
+const aircraftExterior = 'https://upload.wikimedia.org/wikipedia/commons/8/8b/Piper_PA-28_Cherokee_-_G-BCPG_-_2_October_2025.jpg';
+const aircraftCockpit = 'https://upload.wikimedia.org/wikipedia/commons/2/29/Cockpit_of_Piper_PA-28-151_%28G-BOYH%29_at_Bristol_Airport%2C_England_15May2016_arp.jpg';
+const aircraftLanding = 'https://upload.wikimedia.org/wikipedia/commons/2/24/Piper_PA-28_Cherokee_Landing_03.JPG';
 ---
 <BaseLayout title="About Tyler | Hutzell Aviation" description="Learn about Tyler Hutzell, his ATP training background, and the purpose behind Hutzell Aviation aircraft rental in Athens, Georgia.">
   <Header />
@@ -17,7 +20,7 @@ const base = import.meta.env.BASE_URL;
     <section class="section">
       <div class="container biography-grid">
         <div class="bio-visual reveal">
-          <div class="portrait-placeholder"><div class="portrait-route"></div><span>TH</span><small>Replace with Tyler’s portrait</small></div>
+          <figure class="portrait-photo"><img src={`${base}images/tyler-hutzell.png`} alt="Tyler Hutzell, founder of Hutzell Aviation" width="400" height="400" decoding="async" /><figcaption><span>Tyler Hutzell</span><small>Founder, Hutzell Aviation LLC</small></figcaption></figure>
           <div class="bio-credential"><Icon name="plane" size={25} /><div><strong>ATP-trained pilot</strong><span>Exact training details to be added</span></div></div>
         </div>
         <div class="bio-copy reveal reveal-delay">
@@ -40,8 +43,14 @@ const base = import.meta.env.BASE_URL;
 
     <section class="section gallery-section">
       <div class="container">
-        <div class="section-heading reveal"><p class="eyebrow"><span></span> PHOTO GALLERY</p><h2>Ready for aircraft and owner photography.</h2><p>These placeholders establish the final layout. Replace them with Tyler, exterior, cockpit, panel, ramp, and in-flight images.</p></div>
-        <div class="gallery-grid"><div class="gallery-placeholder wide"><Icon name="plane" size={42} /><span>Aircraft exterior hero image</span></div><div class="gallery-placeholder"><Icon name="gauge" size={34} /><span>Instrument panel</span></div><div class="gallery-placeholder"><Icon name="user" size={34} /><span>Tyler with aircraft</span></div><div class="gallery-placeholder"><Icon name="location" size={34} /><span>Ramp and airport</span></div><div class="gallery-placeholder"><Icon name="plane" size={34} /><span>In-flight image</span></div></div>
+        <div class="section-heading reveal"><p class="eyebrow"><span></span> PHOTO GALLERY</p><h2>A first look at Tyler and the aircraft platform.</h2><p>Tyler’s portrait is current. The Piper Cherokee images are representative filler photography and should be replaced with photos of the actual rental aircraft before the final launch.</p></div>
+        <div class="gallery-grid">
+          <figure class="gallery-photo wide"><img src={aircraftExterior} alt="Representative Piper PA-28 Cherokee parked on an airfield" width="4259" height="2842" loading="lazy" decoding="async" /><figcaption>Representative Piper Cherokee exterior</figcaption></figure>
+          <figure class="gallery-photo"><img src={aircraftCockpit} alt="Representative Piper PA-28 cockpit and instrument panel" width="3852" height="2564" loading="lazy" decoding="async" /><figcaption>Representative PA-28 panel</figcaption></figure>
+          <figure class="gallery-photo portrait-tile"><img src={`${base}images/tyler-hutzell.png`} alt="Tyler Hutzell" width="400" height="400" loading="lazy" decoding="async" /><figcaption>Tyler Hutzell</figcaption></figure>
+          <figure class="gallery-photo"><img src={aircraftLanding} alt="Representative Piper PA-28 Cherokee landing" width="1600" height="1200" loading="lazy" decoding="async" /><figcaption>Representative aircraft in operation</figcaption></figure>
+          <figure class="gallery-photo aircraft-detail-crop"><img src={aircraftExterior} alt="Close crop of a representative Piper PA-28 Cherokee" width="4259" height="2842" loading="lazy" decoding="async" /><figcaption>Exterior detail</figcaption></figure>
+        </div>
       </div>
     </section>
 

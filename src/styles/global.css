@@ -104,8 +104,11 @@ p { color: var(--muted); }
 .hero-trust { display: flex; flex-wrap: wrap; gap: 18px; color: #4c6574; font-size: .86rem; font-weight: 800; }
 .hero-trust span { display: inline-flex; align-items: center; gap: 7px; }
 .hero-trust svg { color: var(--blue); }
-.hero-visual { position: relative; }
-.hero-visual > img { width: 100%; }
+.hero-visual { position: relative; min-width: 0; }
+.hero-photo-frame { position: relative; overflow: hidden; margin: 0; border: 1px solid var(--line); border-radius: 26px; background: var(--cloud); box-shadow: var(--shadow); }
+.hero-photo-frame::after { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(4,29,47,.32)); content: ''; pointer-events: none; }
+.hero-photo-frame img { display: block; width: 100%; aspect-ratio: 1.22 / 1; object-fit: cover; object-position: center 52%; }
+.hero-photo-frame figcaption { position: absolute; z-index: 2; left: 18px; bottom: 18px; padding: 7px 10px; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; color: #fff; background: rgba(8,43,69,.76); backdrop-filter: blur(8px); font-size: .69rem; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
 .hero-status-card { position: absolute; right: 3%; bottom: 7%; display: flex; align-items: center; gap: 12px; min-width: 260px; padding: 16px 19px; border: 1px solid rgba(8,43,69,.08); border-radius: 14px; background: rgba(255,255,255,.96); box-shadow: var(--shadow-soft); }
 .status-dot { width: 12px; height: 12px; border: 3px solid #bde6d2; border-radius: 50%; background: var(--green); }
 .hero-status-card div { display: flex; flex-direction: column; }
@@ -136,9 +139,12 @@ p { color: var(--muted); }
 .rental-steps h3 { color: #fff; }
 .rental-steps p { margin-bottom: 0; color: #bcd0dc; font-size: .92rem; }
 .aircraft-preview-grid { display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: 76px; }
-.aircraft-line-card { padding: 22px; border: 1px solid var(--line); border-radius: 24px; background: var(--cloud); box-shadow: var(--shadow); }
+.aircraft-line-card, .aircraft-photo-card { padding: 22px; border: 1px solid var(--line); border-radius: 24px; background: var(--cloud); box-shadow: var(--shadow); }
+.aircraft-photo-card { margin: 0; overflow: hidden; }
+.aircraft-photo-card img { display: block; width: 100%; aspect-ratio: 1.45 / 1; margin-top: 16px; border-radius: 16px; object-fit: cover; object-position: center; }
+.aircraft-photo-card figcaption, .aircraft-art-meta { display: flex; justify-content: space-between; gap: 18px; padding: 14px 16px 4px; color: var(--navy); font-size: .83rem; font-weight: 900; }
+.aircraft-photo-card figcaption span:last-child { color: var(--muted); font-size: .72rem; text-align: right; }
 .card-label { color: var(--blue); font-size: .75rem; font-weight: 900; letter-spacing: .15em; }
-.aircraft-art-meta { display: flex; justify-content: space-between; padding: 14px 16px 4px; color: var(--navy); font-size: .83rem; font-weight: 900; }
 .check-list { padding: 0; margin: 28px 0 30px; list-style: none; }
 .check-list li { display: flex; align-items: center; gap: 10px; margin: 10px 0; color: #405968; font-weight: 800; }
 .check-list svg { color: var(--green); }
@@ -150,18 +156,21 @@ p { color: var(--muted); }
 .mini-price-card > strong { display: block; color: var(--blue); font-size: .86rem; text-transform: uppercase; letter-spacing: .08em; }
 .plan-badge { display: inline-block; padding: 5px 9px; border-radius: 20px; color: var(--navy); background: var(--gold); font-size: .67rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
 .about-preview-grid { display: grid; grid-template-columns: .72fr 1.28fr; align-items: center; gap: 78px; }
-.tyler-card { position: relative; padding: 36px; border-radius: 24px; color: #fff; background: linear-gradient(145deg, var(--navy), var(--blue)); box-shadow: var(--shadow); }
-.tyler-initials { display: grid; width: 150px; height: 150px; margin-bottom: 42px; place-items: center; border: 1px solid rgba(255,255,255,.3); border-radius: 50%; color: #fff; font-family: 'League Spartan', sans-serif; font-size: 4.4rem; font-weight: 700; }
-.tyler-card > span { color: var(--gold); font-size: .72rem; font-weight: 900; letter-spacing: .16em; }
+.tyler-card { position: relative; overflow: hidden; padding: 0; border-radius: 24px; color: #fff; background: var(--navy); box-shadow: var(--shadow); }
+.tyler-card-photo { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; object-position: center 30%; }
+.tyler-card-body { padding: 29px 34px 33px; background: linear-gradient(145deg, var(--navy-deep), var(--blue)); }
+.tyler-card-body > span { color: var(--gold); font-size: .72rem; font-weight: 900; letter-spacing: .16em; }
 .tyler-card h3 { margin-top: 8px; color: #fff; font-size: 2rem; }
-.tyler-card p { color: #d5e4eb; }
+.tyler-card p { margin-bottom: 0; color: #d5e4eb; }
 
 /* About */
 .biography-grid { display: grid; grid-template-columns: .82fr 1.18fr; align-items: center; gap: 85px; }
-.portrait-placeholder { position: relative; display: grid; min-height: 510px; place-items: center; overflow: hidden; border-radius: 25px; color: #fff; background: linear-gradient(145deg, var(--navy-deep), var(--blue)); box-shadow: var(--shadow); }
-.portrait-placeholder > span { position: relative; z-index: 2; font-family: 'League Spartan',sans-serif; font-size: 7rem; font-weight: 700; }
-.portrait-placeholder small { position: absolute; bottom: 24px; z-index: 2; color: #d8e5eb; }
-.portrait-route { position: absolute; top: 31%; left: -8%; width: 120%; height: 160px; border-top: 4px solid rgba(255,255,255,.34); border-radius: 50%; transform: rotate(-12deg); }
+.portrait-photo { position: relative; overflow: hidden; min-height: 510px; margin: 0; border-radius: 25px; background: var(--navy); box-shadow: var(--shadow); }
+.portrait-photo::after { position: absolute; inset: 52% 0 0; background: linear-gradient(180deg, transparent, rgba(4,29,47,.9)); content: ''; pointer-events: none; }
+.portrait-photo img { display: block; width: 100%; height: 510px; object-fit: cover; object-position: center 25%; }
+.portrait-photo figcaption { position: absolute; z-index: 2; right: 26px; bottom: 25px; left: 26px; display: flex; flex-direction: column; color: #fff; }
+.portrait-photo figcaption span { font-family: 'League Spartan',sans-serif; font-size: 2rem; font-weight: 700; }
+.portrait-photo figcaption small { color: #d8e5eb; }
 .bio-credential { display: flex; align-items: center; gap: 13px; width: calc(100% - 38px); margin: -32px auto 0; padding: 18px 21px; border: 1px solid var(--line); border-radius: 14px; background: #fff; box-shadow: var(--shadow-soft); position: relative; }
 .bio-credential svg { color: var(--gold); }
 .bio-credential div { display: flex; flex-direction: column; }
@@ -181,8 +190,18 @@ p { color: var(--muted); }
 .gallery-section { background: var(--cloud); }
 .gallery-grid { display: grid; grid-template-columns: repeat(4,1fr); grid-auto-rows: 235px; gap: 15px; }
 .gallery-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 13px; border: 1px dashed #9eb3c0; border-radius: 17px; color: var(--blue); background: linear-gradient(145deg,#fff,#e9f0f4); text-align: center; }
-.gallery-placeholder.wide { grid-column: span 2; grid-row: span 2; }
+.gallery-placeholder.wide, .gallery-photo.wide { grid-column: span 2; grid-row: span 2; }
 .gallery-placeholder span { color: var(--navy); font-weight: 800; }
+.gallery-photo { position: relative; overflow: hidden; margin: 0; border-radius: 17px; background: var(--navy); box-shadow: var(--shadow-soft); }
+.gallery-photo::after { position: absolute; inset: 50% 0 0; background: linear-gradient(180deg, transparent, rgba(4,29,47,.8)); content: ''; pointer-events: none; }
+.gallery-photo img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 320ms ease; }
+.gallery-photo:hover img { transform: scale(1.025); }
+.gallery-photo figcaption { position: absolute; z-index: 2; right: 16px; bottom: 15px; left: 16px; color: #fff; font-size: .78rem; font-weight: 900; letter-spacing: .04em; }
+.gallery-photo.portrait-tile img { object-position: center 25%; }
+.gallery-photo.aircraft-detail-crop img { object-position: 76% center; transform: scale(1.16); }
+.gallery-photo.aircraft-detail-crop:hover img { transform: scale(1.19); }
+.gallery-photo.cockpit-detail-crop img { object-position: 62% center; transform: scale(1.18); }
+.gallery-photo.cockpit-detail-crop:hover img { transform: scale(1.21); }
 
 /* Aircraft */
 .aircraft-detail-section { background: #fff; }
@@ -190,7 +209,8 @@ p { color: var(--muted); }
 .aircraft-showcase { padding: 22px; border: 1px solid var(--line); border-radius: 24px; background: #fff; box-shadow: var(--shadow); }
 .aircraft-showcase-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; color: var(--navy); font-size: .76rem; font-weight: 900; letter-spacing: .13em; }
 .draft-pill { padding: 6px 9px; border-radius: 20px; color: var(--gold-dark); background: #fff4dc; letter-spacing: 0; }
-.aircraft-showcase > p { margin: 16px 8px 3px; font-size: .82rem; text-align: center; }
+.aircraft-showcase-photo { display: block; width: 100%; aspect-ratio: 1.46 / 1; border-radius: 17px; object-fit: cover; object-position: center; }
+.aircraft-showcase figcaption, .aircraft-showcase > p { margin: 16px 8px 3px; color: var(--muted); font-size: .82rem; text-align: center; }
 .spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 30px; }
 .spec-grid > div { min-height: 94px; padding: 17px; border: 1px solid var(--line); border-radius: 13px; background: var(--cloud); }
 .spec-grid span { display: block; margin-bottom: 7px; color: var(--blue); font-size: .7rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
@@ -404,14 +424,14 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); outline: 
   .hero-copy { text-align: center; }
   .hero-copy .eyebrow { justify-content: center; }
   .hero-actions, .hero-trust { justify-content: center; }
-  .hero-visual { max-width: 660px; margin-inline: auto; }
+  .hero-visual { width: 100%; max-width: 660px; margin-inline: auto; }
   .proof-grid { grid-template-columns: repeat(2,1fr); }
   .proof-grid > div:nth-child(3) { border-left: 1px solid var(--line); }
   .intro-copy { padding-top: 0; }
   .feature-grid, .purpose-grid, .pricing-grid { grid-template-columns: 1fr; }
   .feature-card p { min-height: auto; }
   .about-preview-grid { gap: 40px; }
-  .tyler-card { max-width: 500px; }
+  .tyler-card { width: 100%; max-width: 500px; margin-inline: auto; }
   .gallery-grid { grid-template-columns: repeat(2,1fr); }
   .application-sidebar, .faq-intro { position: static; }
   .upload-grid { grid-template-columns: 1fr; }
@@ -438,7 +458,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); outline: 
   .spec-grid, .form-grid { grid-template-columns: 1fr; }
   .form-grid label.full { grid-column: auto; }
   .gallery-grid { grid-template-columns: 1fr; grid-auto-rows: 220px; }
-  .gallery-placeholder.wide { grid-column: auto; grid-row: auto; }
+  .gallery-placeholder.wide, .gallery-photo.wide { grid-column: auto; grid-row: auto; }
   .calendar-main { padding: 17px; }
   .calendar-toolbar { align-items: flex-start; flex-direction: column; }
   .calendar-legend { gap: 9px 14px; }
