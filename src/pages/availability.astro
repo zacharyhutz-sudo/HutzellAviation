@@ -30,7 +30,7 @@ const base = import.meta.env.BASE_URL;
             <div class="calendar-grid" data-calendar-grid aria-live="polite"></div>
           </div>
 
-          <aside class="slot-panel" data-slot-panel>
+          <aside class="slot-panel" data-slot-panel tabindex="-1" aria-live="polite">
             <div class="slot-empty" data-slot-empty><span class="slot-icon"><Icon name="calendar" size={30}/></span><h3>Select a date</h3><p>Choose a calendar day to review busy periods and request a rental window.</p></div>
             <div class="slot-content" data-slot-content hidden>
               <p class="slot-eyebrow">SELECTED DATE</p><h3 data-selected-date></h3>
@@ -76,6 +76,7 @@ const base = import.meta.env.BASE_URL;
 
   const grid = calendarRoot.querySelector<HTMLElement>('[data-calendar-grid]')!;
   const monthLabel = calendarRoot.querySelector<HTMLElement>('[data-month-label]')!;
+  const slotPanel = calendarRoot.querySelector<HTMLElement>('[data-slot-panel]')!;
   const slotEmpty = calendarRoot.querySelector<HTMLElement>('[data-slot-empty]')!;
   const slotContent = calendarRoot.querySelector<HTMLElement>('[data-slot-content]')!;
   const selectedDateEl = calendarRoot.querySelector<HTMLElement>('[data-selected-date]')!;
@@ -204,7 +205,19 @@ const base = import.meta.env.BASE_URL;
       : '<div class="busy-period open-all-day"><strong>Open calendar</strong><span>No busy periods published</span></div>';
     slotEmpty.hidden = true;
     slotContent.hidden = false;
+    slotPanel.classList.add('has-selection');
     validateSelection();
+
+    // On narrow layouts the booking panel sits below the calendar. Bring it
+    // into view immediately so the selected-date controls are not mistaken
+    // for missing content. Desktop layouts keep the panel beside the grid.
+    window.requestAnimationFrame(() => {
+      if (window.matchMedia('(max-width: 820px)').matches) {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        slotPanel.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+        slotPanel.focus({ preventScroll: true });
+      }
+    });
   }
 
   function validateSelection() {
@@ -320,9 +333,9 @@ const base = import.meta.env.BASE_URL;
     await loadMonth();
   });
 
-  calendarRoot.querySelector('[data-prev-month]')!.addEventListener('click', () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1); selectedButton = null; selectedDateKey = ''; slotContent.hidden = true; slotEmpty.hidden = false; loadMonth(); });
-  calendarRoot.querySelector('[data-next-month]')!.addEventListener('click', () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1); selectedButton = null; selectedDateKey = ''; slotContent.hidden = true; slotEmpty.hidden = false; loadMonth(); });
-  calendarRoot.querySelector('[data-today]')!.addEventListener('click', () => { viewDate = new Date(); selectedButton = null; selectedDateKey = ''; slotContent.hidden = true; slotEmpty.hidden = false; loadMonth(); });
+  calendarRoot.querySelector('[data-prev-month]')!.addEventListener('click', () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1); selectedButton = null; selectedDateKey = ''; slotContent.hidden = true; slotEmpty.hidden = false; slotPanel.classList.remove('has-selection'); loadMonth(); });
+  calendarRoot.querySelector('[data-next-month]')!.addEventListener('click', () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1); selectedButton = null; selectedDateKey = ''; slotContent.hidden = true; slotEmpty.hidden = false; slotPanel.classList.remove('has-selection'); loadMonth(); });
+  calendarRoot.querySelector('[data-today]')!.addEventListener('click', () => { viewDate = new Date(); selectedButton = null; selectedDateKey = ''; slotContent.hidden = true; slotEmpty.hidden = false; slotPanel.classList.remove('has-selection'); loadMonth(); });
   calendarRoot.querySelector('[data-refresh-calendar]')!.addEventListener('click', loadMonth);
 
   supabase.auth.onAuthStateChange(() => window.setTimeout(loadProfile, 0));

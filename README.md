@@ -2,6 +2,14 @@
 
 This Astro project presents Hutzell Aviation LLC as a Piper Cherokee aircraft-rental company for approved pilots and time builders. It does not advertise flight instruction through the aircraft.
 
+
+## Calendar panel visibility patch (v3.0.1)
+
+- Keeps the selected-date booking panel beside the calendar on laptop and tablet-width desktop layouts.
+- Stacks the panel only at 820px and below.
+- Automatically scrolls the booking panel into view after a date is selected on narrow screens.
+- Adds explicit hidden-state CSS so the empty and selected-date panels cannot overlap.
+
 ## Live features
 
 - Supabase email/password renter accounts
