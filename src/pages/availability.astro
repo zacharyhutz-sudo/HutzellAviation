@@ -4,38 +4,52 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import PageHero from '../components/PageHero.astro';
 import Icon from '../components/Icon.astro';
-import { demoAvailability } from '../lib/availability';
 import '../styles/global.css';
 const base = import.meta.env.BASE_URL;
 ---
-<BaseLayout title="Aircraft Availability | Hutzell Aviation" description="Preview the custom Hutzell Aviation aircraft-rental calendar for the Piper Cherokee in the Athens, Georgia area.">
+<BaseLayout title="Aircraft Availability | Hutzell Aviation" description="See live Piper Cherokee availability and request an aircraft rental in the Athens, Georgia area.">
   <Header />
   <main>
-    <PageHero eyebrow="CUSTOM RENTAL CALENDAR" title="See when the aircraft is open." description="This interactive front-end prototype demonstrates the renter calendar. Live reservations, accounts, payments, and double-booking protection will be connected in the backend phase." />
+    <PageHero eyebrow="LIVE AIRCRAFT CALENDAR" title="Choose your time to fly." description="Review open time, sign in with an approved renter account, and request the Piper Cherokee directly from the calendar." />
 
     <section class="section calendar-section">
       <div class="container">
-        <div class="prototype-banner"><Icon name="wrench" size={22}/><div><strong>Interactive prototype</strong><span>The calendar works in the browser with sample availability. It does not yet save reservations or process payments.</span></div></div>
+        <div class="live-banner" data-calendar-connection>
+          <span class="live-dot"></span>
+          <div><strong>Connecting to live availability…</strong><span>Times are displayed in Athens local time (Eastern).</span></div>
+        </div>
 
         <div class="calendar-shell" data-rental-calendar>
           <div class="calendar-main">
             <div class="calendar-toolbar">
-              <div><p class="calendar-kicker">PIPER CHEROKEE</p><h2 data-month-label>August 2026</h2></div>
-              <div class="calendar-nav"><button type="button" data-prev-month aria-label="Previous month">←</button><button type="button" data-today>Today</button><button type="button" data-next-month aria-label="Next month">→</button></div>
+              <div><p class="calendar-kicker">PIPER CHEROKEE</p><h2 data-month-label></h2></div>
+              <div class="calendar-nav"><button type="button" data-prev-month aria-label="Previous month">←</button><button type="button" data-today>Today</button><button type="button" data-refresh-calendar aria-label="Refresh availability">Refresh</button><button type="button" data-next-month aria-label="Next month">→</button></div>
             </div>
-            <div class="calendar-legend" aria-label="Calendar legend"><span><i class="legend-dot available"></i>Available</span><span><i class="legend-dot limited"></i>Limited</span><span><i class="legend-dot reserved"></i>Reserved</span><span><i class="legend-dot maintenance"></i>Maintenance</span></div>
+            <div class="calendar-legend" aria-label="Calendar legend"><span><i class="legend-dot available"></i>Open</span><span><i class="legend-dot limited"></i>Partially booked</span><span><i class="legend-dot reserved"></i>Unavailable</span><span><i class="legend-dot maintenance"></i>Maintenance</span></div>
             <div class="calendar-weekdays" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
             <div class="calendar-grid" data-calendar-grid aria-live="polite"></div>
           </div>
 
           <aside class="slot-panel" data-slot-panel>
-            <div class="slot-empty" data-slot-empty><span class="slot-icon"><Icon name="calendar" size={30}/></span><h3>Select a date</h3><p>Choose a calendar day to review available windows and the planned reservation experience.</p></div>
+            <div class="slot-empty" data-slot-empty><span class="slot-icon"><Icon name="calendar" size={30}/></span><h3>Select a date</h3><p>Choose a calendar day to review busy periods and request a rental window.</p></div>
             <div class="slot-content" data-slot-content hidden>
-              <p class="slot-eyebrow">SELECTED DATE</p><h3 data-selected-date></h3><div class="selected-status" data-selected-status></div><p data-selected-note></p>
-              <div class="slot-list" data-slot-list></div>
-              <div class="reservation-summary" data-reservation-summary hidden><span>Selected window</span><strong data-selected-slot></strong></div>
-              <a class="button slot-action" data-slot-action href={`${base}checkout/`}>Continue to Checkout Preview</a>
-              <p class="slot-disclaimer">Only approved renters will be able to confirm aircraft reservations.</p>
+              <p class="slot-eyebrow">SELECTED DATE</p><h3 data-selected-date></h3>
+              <div class="selected-status available" data-selected-status>Checking availability</div>
+              <p data-selected-note></p>
+
+              <div class="busy-periods" data-busy-periods></div>
+
+              <form class="reservation-request" data-reservation-form>
+                <div class="time-pair">
+                  <label>Departure time<select name="startTime" data-start-time required></select></label>
+                  <label>Return time<select name="endTime" data-end-time required></select></label>
+                </div>
+                <label>Estimated flight time <span class="optional">optional</span><input name="estimatedHours" type="number" min="0.1" max="24" step="0.1" placeholder="Example: 2.5 hours" /></label>
+                <label>Reservation notes <span class="optional">optional</span><textarea name="notes" rows="3" maxlength="500" placeholder="Local flight, cross-country, overnight request, or other details"></textarea></label>
+                <div class="booking-message" data-booking-message hidden></div>
+                <button class="button slot-action" type="submit" data-book-button disabled>Choose a valid time</button>
+              </form>
+              <p class="slot-disclaimer" data-renter-gate>Approved renter accounts can submit reservation requests. Requests remain pending until reviewed.</p>
             </div>
           </aside>
         </div>
@@ -44,105 +58,273 @@ const base = import.meta.env.BASE_URL;
 
     <section class="section calendar-explainer">
       <div class="container">
-        <div class="section-heading centered reveal"><p class="eyebrow centered-eyebrow"><span></span> FINAL BOOKING FLOW <span></span></p><h2>What the connected calendar will do.</h2></div>
-        <div class="calendar-feature-grid"><article class="reveal"><span><Icon name="user" size={25}/></span><h3>Check approval</h3><p>Only renters with active approval can proceed from an open time window to checkout.</p></article><article class="reveal reveal-1"><span><Icon name="clock" size={25}/></span><h3>Hold the window</h3><p>The backend will temporarily hold the selected period while payment or package authorization is completed.</p></article><article class="reveal reveal-2"><span><Icon name="shield" size={25}/></span><h3>Prevent overlap</h3><p>A database constraint—not browser code—will reject any conflicting reservation attempts.</p></article><article class="reveal reveal-3"><span><Icon name="dollar" size={25}/></span><h3>Reconcile after flight</h3><p>Tyler records actual aircraft time and applies it to the renter’s block or invoice.</p></article></div>
+        <div class="section-heading centered reveal"><p class="eyebrow centered-eyebrow"><span></span> HOW BOOKING WORKS <span></span></p><h2>Availability backed by the database.</h2><p>The calendar publishes only busy time—not renter identities or trip details. The database rejects overlapping reservations even when two pilots choose the same period at nearly the same moment.</p></div>
+        <div class="calendar-feature-grid"><article class="reveal"><span><Icon name="user" size={25}/></span><h3>Sign in</h3><p>Create an account and submit the renter application before booking privileges are activated.</p></article><article class="reveal reveal-1"><span><Icon name="shield" size={25}/></span><h3>Get approved</h3><p>Tyler reviews each renter before the account can place aircraft reservation requests.</p></article><article class="reveal reveal-2"><span><Icon name="calendar" size={25}/></span><h3>Choose a window</h3><p>Select a same-day departure and return time that does not overlap a reservation or aircraft block.</p></article><article class="reveal reveal-3"><span><Icon name="check" size={25}/></span><h3>Track status</h3><p>View pending, confirmed, completed, or cancelled reservations from the renter dashboard.</p></article></div>
       </div>
     </section>
   </main>
   <Footer />
 </BaseLayout>
 
-<script is:inline define:vars={{ demoAvailability, base }}>
-  const calendarRoot = document.querySelector('[data-rental-calendar]');
-  if (calendarRoot) {
-    const grid = calendarRoot.querySelector('[data-calendar-grid]');
-    const monthLabel = calendarRoot.querySelector('[data-month-label]');
-    const slotEmpty = calendarRoot.querySelector('[data-slot-empty]');
-    const slotContent = calendarRoot.querySelector('[data-slot-content]');
-    const selectedDateEl = calendarRoot.querySelector('[data-selected-date]');
-    const selectedStatusEl = calendarRoot.querySelector('[data-selected-status]');
-    const selectedNoteEl = calendarRoot.querySelector('[data-selected-note]');
-    const slotList = calendarRoot.querySelector('[data-slot-list]');
-    const summary = calendarRoot.querySelector('[data-reservation-summary]');
-    const selectedSlotEl = calendarRoot.querySelector('[data-selected-slot]');
-    const action = calendarRoot.querySelector('[data-slot-action]');
-    const lookup = new Map(demoAvailability.map((item) => [item.date, item]));
-    let viewDate = new Date(2026, 7, 1);
-    let selectedButton = null;
+<script>
+  import { aircraftId, getCurrentProfile, isSupabaseConfigured, supabase, type CalendarEvent, type Profile } from '../lib/supabase';
+  import { easternDateKey, eventsForDate, formatEasternDate, formatEasternTime, monthUtcRange, overlaps, timeOptions, zonedDateTimeToUtc } from '../lib/calendar';
 
-    const isoDate = (year, month, day) => `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    const fallbackFor = (date) => {
-      const day = date.getDay();
-      if (day === 0) return { status: 'limited', note: 'By request', slots: ['9:00 AM–1:00 PM'] };
-      return { status: 'available', slots: ['8:00 AM–12:00 PM', '1:00 PM–5:00 PM'] };
-    };
+  const base = import.meta.env.BASE_URL;
+  const calendarRoot = document.querySelector<HTMLElement>('[data-rental-calendar]');
+  if (!calendarRoot) throw new Error('Calendar root not found.');
 
-    const showDate = (dateKey, button) => {
-      selectedButton?.classList.remove('selected');
-      button.classList.add('selected');
-      selectedButton = button;
-      const [year, month, day] = dateKey.split('-').map(Number);
-      const date = new Date(year, month - 1, day);
-      const record = lookup.get(dateKey) || fallbackFor(date);
-      selectedDateEl.textContent = new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).format(date);
-      selectedStatusEl.className = `selected-status ${record.status}`;
-      selectedStatusEl.textContent = record.status === 'available' ? 'Available' : record.status === 'limited' ? 'Limited availability' : record.status === 'reserved' ? 'Reserved' : 'Maintenance';
-      selectedNoteEl.textContent = record.note || (record.status === 'available' ? 'Choose an available window below.' : 'No reservable windows are published for this date.');
-      slotList.innerHTML = '';
-      summary.hidden = true;
-      selectedSlotEl.textContent = '';
-      action.classList.toggle('is-disabled', !record.slots?.length);
-      action.setAttribute('aria-disabled', String(!record.slots?.length));
-      (record.slots || []).forEach((slot) => {
-        const slotButton = document.createElement('button');
-        slotButton.type = 'button';
-        slotButton.className = 'time-slot';
-        slotButton.textContent = slot;
-        slotButton.addEventListener('click', () => {
-          slotList.querySelectorAll('button').forEach((item) => item.classList.remove('active'));
-          slotButton.classList.add('active');
-          selectedSlotEl.textContent = slot;
-          action.href = `${base}checkout/?date=${encodeURIComponent(dateKey)}&slot=${encodeURIComponent(slot)}`;
-          summary.hidden = false;
-        });
-        slotList.appendChild(slotButton);
-      });
-      slotEmpty.hidden = true;
-      slotContent.hidden = false;
-    };
+  const grid = calendarRoot.querySelector<HTMLElement>('[data-calendar-grid]')!;
+  const monthLabel = calendarRoot.querySelector<HTMLElement>('[data-month-label]')!;
+  const slotEmpty = calendarRoot.querySelector<HTMLElement>('[data-slot-empty]')!;
+  const slotContent = calendarRoot.querySelector<HTMLElement>('[data-slot-content]')!;
+  const selectedDateEl = calendarRoot.querySelector<HTMLElement>('[data-selected-date]')!;
+  const selectedStatusEl = calendarRoot.querySelector<HTMLElement>('[data-selected-status]')!;
+  const selectedNoteEl = calendarRoot.querySelector<HTMLElement>('[data-selected-note]')!;
+  const busyPeriods = calendarRoot.querySelector<HTMLElement>('[data-busy-periods]')!;
+  const form = calendarRoot.querySelector<HTMLFormElement>('[data-reservation-form]')!;
+  const startSelect = calendarRoot.querySelector<HTMLSelectElement>('[data-start-time]')!;
+  const endSelect = calendarRoot.querySelector<HTMLSelectElement>('[data-end-time]')!;
+  const bookButton = calendarRoot.querySelector<HTMLButtonElement>('[data-book-button]')!;
+  const bookingMessage = calendarRoot.querySelector<HTMLElement>('[data-booking-message]')!;
+  const renterGate = calendarRoot.querySelector<HTMLElement>('[data-renter-gate]')!;
+  const connection = document.querySelector<HTMLElement>('[data-calendar-connection]')!;
 
-    const render = () => {
-      grid.innerHTML = '';
-      const year = viewDate.getFullYear();
-      const month = viewDate.getMonth();
-      monthLabel.textContent = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(viewDate);
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const prevDays = new Date(year, month, 0).getDate();
-      for (let i = firstDay - 1; i >= 0; i--) {
-        const cell = document.createElement('div'); cell.className = 'calendar-day outside'; cell.innerHTML = `<span>${prevDays - i}</span>`; grid.appendChild(cell);
-      }
-      for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(year, month, day);
-        const key = isoDate(year, month, day);
-        const record = lookup.get(key) || fallbackFor(date);
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = `calendar-day ${record.status}`;
-        button.innerHTML = `<span class="day-number">${day}</span><span class="day-state">${record.status === 'available' ? 'Open' : record.status === 'limited' ? 'Limited' : record.status === 'reserved' ? 'Reserved' : 'Maintenance'}</span>`;
-        button.setAttribute('aria-label', `${key}, ${record.status}`);
-        button.addEventListener('click', () => showDate(key, button));
-        grid.appendChild(button);
-      }
-      const total = firstDay + daysInMonth;
-      const trailing = (7 - (total % 7)) % 7;
-      for (let day = 1; day <= trailing; day++) { const cell = document.createElement('div'); cell.className = 'calendar-day outside'; cell.innerHTML = `<span>${day}</span>`; grid.appendChild(cell); }
-    };
+  let viewDate = new Date();
+  let selectedDateKey = '';
+  let selectedButton: HTMLButtonElement | null = null;
+  let events: CalendarEvent[] = [];
+  let profile: Profile | null = null;
+  let signedIn = false;
+  let loading = false;
 
-    calendarRoot.querySelector('[data-prev-month]').addEventListener('click', () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1); selectedButton = null; render(); });
-    calendarRoot.querySelector('[data-next-month]').addEventListener('click', () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1); selectedButton = null; render(); });
-    calendarRoot.querySelector('[data-today]').addEventListener('click', () => { viewDate = new Date(2026, 7, 1); selectedButton = null; render(); });
-    action.addEventListener('click', (event) => { if (action.classList.contains('is-disabled')) event.preventDefault(); });
-    render();
+  function setConnection(ok: boolean, text: string) {
+    connection.classList.toggle('is-live', ok);
+    connection.classList.toggle('is-error', !ok);
+    connection.querySelector('strong')!.textContent = text;
   }
+
+  function optionMarkup() {
+    return [`<option value="">Select</option>`, ...timeOptions().map((option) => `<option value="${option.value}">${option.label}</option>`)].join('');
+  }
+  startSelect.innerHTML = optionMarkup();
+  endSelect.innerHTML = optionMarkup();
+
+  async function loadProfile() {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      signedIn = Boolean(session);
+      profile = session ? await getCurrentProfile() : null;
+    } catch (error) {
+      console.error(error);
+      signedIn = false;
+      profile = null;
+    }
+    updateBookingGate();
+  }
+
+  function updateBookingGate() {
+    if (!signedIn) {
+      renterGate.textContent = 'Sign in or create an account before requesting a reservation.';
+      bookButton.textContent = 'Sign in to continue';
+    } else if (profile?.role !== 'admin' && profile?.approval_status !== 'approved') {
+      renterGate.textContent = `Your renter status is ${profile?.approval_status || 'incomplete'}. Submit the application and wait for approval before booking.`;
+      bookButton.textContent = 'Complete renter application';
+    } else {
+      renterGate.textContent = 'Your account is approved. Valid requests are placed on the calendar as pending for Tyler’s review.';
+      bookButton.textContent = 'Request this reservation';
+    }
+    validateSelection();
+  }
+
+  async function loadMonth() {
+    if (!isSupabaseConfigured) {
+      setConnection(false, 'Supabase variables are missing from the site build.');
+      events = [];
+      render();
+      return;
+    }
+    loading = true;
+    grid.setAttribute('aria-busy', 'true');
+    const { start, end } = monthUtcRange(viewDate.getFullYear(), viewDate.getMonth());
+    const { data, error } = await supabase.rpc('get_public_calendar_events', { p_start: start, p_end: end });
+    loading = false;
+    grid.removeAttribute('aria-busy');
+    if (error) {
+      console.error(error);
+      events = [];
+      setConnection(false, 'Calendar database is not ready. Run the supplied Supabase SQL.');
+    } else {
+      events = (data || []) as CalendarEvent[];
+      setConnection(true, 'Live availability connected');
+    }
+    render();
+    if (selectedDateKey.startsWith(`${viewDate.getFullYear()}-${String(viewDate.getMonth() + 1).padStart(2, '0')}`)) showDate(selectedDateKey, selectedButton);
+  }
+
+  function dayStatus(dateKey: string) {
+    const dayEvents = eventsForDate(events, dateKey);
+    if (!dayEvents.length) return { status: 'available', text: 'Open' };
+    const start = zonedDateTimeToUtc(dateKey, '07:00').getTime();
+    const end = zonedDateTimeToUtc(dateKey, '21:00').getTime();
+    const occupied = dayEvents
+      .map((event) => [Math.max(start, new Date(event.starts_at).getTime()), Math.min(end, new Date(event.ends_at).getTime())])
+      .filter(([a, b]) => b > a)
+      .sort((a, b) => a[0] - b[0]);
+    let total = 0;
+    let cursor = -Infinity;
+    for (const [a, b] of occupied) {
+      const from = Math.max(a, cursor);
+      if (b > from) total += b - from;
+      cursor = Math.max(cursor, b);
+    }
+    const full = total >= (end - start) - 60_000;
+    const maintenanceOnly = dayEvents.every((event) => event.event_kind === 'block' && ['maintenance', 'inspection'].includes(event.status));
+    if (full && maintenanceOnly) return { status: 'maintenance', text: 'Maintenance' };
+    if (full) return { status: 'reserved', text: 'Unavailable' };
+    return { status: 'limited', text: 'Partially open' };
+  }
+
+  function showDate(dateKey: string, button: HTMLButtonElement | null) {
+    selectedButton?.classList.remove('selected');
+    button?.classList.add('selected');
+    selectedButton = button;
+    selectedDateKey = dateKey;
+    bookingMessage.hidden = true;
+    form.reset();
+    const noon = zonedDateTimeToUtc(dateKey, '12:00');
+    const dayEvents = eventsForDate(events, dateKey);
+    const status = dayStatus(dateKey);
+    selectedDateEl.textContent = formatEasternDate(noon);
+    selectedStatusEl.className = `selected-status ${status.status}`;
+    selectedStatusEl.textContent = status.text;
+    selectedNoteEl.textContent = dayEvents.length ? 'Existing busy periods are listed below. Choose a departure and return time around them.' : 'No reservations or aircraft blocks are currently published for this date.';
+    busyPeriods.innerHTML = dayEvents.length
+      ? `<span class="busy-label">Busy periods</span>${dayEvents.map((event) => `<div class="busy-period"><strong>${formatEasternTime(event.starts_at)}–${formatEasternTime(event.ends_at)}</strong><span>${event.label}</span></div>`).join('')}`
+      : '<div class="busy-period open-all-day"><strong>Open calendar</strong><span>No busy periods published</span></div>';
+    slotEmpty.hidden = true;
+    slotContent.hidden = false;
+    validateSelection();
+  }
+
+  function validateSelection() {
+    const startValue = startSelect.value;
+    const endValue = endSelect.value;
+    bookingMessage.hidden = true;
+    let valid = Boolean(selectedDateKey && startValue && endValue);
+    let message = '';
+    if (valid) {
+      const start = zonedDateTimeToUtc(selectedDateKey, startValue);
+      const end = zonedDateTimeToUtc(selectedDateKey, endValue);
+      if (end <= start) {
+        valid = false;
+        message = 'Return time must be later than departure time.';
+      } else if (start.getTime() < Date.now() + 15 * 60_000) {
+        valid = false;
+        message = 'Departure time must be at least 15 minutes in the future.';
+      } else {
+        const conflict = overlaps(eventsForDate(events, selectedDateKey), start, end);
+        if (conflict) {
+          valid = false;
+          message = `That window conflicts with ${conflict.label.toLowerCase()} from ${formatEasternTime(conflict.starts_at)} to ${formatEasternTime(conflict.ends_at)}.`;
+        }
+      }
+    }
+    if (message) {
+      bookingMessage.className = 'booking-message error';
+      bookingMessage.textContent = message;
+      bookingMessage.hidden = false;
+    }
+    bookButton.disabled = !valid || loading;
+    if (!signedIn && valid) bookButton.disabled = false;
+    if (signedIn && profile?.role !== 'admin' && profile?.approval_status !== 'approved' && valid) bookButton.disabled = false;
+    if (!valid) bookButton.textContent = 'Choose a valid time';
+    else updateBookingGateTextOnly();
+  }
+
+  function updateBookingGateTextOnly() {
+    if (!signedIn) bookButton.textContent = 'Sign in to continue';
+    else if (profile?.role !== 'admin' && profile?.approval_status !== 'approved') bookButton.textContent = 'Complete renter application';
+    else bookButton.textContent = 'Request this reservation';
+  }
+
+  function render() {
+    grid.innerHTML = '';
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+    monthLabel.textContent = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(viewDate);
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const prevDays = new Date(year, month, 0).getDate();
+    for (let i = firstDay - 1; i >= 0; i -= 1) {
+      const cell = document.createElement('div'); cell.className = 'calendar-day outside'; cell.innerHTML = `<span>${prevDays - i}</span>`; grid.appendChild(cell);
+    }
+    for (let day = 1; day <= daysInMonth; day += 1) {
+      const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const isPast = key < easternDateKey(new Date());
+      const status = isPast ? { status: 'reserved', text: 'Past' } : dayStatus(key);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `calendar-day ${status.status}${isPast ? ' past' : ''}`;
+      button.innerHTML = `<span class="day-number">${day}</span><span class="day-state">${status.text}</span>`;
+      button.setAttribute('aria-label', `${key}, ${status.text}`);
+      button.disabled = isPast;
+      if (!isPast) button.addEventListener('click', () => showDate(key, button));
+      grid.appendChild(button);
+    }
+    const total = firstDay + daysInMonth;
+    const trailing = (7 - (total % 7)) % 7;
+    for (let day = 1; day <= trailing; day += 1) { const cell = document.createElement('div'); cell.className = 'calendar-day outside'; cell.innerHTML = `<span>${day}</span>`; grid.appendChild(cell); }
+  }
+
+  startSelect.addEventListener('change', validateSelection);
+  endSelect.addEventListener('change', validateSelection);
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!signedIn) {
+      window.location.href = `${base}account/?returnTo=${encodeURIComponent(`${base}availability/`)}`;
+      return;
+    }
+    if (profile?.role !== 'admin' && profile?.approval_status !== 'approved') {
+      window.location.href = `${base}apply/`;
+      return;
+    }
+    const formData = new FormData(form);
+    const startsAt = zonedDateTimeToUtc(selectedDateKey, String(formData.get('startTime')));
+    const endsAt = zonedDateTimeToUtc(selectedDateKey, String(formData.get('endTime')));
+    const estimated = String(formData.get('estimatedHours') || '').trim();
+    bookButton.disabled = true;
+    bookButton.textContent = 'Submitting…';
+    const { error } = await supabase.rpc('create_reservation', {
+      p_aircraft_id: aircraftId,
+      p_starts_at: startsAt.toISOString(),
+      p_ends_at: endsAt.toISOString(),
+      p_estimated_flight_hours: estimated ? Number(estimated) : null,
+      p_notes: String(formData.get('notes') || '').trim() || null,
+    });
+    if (error) {
+      bookingMessage.className = 'booking-message error';
+      bookingMessage.textContent = error.message;
+      bookingMessage.hidden = false;
+      updateBookingGateTextOnly();
+      bookButton.disabled = false;
+      await loadMonth();
+      return;
+    }
+    bookingMessage.className = 'booking-message success';
+    bookingMessage.innerHTML = `Reservation request submitted. <a href="${base}account/">View it in your dashboard.</a>`;
+    bookingMessage.hidden = false;
+    form.reset();
+    bookButton.textContent = 'Choose a valid time';
+    await loadMonth();
+  });
+
+  calendarRoot.querySelector('[data-prev-month]')!.addEventListener('click', () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1); selectedButton = null; selectedDateKey = ''; slotContent.hidden = true; slotEmpty.hidden = false; loadMonth(); });
+  calendarRoot.querySelector('[data-next-month]')!.addEventListener('click', () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1); selectedButton = null; selectedDateKey = ''; slotContent.hidden = true; slotEmpty.hidden = false; loadMonth(); });
+  calendarRoot.querySelector('[data-today]')!.addEventListener('click', () => { viewDate = new Date(); selectedButton = null; selectedDateKey = ''; slotContent.hidden = true; slotEmpty.hidden = false; loadMonth(); });
+  calendarRoot.querySelector('[data-refresh-calendar]')!.addEventListener('click', loadMonth);
+
+  supabase.auth.onAuthStateChange(() => window.setTimeout(loadProfile, 0));
+  await Promise.all([loadProfile(), loadMonth()]);
 </script>

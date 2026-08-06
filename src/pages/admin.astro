@@ -1,0 +1,161 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import '../styles/global.css';
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout title="Admin Dashboard | Hutzell Aviation" description="Hutzell Aviation renter approvals, reservations, and aircraft availability administration.">
+  <Header />
+  <main>
+    <PageHero eyebrow="ADMINISTRATION" title="Manage renters and aircraft time." description="Approve renter applications, review reservation requests, and block the Piper Cherokee calendar for maintenance or owner use." />
+    <section class="section admin-section">
+      <div class="container" data-admin-root>
+        <div class="admin-gate" data-admin-gate><Icon name="shield" size={30}/><div><h2>Administrator access required</h2><p>Sign in with the initial administrator account to open this dashboard.</p></div><a class="button" href={`${base}account/?returnTo=${encodeURIComponent(`${base}admin/`)}`}>Sign In</a></div>
+
+        <div class="admin-dashboard" data-admin-dashboard hidden>
+          <div class="admin-toolbar"><div><span>ADMIN ACCOUNT</span><strong data-admin-email></strong></div><button class="button button-outline" type="button" data-admin-refresh>Refresh Dashboard</button></div>
+
+          <section class="admin-panel">
+            <div class="admin-panel-heading"><div><p class="eyebrow"><span></span> RENTER REVIEW</p><h2>Applications</h2></div><span class="count-badge" data-application-count>0</span></div>
+            <div class="admin-list" data-admin-applications><p>Loading applications…</p></div>
+          </section>
+
+          <section class="admin-panel">
+            <div class="admin-panel-heading"><div><p class="eyebrow"><span></span> AIRCRAFT CALENDAR</p><h2>Reservation requests</h2></div><span class="count-badge" data-reservation-count>0</span></div>
+            <div class="admin-list" data-admin-reservations><p>Loading reservations…</p></div>
+          </section>
+
+          <section class="admin-grid-two">
+            <div class="admin-panel">
+              <div class="admin-panel-heading"><div><p class="eyebrow"><span></span> BLOCK TIME</p><h2>Add unavailable time</h2></div></div>
+              <form class="admin-block-form" data-block-form>
+                <label>Date<input type="date" name="date" required/></label>
+                <div class="time-pair"><label>Start<input type="time" name="start" value="08:00" required/></label><label>End<input type="time" name="end" value="17:00" required/></label></div>
+                <label>Reason<select name="type"><option value="maintenance">Maintenance</option><option value="inspection">Inspection</option><option value="owner_use">Owner use</option><option value="unavailable">Unavailable</option><option value="other">Other</option></select></label>
+                <label>Internal note<textarea name="notes" rows="3" maxlength="500"></textarea></label>
+                <button class="button" type="submit">Add Calendar Block</button>
+                <div class="auth-message" data-block-message hidden></div>
+              </form>
+            </div>
+            <div class="admin-panel">
+              <div class="admin-panel-heading"><div><p class="eyebrow"><span></span> ACTIVE BLOCKS</p><h2>Upcoming unavailable time</h2></div></div>
+              <div class="admin-list compact" data-admin-blocks><p>Loading blocks…</p></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<script>
+  import { aircraftId, aviationTimeZone, getCurrentProfile, supabase } from '../lib/supabase';
+  import { formatEasternDate, formatEasternTime, zonedDateTimeToUtc } from '../lib/calendar';
+
+  const gate = document.querySelector<HTMLElement>('[data-admin-gate]')!;
+  const dashboard = document.querySelector<HTMLElement>('[data-admin-dashboard]')!;
+  const applicationsEl = document.querySelector<HTMLElement>('[data-admin-applications]')!;
+  const reservationsEl = document.querySelector<HTMLElement>('[data-admin-reservations]')!;
+  const blocksEl = document.querySelector<HTMLElement>('[data-admin-blocks]')!;
+  const blockForm = document.querySelector<HTMLFormElement>('[data-block-form]')!;
+  const blockMessage = document.querySelector<HTMLElement>('[data-block-message]')!;
+
+  function escapeHtml(value: unknown) {
+    return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#039;', '"':'&quot;' })[char]!);
+  }
+
+  async function requireAdmin() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return false;
+    try {
+      const profile = await getCurrentProfile();
+      if (profile?.role !== 'admin') return false;
+      document.querySelector<HTMLElement>('[data-admin-email]')!.textContent = profile.email;
+      return true;
+    } catch { return false; }
+  }
+
+  async function loadApplications() {
+    const { data, error } = await supabase
+      .from('renter_applications')
+      .select('user_id,legal_first_name,legal_last_name,phone,certificate,rental_purpose,total_time,cherokee_time,status,admin_notes,submitted_at,profiles!renter_applications_user_id_fkey(email)')
+      .order('submitted_at', { ascending: false });
+    if (error) { applicationsEl.innerHTML = `<p class="inline-error">${escapeHtml(error.message)}</p>`; return; }
+    document.querySelector<HTMLElement>('[data-application-count]')!.textContent = String(data?.length || 0);
+    if (!data?.length) { applicationsEl.innerHTML = '<div class="empty-dashboard"><strong>No applications yet.</strong></div>'; return; }
+    applicationsEl.innerHTML = data.map((application: any) => `<article class="admin-row"><div class="admin-row-main"><span>${escapeHtml(application.certificate)} · ${escapeHtml(application.rental_purpose)}</span><strong>${escapeHtml(application.legal_first_name)} ${escapeHtml(application.legal_last_name)}</strong><small>${escapeHtml(application.profiles?.email || '')} · ${escapeHtml(application.phone)} · ${application.total_time ?? '—'} total hours · ${application.cherokee_time ?? '—'} Cherokee hours</small></div><div class="admin-row-actions"><span class="status-pill ${escapeHtml(application.status)}">${escapeHtml(String(application.status).replace('_',' '))}</span><select data-app-status="${application.user_id}"><option value="pending" ${application.status === 'pending' ? 'selected' : ''}>Pending</option><option value="needs_information" ${application.status === 'needs_information' ? 'selected' : ''}>Needs information</option><option value="approved" ${application.status === 'approved' ? 'selected' : ''}>Approved</option><option value="rejected" ${application.status === 'rejected' ? 'selected' : ''}>Rejected</option><option value="suspended" ${application.status === 'suspended' ? 'selected' : ''}>Suspended</option></select><button type="button" data-save-app="${application.user_id}">Save</button></div></article>`).join('');
+    applicationsEl.querySelectorAll<HTMLButtonElement>('[data-save-app]').forEach((button) => button.addEventListener('click', async () => {
+      const userId = button.dataset.saveApp!;
+      const select = applicationsEl.querySelector<HTMLSelectElement>(`[data-app-status="${userId}"]`)!;
+      button.disabled = true;
+      const { error: updateError } = await supabase.rpc('admin_set_application_status', { p_user_id: userId, p_status: select.value, p_admin_notes: null });
+      if (updateError) alert(updateError.message);
+      await loadApplications();
+    }));
+  }
+
+  async function loadReservations() {
+    const { data, error } = await supabase
+      .from('reservations')
+      .select('id,renter_id,starts_at,ends_at,status,estimated_flight_hours,renter_notes,profiles!reservations_renter_id_fkey(full_name,email)')
+      .gte('ends_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .order('starts_at', { ascending: true });
+    if (error) { reservationsEl.innerHTML = `<p class="inline-error">${escapeHtml(error.message)}</p>`; return; }
+    document.querySelector<HTMLElement>('[data-reservation-count]')!.textContent = String(data?.length || 0);
+    if (!data?.length) { reservationsEl.innerHTML = '<div class="empty-dashboard"><strong>No upcoming reservations.</strong></div>'; return; }
+    reservationsEl.innerHTML = data.map((reservation: any) => `<article class="admin-row"><div class="admin-row-main"><span>${formatEasternDate(reservation.starts_at)}</span><strong>${formatEasternTime(reservation.starts_at)}–${formatEasternTime(reservation.ends_at)} · ${escapeHtml(reservation.profiles?.full_name || reservation.profiles?.email || 'Renter')}</strong><small>${reservation.estimated_flight_hours ? `${reservation.estimated_flight_hours} estimated flight hours` : 'No flight-time estimate'}${reservation.renter_notes ? ` · ${escapeHtml(reservation.renter_notes)}` : ''}</small></div><div class="admin-row-actions"><span class="status-pill ${escapeHtml(reservation.status)}">${escapeHtml(reservation.status)}</span><select data-res-status="${reservation.id}"><option value="pending" ${reservation.status === 'pending' ? 'selected' : ''}>Pending</option><option value="confirmed" ${reservation.status === 'confirmed' ? 'selected' : ''}>Confirmed</option><option value="completed" ${reservation.status === 'completed' ? 'selected' : ''}>Completed</option><option value="cancelled" ${reservation.status === 'cancelled' ? 'selected' : ''}>Cancelled</option><option value="rejected" ${reservation.status === 'rejected' ? 'selected' : ''}>Rejected</option></select><button type="button" data-save-res="${reservation.id}">Save</button></div></article>`).join('');
+    reservationsEl.querySelectorAll<HTMLButtonElement>('[data-save-res]').forEach((button) => button.addEventListener('click', async () => {
+      const id = button.dataset.saveRes!;
+      const select = reservationsEl.querySelector<HTMLSelectElement>(`[data-res-status="${id}"]`)!;
+      button.disabled = true;
+      const { error: updateError } = await supabase.rpc('admin_set_reservation_status', { p_reservation_id: id, p_status: select.value, p_admin_notes: null, p_actual_aircraft_hours: null });
+      if (updateError) alert(updateError.message);
+      await loadReservations();
+    }));
+  }
+
+  async function loadBlocks() {
+    const { data, error } = await supabase
+      .from('aircraft_blocks')
+      .select('id,starts_at,ends_at,block_type,notes')
+      .gte('ends_at', new Date().toISOString())
+      .order('starts_at', { ascending: true });
+    if (error) { blocksEl.innerHTML = `<p class="inline-error">${escapeHtml(error.message)}</p>`; return; }
+    if (!data?.length) { blocksEl.innerHTML = '<div class="empty-dashboard"><strong>No upcoming blocks.</strong></div>'; return; }
+    blocksEl.innerHTML = data.map((block: any) => `<article class="admin-row compact-row"><div class="admin-row-main"><span>${escapeHtml(String(block.block_type).replace('_',' '))}</span><strong>${formatEasternDate(block.starts_at)}</strong><small>${formatEasternTime(block.starts_at)}–${formatEasternTime(block.ends_at)}${block.notes ? ` · ${escapeHtml(block.notes)}` : ''}</small></div><button type="button" class="danger-button" data-delete-block="${block.id}">Remove</button></article>`).join('');
+    blocksEl.querySelectorAll<HTMLButtonElement>('[data-delete-block]').forEach((button) => button.addEventListener('click', async () => {
+      if (!confirm('Remove this unavailable-time block?')) return;
+      const { error: deleteError } = await supabase.rpc('admin_delete_aircraft_block', { p_block_id: button.dataset.deleteBlock });
+      if (deleteError) alert(deleteError.message);
+      await loadBlocks();
+    }));
+  }
+
+  async function loadDashboard() { await Promise.all([loadApplications(), loadReservations(), loadBlocks()]); }
+
+  blockForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const data = new FormData(blockForm);
+    const date = String(data.get('date'));
+    const startsAt = zonedDateTimeToUtc(date, String(data.get('start')));
+    const endsAt = zonedDateTimeToUtc(date, String(data.get('end')));
+    const button = blockForm.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    button.disabled = true; button.textContent = 'Adding…'; blockMessage.hidden = true;
+    const { error } = await supabase.rpc('admin_create_aircraft_block', { p_aircraft_id: aircraftId, p_starts_at: startsAt.toISOString(), p_ends_at: endsAt.toISOString(), p_block_type: String(data.get('type')), p_notes: String(data.get('notes') || '') || null });
+    button.disabled = false; button.textContent = 'Add Calendar Block';
+    blockMessage.className = `auth-message ${error ? 'error' : 'success'}`;
+    blockMessage.textContent = error ? error.message : 'Aircraft block added to the live calendar.';
+    blockMessage.hidden = false;
+    if (!error) { blockForm.reset(); await loadBlocks(); }
+  });
+
+  document.querySelector('[data-admin-refresh]')!.addEventListener('click', loadDashboard);
+  const allowed = await requireAdmin();
+  gate.hidden = allowed;
+  dashboard.hidden = !allowed;
+  if (allowed) await loadDashboard();
+</script>

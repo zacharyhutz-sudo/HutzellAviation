@@ -1,6 +1,6 @@
 ---
 import Icon from './Icon.astro';
-import { navItems, site } from '../data/site';
+import { navItems } from '../data/site';
 const base = import.meta.env.BASE_URL;
 const pathname = Astro.url.pathname;
 const activeFor = (href: string) => href === '' ? pathname === base || pathname === base.slice(0, -1) : pathname.includes(`/${href}`);
@@ -8,14 +8,13 @@ const activeFor = (href: string) => href === '' ? pathname === base || pathname 
 <div class="announcement">
   <div class="container announcement-inner">
     <span>Piper Cherokee rental for approved pilots and time builders</span>
-    <a href={`${base}apply/`}>Apply to rent <span aria-hidden="true">→</span></a>
+    <a href={`${base}availability/`}>View aircraft availability <span aria-hidden="true">→</span></a>
   </div>
 </div>
 <header class="site-header" data-header>
   <div class="container header-inner">
-    <a class="brand" href={base} aria-label="Hutzell Aviation home">
-      <span class="brand-mark-wrap"><img src={`${base}images/logo-mark.png`} alt="" width="132" height="60" /></span>
-      <span class="brand-words"><strong>HUTZELL</strong><span>AVIATION</span></span>
+    <a class="brand brand-image" href={base} aria-label="Hutzell Aviation home">
+      <img src={`${base}images/logo-full.png`} alt="Hutzell Aviation" width="1400" height="1069" />
     </a>
 
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" data-nav-toggle>
@@ -24,12 +23,15 @@ const activeFor = (href: string) => href === '' ? pathname === base || pathname 
 
     <nav class="primary-nav" id="primary-nav" aria-label="Primary navigation" data-nav>
       {navItems.map((item) => <a class:list={[{ active: activeFor(item.href) }]} href={`${base}${item.href}`}>{item.label}</a>)}
-      <a class="nav-account" href={`${base}account/`}><Icon name="user" size={17} /> Account</a>
+      <a class="nav-admin" href={`${base}admin/`} data-admin-link hidden>Admin</a>
+      <a class="nav-account" href={`${base}account/`} data-account-link><Icon name="user" size={17} /> <span data-account-label>Account</span></a>
       <a class="button button-small" href={`${base}apply/`}>Apply to Rent</a>
     </nav>
   </div>
 </header>
-<script is:inline>
+<script>
+  import { getCurrentProfile, supabase } from '../lib/supabase';
+
   const toggle = document.querySelector('[data-nav-toggle]');
   const nav = document.querySelector('[data-nav]');
   if (toggle && nav) {
@@ -45,4 +47,24 @@ const activeFor = (href: string) => href === '' ? pathname === base || pathname 
       document.body.classList.remove('nav-open');
     }));
   }
+
+  const accountLabel = document.querySelector('[data-account-label]');
+  const adminLink = document.querySelector<HTMLElement>('[data-admin-link]');
+  async function updateHeaderAccount() {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        if (accountLabel) accountLabel.textContent = 'Account';
+        if (adminLink) adminLink.hidden = true;
+        return;
+      }
+      const profile = await getCurrentProfile();
+      if (accountLabel) accountLabel.textContent = 'Dashboard';
+      if (adminLink) adminLink.hidden = profile?.role !== 'admin';
+    } catch {
+      if (adminLink) adminLink.hidden = true;
+    }
+  }
+  updateHeaderAccount();
+  supabase.auth.onAuthStateChange(() => { window.setTimeout(updateHeaderAccount, 0); });
 </script>

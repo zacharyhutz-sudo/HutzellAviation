@@ -1,104 +1,91 @@
-# Hutzell Aviation website — rental update
+# Hutzell Aviation website — live renter calendar
 
-This Astro project updates the original flight-training homepage into a professional aircraft-rental website for Hutzell Aviation LLC.
+This Astro project presents Hutzell Aviation LLC as a Piper Cherokee aircraft-rental company for approved pilots and time builders. It does not advertise flight instruction through the aircraft.
 
-## Included pages
+## Live features
 
-- Home
-- About Tyler and Hutzell Aviation
-- Piper Cherokee aircraft profile
-- Pay-as-you-go and 15-, 25-, and 50-hour pricing options
-- Interactive custom availability-calendar prototype
-- Renter-application prototype
-- Renter-account sign-in preview
-- Custom 404 page
+- Supabase email/password renter accounts
+- Email-confirmation-compatible registration and login
+- Renter application stored in Supabase
+- Administrator role for `zacharyhutz@gmail.com`
+- Administrator approval workflow
+- Public, privacy-safe aircraft calendar
+- Same-day departure and return-time selection
+- Approved-renter reservation requests
+- Database-level protection against overlapping active reservations
+- Renter dashboard with reservation history and cancellation
+- Admin reservation review and status controls
+- Admin maintenance, inspection, owner-use, and unavailable calendar blocks
+- Responsive replacement logo with a transparent background
 
-## Current business positioning
+## Not connected yet
 
-The site presents Hutzell Aviation as an aircraft-rental company for approved pilots and time builders. It does not advertise Hutzell Aviation as a flight school and does not offer instruction through the aircraft.
+- Document uploads
+- Stripe checkout
+- Prepaid-hour balances and ledger
+- Final rates and billing reconciliation
+- Automated email notifications
+- Overnight/multi-day selection in the browser
 
-## What is functional now
+The database accepts reservations lasting up to seven days, but the first calendar interface intentionally limits renter self-service to a single day. Tyler can manage exceptions manually while policies are finalized.
 
-- Responsive multi-page navigation
-- Branded page layouts
-- Interactive month calendar
-- Calendar status and time-slot selection
-- Browser validation for the renter application
-- GitHub Pages deployment workflow
+## Required Supabase setup
 
-## What is still a prototype
+1. Open the Supabase project.
+2. Go to **SQL Editor**.
+3. Paste and run `supabase/setup.sql`.
+4. Go to **Authentication → URL Configuration**.
+5. Set the site URL to:
 
-The following features are intentionally not connected yet:
+```text
+https://zacharyhutz-sudo.github.io/HutzellAviation/
+```
 
-- User accounts and authentication
-- Saving renter applications
-- Secure document uploads
-- Tyler’s approval dashboard
-- Live availability records
-- Reservation holds and confirmations
-- Payments and hour-package purchases
-- Actual aircraft-hour reconciliation
+6. Add this redirect URL:
 
-See `docs/BACKEND_IMPLEMENTATION_PLAN.md` for the next phase.
+```text
+https://zacharyhutz-sudo.github.io/HutzellAviation/**
+```
 
-## Important placeholders to replace
+7. Create or sign in with `zacharyhutz@gmail.com`. The SQL backfill and auth trigger assign that verified email the initial administrator role.
 
-Most editable business information is centralized in `src/data/site.ts`.
+## Required GitHub repository variables
 
-Replace before public launch:
+Under **Settings → Secrets and variables → Actions → Variables**, add:
 
-- Phone: `(706) 555-0148`
-- Email: `hello@hutzellaviation.com`
-- Exact airport and aircraft location
-- Piper Cherokee model, year, tail number, avionics, and specifications
-- Exact renter and checkout requirements
-- Wet/dry policy and Hobbs/tach policy
-- Pay-as-you-go and block-hour rates
-- Cancellation, expiration, overnight, fuel, and refund policies
-- Tyler’s complete ATP biography and photographs
-- Actual aircraft photography
+```text
+PUBLIC_SUPABASE_URL=https://svcrlkpyudmksrnvgrsj.supabase.co
+PUBLIC_SUPABASE_PUBLISHABLE_KEY=your publishable key
+PUBLIC_SITE_URL=https://zacharyhutz-sudo.github.io/HutzellAviation/
+```
 
-## Logo note
+These are repository **variables**, not environment variables and not secrets. Never place a Supabase secret/service-role key in this static site.
 
-The current logo contains white masking shapes. The site keeps the logo on `#FFFFFF` surfaces so those shapes remain hidden. Do not place the supplied logo directly on a colored or photographic background.
+## Deploy
+
+The included `.github/workflows/deploy.yml` builds and deploys the Astro site through GitHub Actions whenever `main` changes.
+
+1. Upload the contents of this ZIP to the repository root.
+2. Confirm `.github/workflows/deploy.yml` exists.
+3. Set **Settings → Pages → Source** to **GitHub Actions**.
+4. Commit to `main`.
 
 ## Run locally
 
-1. Install Node.js 22 or newer.
-2. Open a terminal in the project folder.
-3. Run:
+Copy `.env.example` to `.env`, supply the publishable key, then run:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Astro normally opens the site at `http://localhost:4321`.
+## Content still needed
 
-## Build
+Edit `src/data/site.ts` when final information is available:
 
-```bash
-npm run build
-```
-
-The static production site is generated in `dist/`.
-
-## Deploy to GitHub Pages
-
-The ZIP includes `.github/workflows/deploy.yml`.
-
-1. Upload the contents of this project to the repository root.
-2. Confirm that `.github/workflows/deploy.yml` is visible in GitHub.
-3. In **Settings → Pages**, choose **GitHub Actions** as the source.
-4. Commit to `main` or manually run the workflow from the Actions tab.
-
-For a normal project repository, the workflow uses the repository name as the Astro base path. If the repository is named exactly `<username>.github.io`, set `BASE_PATH` to `/` in the workflow.
-
-## Custom domain later
-
-When using a custom domain:
-
-1. Set `BASE_PATH: /`.
-2. Set `SITE_URL` to the complete custom-domain URL.
-3. Add a `public/CNAME` file containing the domain.
-4. Configure the domain in GitHub Pages and at the DNS provider.
+- Business phone and email
+- Home airport
+- Exact aircraft model, year, tail number, avionics, and specifications
+- Final rental requirements and policies
+- Pay-as-you-go and block-hour rates
+- Tyler's full biography and actual photography

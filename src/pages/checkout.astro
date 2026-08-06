@@ -3,39 +3,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Icon from '../components/Icon.astro';
-import { pricingPlans } from '../data/site';
 import '../styles/global.css';
 const base = import.meta.env.BASE_URL;
 ---
-<BaseLayout title="Reservation Checkout Preview | Hutzell Aviation" description="Preview the planned Hutzell Aviation aircraft-rental reservation and checkout flow.">
+<BaseLayout title="Reservation Payments | Hutzell Aviation" description="Online payment and prepaid-hour checkout will be added after Hutzell Aviation finalizes rental rates and policies.">
   <Header />
   <main>
-    <section class="checkout-hero"><div class="container"><p class="eyebrow light"><span></span> CHECKOUT PROTOTYPE</p><h1>Review your rental window.</h1><p>This static preview shows the planned checkout structure. It does not hold the aircraft, authenticate a renter, or charge a payment method.</p></div></section>
-    <section class="section checkout-section">
-      <div class="container checkout-grid">
-        <div class="checkout-form-card">
-          <div class="prototype-banner"><Icon name="wrench" size={22}/><div><strong>Demo only</strong><span>A production reservation will require an approved renter account and a live, conflict-free hold from the database.</span></div></div>
-          <section class="checkout-block"><span class="checkout-step">01</span><div><h2>Reservation details</h2><div class="reservation-detail-grid"><div><span>Date</span><strong data-checkout-date>Choose a date from the calendar</strong></div><div><span>Time window</span><strong data-checkout-slot>No time selected</strong></div><div><span>Aircraft</span><strong>Piper Cherokee</strong></div><div><span>Billing</span><strong>Actual aircraft time after flight</strong></div></div><a class="text-link" href={`${base}availability/`}>Change selection <Icon name="arrow" size={17}/></a></div></section>
-          <section class="checkout-block"><span class="checkout-step">02</span><div><h2>Choose payment option</h2><div class="checkout-options">{pricingPlans.map((plan, index) => <label class="checkout-option"><input type="radio" name="plan" checked={index === 0}/><span><strong>{plan.name}</strong><small>{plan.rate}</small></span></label>)}</div></div></section>
-          <section class="checkout-block"><span class="checkout-step">03</span><div><h2>Renter verification</h2><div class="access-gate"><Icon name="shield" size={26}/><div><strong>Approved renter sign-in required</strong><p>When authentication is connected, the system will verify approval status, required checkout completion, document expiration, and booking eligibility.</p></div></div><a class="button button-outline" href={`${base}account/`}>Open Account Preview</a></div></section>
-        </div>
-        <aside class="checkout-summary"><p class="checkout-summary-label">RESERVATION SUMMARY</p><h2>Piper Cherokee</h2><div class="summary-aircraft"><Icon name="plane" size={42}/></div><dl><div><dt>Calendar window</dt><dd data-summary-slot>Not selected</dd></div><div><dt>Estimated charge</dt><dd>Calculated at checkout</dd></div><div><dt>Final charge</dt><dd>Reconciled after flight</dd></div></dl><button class="button is-disabled" type="button" disabled>Confirm Reservation</button><small>No aircraft time is being held by this prototype.</small></aside>
-      </div>
-    </section>
+    <section class="checkout-hero"><div class="container"><p class="eyebrow light"><span></span> RESERVATION PAYMENTS</p><h1>Booking is live. Online payments are next.</h1><p>Approved renters can now request open aircraft time from the live calendar. Stripe payments and prepaid-hour packages will be connected after rates and billing policies are finalized.</p></div></section>
+    <section class="section checkout-section"><div class="container"><div class="checkout-form-card payment-roadmap"><Icon name="calendar" size={34}/><h2>Request time through the calendar</h2><p>The calendar checks live reservations and aircraft blocks, verifies renter approval, and saves conflict-free requests to Supabase.</p><div class="account-actions"><a class="button" href={`${base}availability/`}>View Availability</a><a class="button button-outline" href={`${base}account/`}>Open Renter Account</a></div></div></div></section>
   </main>
   <Footer />
 </BaseLayout>
-<script is:inline>
-  const params = new URLSearchParams(window.location.search);
-  const date = params.get('date');
-  const slot = params.get('slot');
-  const dateEl = document.querySelector('[data-checkout-date]');
-  const slotEl = document.querySelector('[data-checkout-slot]');
-  const summaryEl = document.querySelector('[data-summary-slot]');
-  if (date && dateEl) {
-    const parsed = new Date(`${date}T12:00:00`);
-    dateEl.textContent = new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).format(parsed);
-  }
-  if (slot && slotEl) slotEl.textContent = slot;
-  if (summaryEl && (date || slot)) summaryEl.textContent = [date, slot].filter(Boolean).join(' • ');
-</script>

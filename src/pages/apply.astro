@@ -5,30 +5,141 @@ import Footer from '../components/Footer.astro';
 import PageHero from '../components/PageHero.astro';
 import Icon from '../components/Icon.astro';
 import '../styles/global.css';
+const base = import.meta.env.BASE_URL;
 ---
-<BaseLayout title="Renter Application | Hutzell Aviation" description="Preview the Hutzell Aviation renter application for qualified pilots seeking access to the Piper Cherokee.">
+<BaseLayout title="Renter Application | Hutzell Aviation" description="Apply for approved renter access to the Hutzell Aviation Piper Cherokee.">
   <Header />
   <main>
-    <PageHero eyebrow="RENTER APPLICATION" title="Apply for aircraft access." description="This front-end application establishes the information Tyler will review before activating booking privileges. Secure storage and submission will be connected in the backend phase." />
+    <PageHero eyebrow="RENTER APPLICATION" title="Apply for aircraft access." description="Create a renter account, provide your pilot background, and submit the application for review before booking privileges are activated." />
 
     <section class="section application-section">
       <div class="container application-grid">
-        <div class="application-sidebar reveal"><div class="application-step active"><span>1</span><div><strong>Contact information</strong><small>Who you are</small></div></div><div class="application-step"><span>2</span><div><strong>Pilot experience</strong><small>Certificates and time</small></div></div><div class="application-step"><span>3</span><div><strong>Documents</strong><small>Secure uploads later</small></div></div><div class="application-step"><span>4</span><div><strong>Review</strong><small>Tyler approves access</small></div></div><div class="application-help"><Icon name="shield" size={25}/><h3>Approval is required</h3><p>Submitting an application will not automatically authorize use of the aircraft.</p></div></div>
+        <div class="application-sidebar reveal"><div class="application-step active"><span>1</span><div><strong>Create an account</strong><small>Email and password</small></div></div><div class="application-step active"><span>2</span><div><strong>Pilot experience</strong><small>Certificate and time</small></div></div><div class="application-step"><span>3</span><div><strong>Documents</strong><small>Added after requirements are final</small></div></div><div class="application-step"><span>4</span><div><strong>Review</strong><small>Tyler approves access</small></div></div><div class="application-help"><Icon name="shield" size={25}/><h3>Approval is required</h3><p>Submitting this form does not automatically authorize aircraft rental or reservation privileges.</p></div></div>
 
-        <form class="renter-form reveal reveal-delay" data-demo-application>
-          <div class="form-notice"><Icon name="wrench" size={21}/><div><strong>Prototype form</strong><span>This version validates in the browser but does not transmit or store personal information.</span></div></div>
-          <fieldset><legend>Contact information</legend><div class="form-grid"><label>Legal first name<input name="firstName" autocomplete="given-name" required /></label><label>Legal last name<input name="lastName" autocomplete="family-name" required /></label><label>Email address<input type="email" name="email" autocomplete="email" required /></label><label>Phone number<input type="tel" name="phone" autocomplete="tel" required /></label><label class="full">Home address<input name="address" autocomplete="street-address" /></label><label>City<input name="city" autocomplete="address-level2" /></label><label>State<input name="state" autocomplete="address-level1" value="Georgia" /></label></div></fieldset>
-          <fieldset><legend>Pilot information</legend><div class="form-grid"><label>Highest certificate<select name="certificate" required><option value="">Choose one</option><option>Student Pilot</option><option>Private Pilot</option><option>Commercial Pilot</option><option>Airline Transport Pilot</option></select></label><label>Primary rental purpose<select name="purpose" required><option value="">Choose one</option><option>Time building</option><option>Local personal flying</option><option>Cross-country flying</option><option>Other</option></select></label><label>Total flight time<input type="number" name="totalTime" min="0" step="0.1" placeholder="Hours" /></label><label>Time in Piper Cherokee<input type="number" name="cherokeeTime" min="0" step="0.1" placeholder="Hours" /></label><label>Last flight review<input type="date" name="flightReview" /></label><label>Medical / BasicMed expiration<input type="date" name="medicalExpiration" /></label><label class="full">Ratings and endorsements<textarea name="ratings" rows="4" placeholder="List relevant ratings, endorsements, and recent experience."></textarea></label></div></fieldset>
-          <fieldset><legend>Documents and acknowledgments</legend><div class="upload-grid"><label class="upload-box"><Icon name="document" size={27}/><strong>Pilot certificate</strong><span>Upload will be enabled with private storage</span><input type="file" disabled /></label><label class="upload-box"><Icon name="document" size={27}/><strong>Medical or BasicMed</strong><span>Upload will be enabled with private storage</span><input type="file" disabled /></label><label class="upload-box"><Icon name="document" size={27}/><strong>Photo identification</strong><span>Upload will be enabled with private storage</span><input type="file" disabled /></label></div><label class="check-row"><input type="checkbox" required /><span>I understand this is an application for review and does not guarantee aircraft access or reservation privileges.</span></label></fieldset>
-          <button class="button" type="submit">Preview Submission <Icon name="arrow" size={19}/></button>
-          <div class="form-success" data-form-success hidden><Icon name="check" size={24}/><div><strong>Prototype validation complete.</strong><span>No information was transmitted. Connect Supabase before accepting real applications.</span></div></div>
-        </form>
+        <div>
+          <div class="application-auth-gate" data-application-gate>
+            <Icon name="user" size={27}/><div><strong>Sign in before applying</strong><p>Your application is securely connected to your renter account.</p></div><a class="button" href={`${base}account/?returnTo=${encodeURIComponent(`${base}apply/`)}`}>Sign In or Register</a>
+          </div>
+
+          <form class="renter-form reveal reveal-delay" data-renter-application hidden>
+            <div class="form-notice live-form-notice"><Icon name="check" size={21}/><div><strong>Connected application</strong><span>Your submission will be stored in Supabase and made available to the administrator for review.</span></div></div>
+            <div class="application-current-status" data-application-status hidden></div>
+            <fieldset><legend>Contact information</legend><div class="form-grid"><label>Legal first name<input name="firstName" autocomplete="given-name" required /></label><label>Legal last name<input name="lastName" autocomplete="family-name" required /></label><label>Email address<input type="email" name="email" autocomplete="email" readonly /></label><label>Phone number<input type="tel" name="phone" autocomplete="tel" required /></label><label class="full">Home address<input name="address" autocomplete="street-address" /></label><label>City<input name="city" autocomplete="address-level2" /></label><label>State<input name="state" autocomplete="address-level1" value="Georgia" /></label></div></fieldset>
+            <fieldset><legend>Pilot information</legend><div class="form-grid"><label>Highest certificate<select name="certificate" required><option value="">Choose one</option><option>Student Pilot</option><option>Private Pilot</option><option>Commercial Pilot</option><option>Airline Transport Pilot</option></select></label><label>Primary rental purpose<select name="purpose" required><option value="">Choose one</option><option>Time building</option><option>Local personal flying</option><option>Cross-country flying</option><option>Other</option></select></label><label>Total flight time<input type="number" name="totalTime" min="0" step="0.1" placeholder="Hours" /></label><label>Time in Piper Cherokee<input type="number" name="cherokeeTime" min="0" step="0.1" placeholder="Hours" /></label><label>Last flight review<input type="date" name="flightReview" /></label><label>Medical / BasicMed expiration<input type="date" name="medicalExpiration" /></label><label class="full">Ratings, endorsements, and relevant experience<textarea name="ratings" rows="4" placeholder="List relevant ratings, endorsements, and recent experience."></textarea></label></div></fieldset>
+            <fieldset><legend>Acknowledgment</legend><label class="check-row"><input type="checkbox" required /><span>I understand that this is an application for review and does not guarantee aircraft access. Final approval is subject to Hutzell Aviation policies, insurance requirements, and any required aircraft checkout.</span></label></fieldset>
+            <button class="button" type="submit">Submit Application <Icon name="arrow" size={19}/></button>
+            <div class="form-success" data-form-success hidden></div>
+          </form>
+        </div>
       </div>
     </section>
   </main>
   <Footer />
 </BaseLayout>
-<script is:inline>
-  const form = document.querySelector('[data-demo-application]');
-  if (form) form.addEventListener('submit', (event) => { event.preventDefault(); const message = form.querySelector('[data-form-success]'); message.hidden = false; message.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+<script>
+  import { getCurrentProfile, supabase } from '../lib/supabase';
+
+  const base = import.meta.env.BASE_URL;
+  const gate = document.querySelector<HTMLElement>('[data-application-gate]')!;
+  const form = document.querySelector<HTMLFormElement>('[data-renter-application]')!;
+  const success = document.querySelector<HTMLElement>('[data-form-success]')!;
+  const statusBox = document.querySelector<HTMLElement>('[data-application-status]')!;
+  let userId = '';
+
+  function setValue(name: string, value: unknown) {
+    const field = form.elements.namedItem(name) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null;
+    if (field && value !== null && value !== undefined) field.value = String(value);
+  }
+
+  async function initialize() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      gate.hidden = false;
+      form.hidden = true;
+      return;
+    }
+    userId = user.id;
+    gate.hidden = true;
+    form.hidden = false;
+    setValue('email', user.email || '');
+    try {
+      const profile = await getCurrentProfile();
+      setValue('phone', profile?.phone || '');
+      const names = (profile?.full_name || '').trim().split(/\s+/);
+      if (names.length) setValue('firstName', names[0]);
+      if (names.length > 1) setValue('lastName', names.slice(1).join(' '));
+    } catch {}
+
+    const { data, error } = await supabase
+      .from('renter_applications')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (error) {
+      success.className = 'form-success error';
+      success.textContent = error.message;
+      success.hidden = false;
+      return;
+    }
+    if (data) {
+      setValue('firstName', data.legal_first_name);
+      setValue('lastName', data.legal_last_name);
+      setValue('phone', data.phone);
+      setValue('address', data.address);
+      setValue('city', data.city);
+      setValue('state', data.state);
+      setValue('certificate', data.certificate);
+      setValue('purpose', data.rental_purpose);
+      setValue('totalTime', data.total_time);
+      setValue('cherokeeTime', data.cherokee_time);
+      setValue('flightReview', data.flight_review_date);
+      setValue('medicalExpiration', data.medical_expiration);
+      setValue('ratings', data.ratings);
+      statusBox.className = `application-current-status ${data.status}`;
+      statusBox.innerHTML = `<strong>Current status: ${String(data.status).replace('_', ' ')}</strong>${data.admin_notes ? `<span>${data.admin_notes}</span>` : '<span>You may update and resubmit the information below.</span>'}`;
+      statusBox.hidden = false;
+    }
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!userId) { window.location.href = `${base}account/`; return; }
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const data = new FormData(form);
+    button.disabled = true; button.textContent = 'Submitting…';
+    success.hidden = true;
+    const nullableNumber = (name: string) => String(data.get(name) || '').trim() ? Number(data.get(name)) : null;
+    const nullableDate = (name: string) => String(data.get(name) || '').trim() || null;
+    const { error } = await supabase.rpc('submit_renter_application', {
+      p_legal_first_name: String(data.get('firstName')),
+      p_legal_last_name: String(data.get('lastName')),
+      p_phone: String(data.get('phone')),
+      p_address: String(data.get('address') || ''),
+      p_city: String(data.get('city') || ''),
+      p_state: String(data.get('state') || ''),
+      p_certificate: String(data.get('certificate')),
+      p_rental_purpose: String(data.get('purpose')),
+      p_total_time: nullableNumber('totalTime'),
+      p_cherokee_time: nullableNumber('cherokeeTime'),
+      p_flight_review_date: nullableDate('flightReview'),
+      p_medical_expiration: nullableDate('medicalExpiration'),
+      p_ratings: String(data.get('ratings') || ''),
+    });
+    button.disabled = false; button.innerHTML = 'Submit Application <span aria-hidden="true">→</span>';
+    if (error) {
+      success.className = 'form-success error';
+      success.textContent = error.message;
+    } else {
+      success.className = 'form-success';
+      success.innerHTML = '<strong>Application submitted.</strong><span>Your status is now pending review. You can track it from the account dashboard.</span>';
+      statusBox.className = 'application-current-status pending';
+      statusBox.innerHTML = '<strong>Current status: pending</strong><span>Your application is awaiting review.</span>';
+      statusBox.hidden = false;
+    }
+    success.hidden = false;
+    success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  supabase.auth.onAuthStateChange(() => window.setTimeout(initialize, 0));
+  await initialize();
 </script>

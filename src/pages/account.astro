@@ -6,15 +6,180 @@ import Icon from '../components/Icon.astro';
 import '../styles/global.css';
 const base = import.meta.env.BASE_URL;
 ---
-<BaseLayout title="Renter Account | Hutzell Aviation" description="Hutzell Aviation renter account and reservation dashboard preview.">
+<BaseLayout title="Renter Account | Hutzell Aviation" description="Create a Hutzell Aviation renter account, review approval status, and manage aircraft reservations.">
   <Header />
   <main class="account-main">
     <section class="account-login-section">
-      <div class="container account-login-grid">
-        <div class="account-intro reveal"><p class="eyebrow light"><span></span> RENTER PORTAL</p><h1>Reservations and hour balances in one place.</h1><p>This page is the front-end preview for approved-renter authentication. Supabase Auth will be connected in the backend phase.</p><ul><li><Icon name="calendar" size={20}/> Upcoming and past reservations</li><li><Icon name="clock" size={20}/> Prepaid hour balance and ledger</li><li><Icon name="document" size={20}/> Receipts, approval status, and documents</li></ul></div>
-        <div class="login-card reveal reveal-delay"><div class="login-logo"><img src={`${base}images/logo-full.png`} alt="Hutzell Aviation" width="250" height="165"/></div><h2>Renter sign in</h2><p>Authentication is not active in this static prototype.</p><label>Email address<input type="email" placeholder="pilot@example.com" disabled/></label><label>Password<input type="password" value="prototype" disabled/></label><button class="button is-disabled" type="button" disabled>Sign In</button><span class="login-divider">or</span><a class="button button-outline" href={`${base}apply/`}>Apply to Become a Renter</a><small>Backend milestone: Supabase authentication, role-based access, and renter approval status.</small></div>
+      <div class="container account-login-grid" data-auth-page>
+        <div class="account-intro reveal"><p class="eyebrow light"><span></span> RENTER PORTAL</p><h1>Your flying schedule in one place.</h1><p>Create an account, submit the renter application, and manage Piper Cherokee reservation requests.</p><ul><li><Icon name="calendar" size={20}/> Upcoming and past reservations</li><li><Icon name="shield" size={20}/> Renter approval status</li><li><Icon name="clock" size={20}/> Live calendar access</li></ul></div>
+
+        <div class="login-card reveal reveal-delay" data-auth-card>
+          <div class="login-logo"><img src={`${base}images/logo-full.png`} alt="Hutzell Aviation" width="1400" height="1069"/></div>
+          <div data-auth-forms>
+            <div class="auth-tabs" role="tablist"><button type="button" class="active" data-auth-tab="signin">Sign In</button><button type="button" data-auth-tab="register">Create Account</button></div>
+            <form data-signin-form>
+              <h2>Renter sign in</h2>
+              <label>Email address<input type="email" name="email" autocomplete="email" required/></label>
+              <label>Password<input type="password" name="password" autocomplete="current-password" minlength="8" required/></label>
+              <button class="button" type="submit">Sign In</button>
+            </form>
+            <form data-register-form hidden>
+              <h2>Create your account</h2>
+              <label>Full name<input name="fullName" autocomplete="name" required/></label>
+              <label>Phone number<input name="phone" type="tel" autocomplete="tel" required/></label>
+              <label>Email address<input type="email" name="email" autocomplete="email" required/></label>
+              <label>Password<input type="password" name="password" autocomplete="new-password" minlength="8" required/></label>
+              <button class="button" type="submit">Create Account</button>
+              <small>Supabase may send an email-confirmation link before the first sign-in.</small>
+            </form>
+            <div class="auth-message" data-auth-message hidden></div>
+          </div>
+
+          <div class="account-dashboard" data-account-dashboard hidden>
+            <div class="dashboard-header"><div><span>Signed in as</span><strong data-dashboard-email></strong></div><button class="text-button" type="button" data-signout>Sign out</button></div>
+            <div class="account-status-card"><span>Renter status</span><strong data-approval-status></strong><p data-status-guidance></p></div>
+            <div class="account-actions"><a class="button" href={`${base}availability/`}>View Availability</a><a class="button button-outline" href={`${base}apply/`} data-application-link>Renter Application</a><a class="button button-outline" href={`${base}admin/`} data-admin-action hidden>Open Admin</a></div>
+            <section class="dashboard-reservations"><div class="dashboard-section-title"><h3>Your reservations</h3><button type="button" class="text-button" data-refresh-reservations>Refresh</button></div><div data-reservation-list><p>Loading reservations…</p></div></section>
+          </div>
+        </div>
       </div>
     </section>
   </main>
   <Footer />
 </BaseLayout>
+
+<script>
+  import { getCurrentProfile, resolveSiteUrl, supabase, type Profile } from '../lib/supabase';
+  import { formatEasternDate, formatEasternTime } from '../lib/calendar';
+
+  const base = import.meta.env.BASE_URL;
+  const formsWrap = document.querySelector<HTMLElement>('[data-auth-forms]')!;
+  const dashboard = document.querySelector<HTMLElement>('[data-account-dashboard]')!;
+  const signInForm = document.querySelector<HTMLFormElement>('[data-signin-form]')!;
+  const registerForm = document.querySelector<HTMLFormElement>('[data-register-form]')!;
+  const message = document.querySelector<HTMLElement>('[data-auth-message]')!;
+  const reservationList = document.querySelector<HTMLElement>('[data-reservation-list]')!;
+  let profile: Profile | null = null;
+
+  function escapeHtml(value: unknown) {
+    return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#039;', '"':'&quot;' })[char]!);
+  }
+
+  function showMessage(text: string, kind: 'success' | 'error' = 'error') {
+    message.className = `auth-message ${kind}`;
+    message.textContent = text;
+    message.hidden = false;
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('[data-auth-tab]').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.authTab;
+      document.querySelectorAll('[data-auth-tab]').forEach((item) => item.classList.toggle('active', item === tab));
+      signInForm.hidden = target !== 'signin';
+      registerForm.hidden = target !== 'register';
+      message.hidden = true;
+    });
+  });
+
+  signInForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    message.hidden = true;
+    const button = signInForm.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const data = new FormData(signInForm);
+    button.disabled = true; button.textContent = 'Signing in…';
+    const { error } = await supabase.auth.signInWithPassword({ email: String(data.get('email')), password: String(data.get('password')) });
+    button.disabled = false; button.textContent = 'Sign In';
+    if (error) showMessage(error.message);
+  });
+
+  registerForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    message.hidden = true;
+    const button = registerForm.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const data = new FormData(registerForm);
+    button.disabled = true; button.textContent = 'Creating…';
+    const { data: result, error } = await supabase.auth.signUp({
+      email: String(data.get('email')),
+      password: String(data.get('password')),
+      options: {
+        data: { full_name: String(data.get('fullName')), phone: String(data.get('phone')) },
+        emailRedirectTo: `${resolveSiteUrl(base)}account/`,
+      },
+    });
+    button.disabled = false; button.textContent = 'Create Account';
+    if (error) showMessage(error.message);
+    else if (!result.session) showMessage('Account created. Check your email for the confirmation link, then return here to sign in.', 'success');
+    else showMessage('Account created successfully.', 'success');
+  });
+
+  async function loadReservations() {
+    if (!profile) return;
+    reservationList.innerHTML = '<p>Loading reservations…</p>';
+    const { data, error } = await supabase
+      .from('reservations')
+      .select('id,starts_at,ends_at,status,estimated_flight_hours,actual_aircraft_hours,renter_notes,admin_notes')
+      .eq('renter_id', profile.id)
+      .order('starts_at', { ascending: false });
+    if (error) {
+      reservationList.innerHTML = `<p class="inline-error">${escapeHtml(error.message)}</p>`;
+      return;
+    }
+    if (!data?.length) {
+      reservationList.innerHTML = `<div class="empty-dashboard"><strong>No reservations yet.</strong><p>Open the live calendar to request your first aircraft window.</p></div>`;
+      return;
+    }
+    reservationList.innerHTML = data.map((reservation: any) => {
+      const canCancel = ['pending','confirmed'].includes(reservation.status) && new Date(reservation.starts_at) > new Date();
+      return `<article class="reservation-row"><div><span>${formatEasternDate(reservation.starts_at)}</span><strong>${formatEasternTime(reservation.starts_at)}–${formatEasternTime(reservation.ends_at)}</strong><small>${reservation.estimated_flight_hours ? `Estimated flight time: ${reservation.estimated_flight_hours} hr` : 'No estimated flight time entered'}</small></div><div class="reservation-row-actions"><span class="status-pill ${reservation.status}">${reservation.status.replace('_',' ')}</span>${canCancel ? `<button type="button" data-cancel-reservation="${reservation.id}">Cancel</button>` : ''}</div></article>`;
+    }).join('');
+    reservationList.querySelectorAll<HTMLButtonElement>('[data-cancel-reservation]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        if (!confirm('Cancel this reservation request?')) return;
+        button.disabled = true;
+        const { error: cancelError } = await supabase.rpc('cancel_my_reservation', { p_reservation_id: button.dataset.cancelReservation });
+        if (cancelError) alert(cancelError.message);
+        await loadReservations();
+      });
+    });
+  }
+
+  async function renderSession() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      profile = null;
+      formsWrap.hidden = false;
+      dashboard.hidden = true;
+      return;
+    }
+    try {
+      profile = await getCurrentProfile();
+    } catch (error) {
+      showMessage(error instanceof Error ? error.message : 'Unable to load the account profile. Run the Supabase setup SQL.');
+      return;
+    }
+    formsWrap.hidden = true;
+    dashboard.hidden = false;
+    dashboard.querySelector<HTMLElement>('[data-dashboard-email]')!.textContent = profile?.email || session.user.email || '';
+    const status = dashboard.querySelector<HTMLElement>('[data-approval-status]')!;
+    status.textContent = profile?.role === 'admin' ? 'Administrator' : (profile?.approval_status || 'incomplete').replace('_', ' ');
+    status.className = `status-value ${profile?.role === 'admin' ? 'approved' : profile?.approval_status}`;
+    const guidance = dashboard.querySelector<HTMLElement>('[data-status-guidance]')!;
+    if (profile?.role === 'admin') guidance.textContent = 'Administrator access is active for renter approvals, reservations, and calendar blocks.';
+    else if (profile?.approval_status === 'approved') guidance.textContent = 'Your account can submit aircraft reservation requests from the live calendar.';
+    else if (profile?.approval_status === 'pending') guidance.textContent = 'Your application is awaiting review. You may view availability, but booking remains locked.';
+    else guidance.textContent = 'Complete the renter application to begin the approval process.';
+    dashboard.querySelector<HTMLElement>('[data-admin-action]')!.hidden = profile?.role !== 'admin';
+    await loadReservations();
+
+    const returnTo = new URLSearchParams(window.location.search).get('returnTo');
+    if (returnTo && (profile?.role === 'admin' || profile?.approval_status === 'approved')) {
+      const target = new URL(returnTo, window.location.origin);
+      if (target.origin === window.location.origin && target.pathname.startsWith(base)) window.location.href = target.href;
+    }
+  }
+
+  document.querySelector('[data-signout]')!.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.href = `${base}account/`; });
+  document.querySelector('[data-refresh-reservations]')!.addEventListener('click', loadReservations);
+  supabase.auth.onAuthStateChange(() => window.setTimeout(renderSession, 0));
+  await renderSession();
+</script>
