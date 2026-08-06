@@ -212,7 +212,7 @@ const base = import.meta.env.BASE_URL;
     // into view immediately so the selected-date controls are not mistaken
     // for missing content. Desktop layouts keep the panel beside the grid.
     window.requestAnimationFrame(() => {
-      if (window.matchMedia('(max-width: 820px)').matches) {
+      if (window.matchMedia('(max-width: 900px)').matches) {
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         slotPanel.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
         slotPanel.focus({ preventScroll: true });

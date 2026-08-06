@@ -673,3 +673,355 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); outline: 
 }
 .calendar-day.past { opacity: .48; cursor: not-allowed; }
 .calendar-day.past:hover { border-color: var(--line); transform: none; }
+
+/* Mobile optimization patch — August 2026 */
+@media (max-width: 900px) {
+  html { scroll-padding-top: 92px; }
+  body { overflow-x: hidden; }
+  body.nav-open { overscroll-behavior: contain; }
+
+  .announcement-inner { min-height: 40px; }
+  .site-header { isolation: isolate; }
+  .header-inner { min-height: 78px; }
+  .brand-image { width: 96px; height: 70px; padding-block: 3px; }
+  .nav-toggle { position: relative; z-index: 3; display: block; width: 48px; height: 46px; flex: 0 0 auto; }
+  .nav-toggle[aria-expanded='true'] span:nth-of-type(2) { transform: translateY(7px) rotate(45deg); }
+  .nav-toggle[aria-expanded='true'] span:nth-of-type(3) { opacity: 0; }
+  .nav-toggle[aria-expanded='true'] span:nth-of-type(4) { transform: translateY(-7px) rotate(-45deg); }
+
+  .primary-nav {
+    position: absolute;
+    z-index: 2;
+    top: 100%;
+    right: 0;
+    left: 0;
+    bottom: auto;
+    display: flex;
+    max-height: calc(100dvh - 78px);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 10px max(20px, env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+    overflow-y: auto;
+    border-top: 1px solid var(--line);
+    background: rgba(255,255,255,.99);
+    box-shadow: 0 24px 50px rgba(5,29,46,.18);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: opacity 180ms ease, transform 180ms ease, visibility 180ms ease;
+  }
+  .primary-nav.is-open { opacity: 1; visibility: visible; pointer-events: auto; transform: none; }
+  .primary-nav > a:not(.button) {
+    display: flex;
+    min-height: 52px;
+    align-items: center;
+    padding: 13px 8px;
+    border-bottom: 1px solid var(--line);
+    font-size: 1rem;
+  }
+  .primary-nav > a:not(.button)::after { display: none; }
+  .primary-nav .nav-account { display: flex; }
+  .primary-nav .button { width: 100%; min-height: 50px; margin-top: 16px; }
+
+  .section { padding-block: 76px; }
+  .section-heading { margin-bottom: 40px; }
+  .page-hero-inner { padding-block: 70px 78px; }
+  .page-hero h1 { font-size: clamp(2.85rem, 9vw, 4.75rem); }
+  .page-hero-inner > p:last-child { font-size: 1.05rem; }
+
+  .home-hero { padding-block: 44px 62px; }
+  .home-hero-grid,
+  .split-intro,
+  .aircraft-preview-grid,
+  .about-preview-grid,
+  .biography-grid,
+  .aircraft-detail-grid,
+  .requirements-grid,
+  .billing-grid,
+  .faq-grid,
+  .application-grid,
+  .account-login-grid { grid-template-columns: 1fr; }
+  .home-hero-grid { gap: 42px; }
+  .hero-visual { width: 100%; max-width: 680px; margin-inline: auto; }
+
+  .feature-grid,
+  .purpose-grid { grid-template-columns: 1fr; }
+  .feature-card p { min-height: 0; }
+  .mini-pricing-grid,
+  .operations-grid,
+  .calendar-feature-grid,
+  .policy-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .billing-flow { grid-template-columns: 1fr; }
+  .billing-flow > div { min-height: 0; }
+  .billing-flow strong { margin-top: 18px; }
+
+  .about-preview-grid,
+  .biography-grid,
+  .aircraft-detail-grid,
+  .requirements-grid,
+  .billing-grid,
+  .faq-grid { gap: 44px; }
+  .tyler-card { width: 100%; max-width: 520px; margin-inline: auto; }
+  .portrait-photo { max-width: 560px; min-height: 0; margin-inline: auto; }
+  .portrait-photo img { height: auto; aspect-ratio: 4 / 5; }
+  .application-sidebar,
+  .faq-intro { position: static; }
+
+  .gallery-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .cta-shell { grid-template-columns: 1fr; padding: 42px; }
+  .cta-actions { flex-direction: row; min-width: 0; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .footer-brand,
+  .footer-cta { grid-column: span 2; }
+  .footer-logo { width: 210px; height: 164px; }
+
+  .calendar-shell { grid-template-columns: 1fr; overflow: visible; border-radius: 18px; }
+  .calendar-main { border-radius: 18px 18px 0 0; }
+  .slot-panel { min-height: 0; border-radius: 0 0 18px 18px; scroll-margin-top: 94px; }
+  .slot-empty { min-height: 270px; }
+
+  .checkout-grid { grid-template-columns: 1fr; }
+  .checkout-summary { position: static; }
+  .admin-grid-two { grid-template-columns: 1fr; }
+  .application-auth-gate,
+  .admin-gate { align-items: flex-start; flex-wrap: wrap; }
+  .application-auth-gate .button,
+  .admin-gate .button { width: 100%; }
+  .admin-row { align-items: flex-start; flex-direction: column; }
+  .admin-row-actions { width: 100%; flex-wrap: wrap; }
+}
+
+@media (max-width: 680px) {
+  :root { --radius: 18px; }
+  html { scroll-padding-top: 84px; }
+  body { font-size: 16px; line-height: 1.58; }
+  .container { width: min(calc(100% - 30px), var(--container)); }
+  .section { padding-block: 62px; }
+  .section-heading { margin-bottom: 32px; }
+  h1 { font-size: clamp(2.7rem, 13vw, 3.7rem); line-height: .98; }
+  h2 { font-size: clamp(2.05rem, 10vw, 2.85rem); line-height: 1.02; }
+  h3 { font-size: 1.35rem; }
+  .lead { font-size: 1.04rem; }
+  .eyebrow { gap: 9px; margin-bottom: 16px; font-size: .69rem; letter-spacing: .14em; }
+  .eyebrow > span { width: 25px; }
+  .centered-eyebrow { flex-wrap: wrap; }
+  .button { min-height: 50px; padding-inline: 19px; }
+  input, select, textarea { font-size: 16px; }
+
+  .announcement { font-size: .72rem; }
+  .announcement-inner { min-height: 38px; }
+  .announcement-inner span { display: none; }
+  .announcement-inner { justify-content: center; }
+  .header-inner { min-height: 72px; }
+  .brand-image { width: 86px; height: 64px; }
+  .primary-nav { max-height: calc(100dvh - 72px); }
+  .nav-toggle { width: 46px; height: 44px; }
+
+  .page-hero::after { top: -160px; right: -270px; width: 480px; height: 480px; }
+  .page-hero-inner { padding-block: 54px 60px; }
+  .page-hero h1 { margin-bottom: 17px; font-size: clamp(2.65rem, 13vw, 3.75rem); overflow-wrap: anywhere; }
+  .page-hero-inner > p:last-child { font-size: 1rem; line-height: 1.58; }
+
+  .home-hero { padding-block: 34px 50px; }
+  .home-hero-grid { gap: 32px; }
+  .hero-copy { text-align: left; }
+  .hero-copy .eyebrow,
+  .hero-actions,
+  .hero-trust { justify-content: flex-start; }
+  .hero-lead { margin-bottom: 24px; font-size: 1.06rem; }
+  .hero-actions { gap: 10px; margin-bottom: 25px; }
+  .hero-actions .button { width: 100%; }
+  .hero-trust { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .hero-photo-frame { border-radius: 18px; }
+  .hero-photo-frame img { aspect-ratio: 4 / 3; }
+  .hero-photo-frame figcaption { right: 12px; bottom: 12px; left: 12px; width: fit-content; max-width: calc(100% - 24px); font-size: .62rem; }
+  .hero-status-card { position: relative; right: auto; bottom: auto; width: 100%; min-width: 0; margin: 12px 0 0; padding: 14px 16px; }
+
+  .proof-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .proof-grid > div { min-height: 88px; padding: 14px 13px; }
+  .proof-grid strong { font-size: 1.28rem; }
+  .proof-grid span { font-size: .74rem; line-height: 1.35; }
+
+  .feature-card,
+  .purpose-grid article,
+  .mini-price-card,
+  .operations-grid > div,
+  .calendar-feature-grid article,
+  .policy-grid article { padding: 23px; }
+  .feature-icon { margin-bottom: 18px; }
+
+  .rental-steps { grid-template-columns: 1fr; }
+  .rental-steps li { min-height: 0; padding: 25px 23px; border-right: 1px solid rgba(255,255,255,.14); border-bottom: 0; }
+  .rental-steps li:last-child { border-bottom: 1px solid rgba(255,255,255,.14); }
+  .rental-steps li > span { margin-bottom: 17px; }
+
+  .aircraft-line-card,
+  .aircraft-photo-card,
+  .aircraft-showcase { padding: 14px; border-radius: 18px; }
+  .aircraft-photo-card img,
+  .aircraft-showcase-photo { border-radius: 12px; }
+  .aircraft-photo-card figcaption,
+  .aircraft-art-meta { flex-direction: column; gap: 4px; padding-inline: 6px; }
+  .aircraft-photo-card figcaption span:last-child { text-align: left; }
+  .aircraft-showcase-head { align-items: flex-start; flex-direction: column; gap: 8px; }
+
+  .mini-pricing-grid,
+  .operations-grid,
+  .calendar-feature-grid,
+  .policy-grid { grid-template-columns: 1fr; }
+  .mini-price-card { min-height: 0; }
+  .price-card { padding: 25px 22px; border-radius: 17px; }
+  .price-card h2 { font-size: 2.1rem; }
+  .price-rate { padding: 16px; }
+  .price-card .button { width: 100%; }
+
+  .about-preview-grid,
+  .biography-grid,
+  .aircraft-detail-grid,
+  .requirements-grid,
+  .billing-grid,
+  .faq-grid { gap: 34px; }
+  .tyler-card { border-radius: 18px; }
+  .tyler-card-body { padding: 24px; }
+  .portrait-photo { border-radius: 18px; }
+  .portrait-photo img { aspect-ratio: 1 / 1.15; }
+  .portrait-photo figcaption { right: 18px; bottom: 18px; left: 18px; }
+  .portrait-photo figcaption span { font-size: 1.7rem; }
+  .bio-credential { width: calc(100% - 24px); margin-top: -18px; padding: 15px 17px; }
+  .bio-values > div { padding: 15px; }
+
+  .gallery-grid { grid-template-columns: 1fr; grid-auto-rows: 220px; }
+  .gallery-placeholder.wide,
+  .gallery-photo.wide { grid-column: auto; grid-row: auto; }
+  .gallery-photo { border-radius: 14px; }
+  .gallery-photo:hover img,
+  .gallery-photo.aircraft-detail-crop:hover img,
+  .gallery-photo.cockpit-detail-crop:hover img { transform: none; }
+
+  .spec-grid,
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid label.full { grid-column: auto; }
+  .spec-grid > div { min-height: 82px; padding: 14px; }
+  .requirement-cards article { padding: 22px; }
+
+  .billing-flow { gap: 10px; }
+  .billing-flow > div { padding: 22px; }
+  .faq-list summary { padding: 19px 38px 19px 0; font-size: 1.1rem; }
+  .faq-list summary span::before,
+  .faq-list summary span::after { top: 28px; }
+  .faq-answer { padding-right: 0; }
+
+  .calendar-main { padding: 14px; }
+  .calendar-toolbar { align-items: stretch; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+  .calendar-toolbar h2 { font-size: 1.72rem; }
+  .calendar-nav { display: grid; grid-template-columns: 44px minmax(0,1fr) minmax(0,1fr) 44px; width: 100%; }
+  .calendar-nav button { min-width: 0; height: 44px; padding-inline: 8px; }
+  .calendar-legend { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px 10px; margin-bottom: 16px; font-size: .68rem; }
+  .calendar-weekdays { font-size: .58rem; }
+  .calendar-day { min-height: 57px; padding: 6px; font-size: .86rem; }
+  .calendar-day::before { top: auto; right: 6px; bottom: 6px; width: 7px; height: 7px; }
+  .day-state { display: none; }
+  .slot-panel { padding: 22px 19px; scroll-margin-top: 84px; }
+  .slot-empty { min-height: 230px; }
+  .slot-icon { width: 54px; height: 54px; margin-bottom: 16px; border-radius: 14px; }
+  .time-pair,
+  .account-actions { grid-template-columns: 1fr; }
+  .time-slot { min-height: 46px; }
+
+  .application-sidebar { padding: 18px; border-radius: 14px; }
+  .application-step { padding: 10px 0; }
+  .application-step small,
+  .application-help { display: none; }
+  .renter-form { padding: 22px 18px; border-radius: 16px; }
+  .renter-form fieldset { margin-bottom: 32px; }
+  .renter-form legend { font-size: 1.42rem; }
+  .upload-grid { grid-template-columns: 1fr; }
+  .upload-box { min-height: 130px; }
+  .check-row { font-size: .8rem; }
+
+  .account-login-section { padding-block: 48px 58px; }
+  .account-login-grid { gap: 30px; }
+  .login-card { order: -1; padding: 25px 19px; border-radius: 17px; }
+  .login-logo { width: 145px; height: 110px; }
+  .account-intro h1 { font-size: clamp(2.6rem, 13vw, 3.7rem); }
+  .account-intro ul { gap: 9px; margin-top: 23px; }
+  .dashboard-header { align-items: flex-start; flex-direction: column; }
+  .reservation-row { align-items: flex-start; flex-direction: column; }
+  .reservation-row-actions { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; }
+  .reservation-row small { white-space: normal; }
+
+  .checkout-hero { padding-block: 56px; }
+  .checkout-form-card { padding: 20px 17px; }
+  .checkout-block { grid-template-columns: 1fr; gap: 12px; padding: 27px 0; }
+  .reservation-detail-grid,
+  .checkout-options { grid-template-columns: 1fr; }
+  .checkout-summary { padding: 23px 19px; }
+
+  .admin-panel { padding: 20px 16px; border-radius: 16px; }
+  .admin-toolbar { align-items: stretch; flex-direction: column; padding: 17px; }
+  .admin-toolbar .button { width: 100%; }
+  .admin-panel-heading h2 { font-size: 1.85rem; }
+  .admin-row { padding: 14px; }
+  .admin-row-actions { display: grid; grid-template-columns: 1fr; }
+  .admin-row-actions select,
+  .admin-row-actions button,
+  .danger-button { width: 100%; min-height: 42px; }
+
+  .cta-section { padding-block: 56px; }
+  .cta-shell { gap: 27px; padding: 31px 22px; border-radius: 18px; }
+  .cta-actions { flex-direction: column; }
+  .cta-actions .button { width: 100%; }
+
+  .site-footer { padding-top: 52px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 32px; padding-bottom: 40px; }
+  .footer-brand,
+  .footer-cta { grid-column: auto; }
+  .footer-logo { width: 176px; height: 136px; padding: 8px; }
+  .site-footer nav a,
+  .site-footer .footer-grid > div > a { display: flex; min-height: 38px; align-items: center; margin: 0; }
+  .footer-bottom { flex-direction: column; gap: 12px; }
+  .footer-bottom p:last-child { text-align: left; }
+}
+
+@media (max-width: 420px) {
+  .container { width: min(calc(100% - 24px), var(--container)); }
+  h1 { font-size: clamp(2.45rem, 13vw, 3.2rem); }
+  h2 { font-size: clamp(1.95rem, 10vw, 2.55rem); }
+  .page-hero h1 { font-size: clamp(2.4rem, 13vw, 3.25rem); }
+  .announcement a { padding-block: 8px; }
+  .brand-image { width: 80px; height: 60px; }
+  .header-inner { min-height: 68px; }
+  .primary-nav { max-height: calc(100dvh - 68px); }
+  .nav-toggle { width: 44px; height: 42px; }
+  .proof-grid { grid-template-columns: 1fr 1fr; }
+  .proof-grid > div { padding-inline: 10px; }
+  .calendar-main { padding: 11px 8px 13px; }
+  .calendar-toolbar { padding-inline: 4px; }
+  .calendar-weekdays { font-size: .52rem; }
+  .calendar-day { min-height: 50px; padding: 5px; font-size: .79rem; }
+  .slot-panel { padding-inline: 16px; }
+  .draft-notice,
+  .prototype-banner,
+  .form-notice,
+  .live-banner,
+  .application-auth-gate,
+  .admin-gate { padding: 14px; }
+  .footer-logo { width: 160px; height: 124px; }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .button:hover,
+  .text-link:hover,
+  .calendar-day:hover:not(.outside),
+  .gallery-photo:hover img,
+  .aircraft-photo-card:hover img { transform: none; }
+  .button,
+  .calendar-nav button,
+  .time-slot,
+  .nav-toggle,
+  input,
+  select { min-height: 44px; }
+}

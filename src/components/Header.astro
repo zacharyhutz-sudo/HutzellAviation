@@ -13,12 +13,12 @@ const activeFor = (href: string) => href === '' ? pathname === base || pathname 
 </div>
 <header class="site-header" data-header>
   <div class="container header-inner">
-    <a class="brand brand-image" href={base} aria-label="Hutzell Aviation home">
+    <a class="brand brand-image" href={base} aria-label="Hutzell Aviation home" data-brand-link>
       <img src={`${base}images/logo-full.png`} alt="Hutzell Aviation" width="1400" height="1069" />
     </a>
 
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" data-nav-toggle>
-      <span class="sr-only">Open navigation</span><span></span><span></span><span></span>
+      <span class="sr-only" data-nav-label>Open navigation</span><span></span><span></span><span></span>
     </button>
 
     <nav class="primary-nav" id="primary-nav" aria-label="Primary navigation" data-nav>
@@ -32,20 +32,42 @@ const activeFor = (href: string) => href === '' ? pathname === base || pathname 
 <script>
   import { getCurrentProfile, supabase } from '../lib/supabase';
 
-  const toggle = document.querySelector('[data-nav-toggle]');
-  const nav = document.querySelector('[data-nav]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
+  const nav = document.querySelector<HTMLElement>('[data-nav]');
+  const navLabel = document.querySelector<HTMLElement>('[data-nav-label]');
+  const brandLink = document.querySelector<HTMLElement>('[data-brand-link]');
+  const mobileNavQuery = window.matchMedia('(max-width: 900px)');
+
+  function setNavOpen(open: boolean, focusFirst = false) {
+    if (!toggle || !nav) return;
+    toggle.setAttribute('aria-expanded', String(open));
+    nav.classList.toggle('is-open', open);
+    document.body.classList.toggle('nav-open', open);
+    if (navLabel) navLabel.textContent = open ? 'Close navigation' : 'Open navigation';
+    if (open && focusFirst) {
+      window.setTimeout(() => nav.querySelector<HTMLElement>('a:not([hidden])')?.focus(), 50);
+    }
+  }
+
   if (toggle && nav) {
     toggle.addEventListener('click', () => {
-      const open = toggle.getAttribute('aria-expanded') === 'true';
-      toggle.setAttribute('aria-expanded', String(!open));
-      nav.classList.toggle('is-open', !open);
-      document.body.classList.toggle('nav-open', !open);
+      const open = toggle.getAttribute('aria-expanded') !== 'true';
+      setNavOpen(open, open);
     });
-    nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
-      toggle.setAttribute('aria-expanded', 'false');
-      nav.classList.remove('is-open');
-      document.body.classList.remove('nav-open');
-    }));
+
+    nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setNavOpen(false)));
+    brandLink?.addEventListener('click', () => setNavOpen(false));
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        setNavOpen(false);
+        toggle.focus();
+      }
+    });
+
+    mobileNavQuery.addEventListener('change', (event) => {
+      if (!event.matches) setNavOpen(false);
+    });
   }
 
   const accountLabel = document.querySelector('[data-account-label]');
