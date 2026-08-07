@@ -153,15 +153,15 @@ begin
     lower(coalesce(new.email, '')),
     nullif(new.raw_user_meta_data ->> 'full_name', ''),
     nullif(new.raw_user_meta_data ->> 'phone', ''),
-    case when lower(coalesce(new.email, '')) = 'zacharyhutz@gmail.com' and new.email_confirmed_at is not null then 'admin' else 'renter' end,
-    case when lower(coalesce(new.email, '')) = 'zacharyhutz@gmail.com' and new.email_confirmed_at is not null then 'approved' else 'incomplete' end
+    case when lower(coalesce(new.email, '')) in ('zacharyhutz@gmail.com', 'tylerhutzell4@gmail.com') and new.email_confirmed_at is not null then 'admin' else 'renter' end,
+    case when lower(coalesce(new.email, '')) in ('zacharyhutz@gmail.com', 'tylerhutzell4@gmail.com') and new.email_confirmed_at is not null then 'approved' else 'incomplete' end
   )
   on conflict (id) do update set
     email = excluded.email,
     full_name = coalesce(public.profiles.full_name, excluded.full_name),
     phone = coalesce(public.profiles.phone, excluded.phone),
-    role = case when excluded.email = 'zacharyhutz@gmail.com' and new.email_confirmed_at is not null then 'admin' else public.profiles.role end,
-    approval_status = case when excluded.email = 'zacharyhutz@gmail.com' and new.email_confirmed_at is not null then 'approved' else public.profiles.approval_status end,
+    role = case when excluded.email in ('zacharyhutz@gmail.com', 'tylerhutzell4@gmail.com') and new.email_confirmed_at is not null then 'admin' else public.profiles.role end,
+    approval_status = case when excluded.email in ('zacharyhutz@gmail.com', 'tylerhutzell4@gmail.com') and new.email_confirmed_at is not null then 'approved' else public.profiles.approval_status end,
     updated_at = now();
   return new;
 end;
@@ -179,13 +179,13 @@ select
   lower(coalesce(u.email, '')),
   nullif(u.raw_user_meta_data ->> 'full_name', ''),
   nullif(u.raw_user_meta_data ->> 'phone', ''),
-  case when lower(coalesce(u.email, '')) = 'zacharyhutz@gmail.com' and u.email_confirmed_at is not null then 'admin' else 'renter' end,
-  case when lower(coalesce(u.email, '')) = 'zacharyhutz@gmail.com' and u.email_confirmed_at is not null then 'approved' else 'incomplete' end
+  case when lower(coalesce(u.email, '')) in ('zacharyhutz@gmail.com', 'tylerhutzell4@gmail.com') and u.email_confirmed_at is not null then 'admin' else 'renter' end,
+  case when lower(coalesce(u.email, '')) in ('zacharyhutz@gmail.com', 'tylerhutzell4@gmail.com') and u.email_confirmed_at is not null then 'approved' else 'incomplete' end
 from auth.users u
 on conflict (id) do update set
   email = excluded.email,
-  role = case when excluded.email = 'zacharyhutz@gmail.com' and exists (select 1 from auth.users au where au.id = excluded.id and au.email_confirmed_at is not null) then 'admin' else public.profiles.role end,
-  approval_status = case when excluded.email = 'zacharyhutz@gmail.com' and exists (select 1 from auth.users au where au.id = excluded.id and au.email_confirmed_at is not null) then 'approved' else public.profiles.approval_status end,
+  role = case when excluded.email in ('zacharyhutz@gmail.com', 'tylerhutzell4@gmail.com') and exists (select 1 from auth.users au where au.id = excluded.id and au.email_confirmed_at is not null) then 'admin' else public.profiles.role end,
+  approval_status = case when excluded.email in ('zacharyhutz@gmail.com', 'tylerhutzell4@gmail.com') and exists (select 1 from auth.users au where au.id = excluded.id and au.email_confirmed_at is not null) then 'approved' else public.profiles.approval_status end,
   updated_at = now();
 
 create or replace function private.is_admin()

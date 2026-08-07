@@ -15,7 +15,7 @@ This Astro project presents Hutzell Aviation LLC as a Piper Cherokee aircraft-re
 - Supabase email/password renter accounts
 - Email-confirmation-compatible registration and login
 - Renter application stored in Supabase
-- Administrator role for `zacharyhutz@gmail.com`
+- Administrator roles for `zacharyhutz@gmail.com` and `tylerhutzell4@gmail.com`
 - Administrator approval workflow
 - Public, privacy-safe aircraft calendar
 - Same-day departure and return-time selection
@@ -55,7 +55,7 @@ https://zacharyhutz-sudo.github.io/HutzellAviation/
 https://zacharyhutz-sudo.github.io/HutzellAviation/**
 ```
 
-7. Create or sign in with `zacharyhutz@gmail.com`. The SQL backfill and auth trigger assign that verified email the initial administrator role.
+7. Create or sign in with either administrator email: `zacharyhutz@gmail.com` or `tylerhutzell4@gmail.com`. The SQL backfill and auth trigger assign either verified email the administrator role.
 
 ## Required GitHub repository variables
 
