@@ -6,14 +6,14 @@ import Icon from '../components/Icon.astro';
 import '../styles/global.css';
 const base = import.meta.env.BASE_URL;
 ---
-<BaseLayout title="Renter Account | Hutzell Aviation" description="Create a Hutzell Aviation renter account, review approval status, and manage aircraft reservations.">
+<BaseLayout title="Renter Account | Hutzell Aviation" description="Create a Hutzell Aviation renter account, review approval status, manage aircraft reservations, block-hour balances, flight records, and billing.">
   <Header />
   <main class="account-main">
     <section class="account-login-section">
       <div class="container account-login-grid" data-auth-page>
-        <div class="account-intro reveal"><p class="eyebrow light"><span></span> RENTER PORTAL</p><h1>Your flying schedule in one place.</h1><p>Create an account, submit the renter application, and manage Piper Cherokee reservation requests.</p><ul><li><Icon name="calendar" size={20}/> Upcoming and past reservations</li><li><Icon name="shield" size={20}/> Renter approval status</li><li><Icon name="clock" size={20}/> Live calendar access</li></ul></div>
+        <div class="account-intro reveal"><p class="eyebrow light"><span></span> RENTER PORTAL</p><h1>Your flying schedule and account in one place.</h1><p>Create an account, submit the renter application, reserve the Piper Cherokee, and keep up with flight activity and billing.</p><ul><li><Icon name="calendar" size={20}/> Reservations and post-flight reports</li><li><Icon name="dollar" size={20}/> Prepaid block-hour balance and charges</li><li><Icon name="wrench" size={20}/> Aircraft issue reporting</li></ul></div>
 
-        <div class="login-card reveal reveal-delay" data-auth-card>
+        <div class="login-card account-portal-card reveal reveal-delay" data-auth-card>
           <div class="login-logo"><img src={`${base}images/logo-full.png`} alt="Hutzell Aviation" width="1358" height="1224"/></div>
           <div data-auth-forms>
             <div class="auth-tabs" role="tablist"><button type="button" class="active" data-auth-tab="signin">Sign In</button><button type="button" data-auth-tab="register">Create Account</button></div>
@@ -38,8 +38,19 @@ const base = import.meta.env.BASE_URL;
           <div class="account-dashboard" data-account-dashboard hidden>
             <div class="dashboard-header"><div><span>Signed in as</span><strong data-dashboard-email></strong></div><button class="text-button" type="button" data-signout>Sign out</button></div>
             <div class="account-status-card"><span>Renter status</span><strong data-approval-status></strong><p data-status-guidance></p></div>
-            <div class="account-actions"><a class="button" href={`${base}availability/`}>View Availability</a><a class="button button-outline" href={`${base}apply/`} data-application-link>Renter Application</a><a class="button button-outline" href={`${base}admin/`} data-admin-action hidden>Open Admin</a></div>
-            <section class="dashboard-reservations"><div class="dashboard-section-title"><h3>Your reservations</h3><button type="button" class="text-button" data-refresh-reservations>Refresh</button></div><div data-reservation-list><p>Loading reservations…</p></div></section>
+
+            <div class="account-ops-grid">
+              <article class="account-metric"><span>Available block hours</span><strong data-block-balance>—</strong><small data-block-expiry>No active prepaid block</small></article>
+              <article class="account-metric"><span>Outstanding balance</span><strong data-outstanding-balance>—</strong><small>Recorded charges not yet marked paid</small></article>
+            </div>
+
+            <div class="account-actions"><a class="button" href={`${base}availability/`}>View Availability</a><a class="button button-outline" href={`${base}apply/`} data-application-link>Renter Application</a><a class="button button-outline" href={`${base}report-squawk/`} data-squawk-action>Report Aircraft Issue</a><a class="button button-outline" href={`${base}admin/`} data-admin-action hidden>Open Admin</a></div>
+
+            <section class="dashboard-reservations"><div class="dashboard-section-title"><h3>Your reservations</h3><button type="button" class="text-button" data-refresh-account>Refresh</button></div><div data-reservation-list><p>Loading reservations…</p></div></section>
+
+            <section class="dashboard-operations"><div class="dashboard-section-title"><h3>Block hours & billing</h3><a class="text-button" href={`${base}pricing/`}>View rates</a></div><div data-billing-list><p>Loading account activity…</p></div></section>
+
+            <section class="dashboard-operations"><div class="dashboard-section-title"><h3>Your reported squawks</h3><a class="text-button" href={`${base}report-squawk/`}>Report issue</a></div><div data-squawk-list><p>Loading reports…</p></div></section>
           </div>
         </div>
       </div>
@@ -59,10 +70,16 @@ const base = import.meta.env.BASE_URL;
   const registerForm = document.querySelector<HTMLFormElement>('[data-register-form]')!;
   const message = document.querySelector<HTMLElement>('[data-auth-message]')!;
   const reservationList = document.querySelector<HTMLElement>('[data-reservation-list]')!;
+  const billingList = document.querySelector<HTMLElement>('[data-billing-list]')!;
+  const squawkList = document.querySelector<HTMLElement>('[data-squawk-list]')!;
   let profile: Profile | null = null;
 
   function escapeHtml(value: unknown) {
     return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#039;', '"':'&quot;' })[char]!);
+  }
+
+  function money(cents: number) {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((cents || 0) / 100);
   }
 
   function showMessage(text: string, kind: 'success' | 'error' = 'error') {
@@ -82,8 +99,7 @@ const base = import.meta.env.BASE_URL;
   });
 
   signInForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    message.hidden = true;
+    event.preventDefault(); message.hidden = true;
     const button = signInForm.querySelector<HTMLButtonElement>('button[type="submit"]')!;
     const data = new FormData(signInForm);
     button.disabled = true; button.textContent = 'Signing in…';
@@ -93,18 +109,14 @@ const base = import.meta.env.BASE_URL;
   });
 
   registerForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    message.hidden = true;
+    event.preventDefault(); message.hidden = true;
     const button = registerForm.querySelector<HTMLButtonElement>('button[type="submit"]')!;
     const data = new FormData(registerForm);
     button.disabled = true; button.textContent = 'Creating…';
     const { data: result, error } = await supabase.auth.signUp({
       email: String(data.get('email')),
       password: String(data.get('password')),
-      options: {
-        data: { full_name: String(data.get('fullName')), phone: String(data.get('phone')) },
-        emailRedirectTo: `${resolveSiteUrl(base)}account/`,
-      },
+      options: { data: { full_name: String(data.get('fullName')), phone: String(data.get('phone')) }, emailRedirectTo: `${resolveSiteUrl(base)}account/` },
     });
     button.disabled = false; button.textContent = 'Create Account';
     if (error) showMessage(error.message);
@@ -115,61 +127,87 @@ const base = import.meta.env.BASE_URL;
   async function loadReservations() {
     if (!profile) return;
     reservationList.innerHTML = '<p>Loading reservations…</p>';
-    const { data, error } = await supabase
-      .from('reservations')
-      .select('id,starts_at,ends_at,status,estimated_flight_hours,actual_aircraft_hours,renter_notes,admin_notes')
-      .eq('renter_id', profile.id)
-      .order('starts_at', { ascending: false });
-    if (error) {
-      reservationList.innerHTML = `<p class="inline-error">${escapeHtml(error.message)}</p>`;
-      return;
-    }
-    if (!data?.length) {
-      reservationList.innerHTML = `<div class="empty-dashboard"><strong>No reservations yet.</strong><p>Open the live calendar to request your first aircraft window.</p></div>`;
-      return;
-    }
+    const [{ data, error }, { data: logs }] = await Promise.all([
+      supabase.from('reservations').select('id,starts_at,ends_at,status,estimated_flight_hours,actual_aircraft_hours,renter_notes,admin_notes').eq('renter_id', profile.id).order('starts_at', { ascending: false }),
+      supabase.from('flight_logs').select('reservation_id,status,actual_aircraft_hours,block_hours_applied,payg_hours,admin_notes').eq('renter_id', profile.id),
+    ]);
+    if (error) { reservationList.innerHTML = `<p class="inline-error">${escapeHtml(error.message)}</p>`; return; }
+    if (!data?.length) { reservationList.innerHTML = `<div class="empty-dashboard"><strong>No reservations yet.</strong><p>Open the live calendar to request your first aircraft window.</p></div>`; return; }
+    const logMap = new Map((logs || []).map((log: any) => [log.reservation_id, log]));
     reservationList.innerHTML = data.map((reservation: any) => {
       const canCancel = ['pending','confirmed'].includes(reservation.status) && new Date(reservation.starts_at) > new Date();
-      return `<article class="reservation-row"><div><span>${formatEasternDate(reservation.starts_at)}</span><strong>${formatEasternTime(reservation.starts_at)}–${formatEasternTime(reservation.ends_at)}</strong><small>${reservation.estimated_flight_hours ? `Estimated flight time: ${reservation.estimated_flight_hours} hr` : 'No estimated flight time entered'}</small></div><div class="reservation-row-actions"><span class="status-pill ${reservation.status}">${reservation.status.replace('_',' ')}</span>${canCancel ? `<button type="button" data-cancel-reservation="${reservation.id}">Cancel</button>` : ''}</div></article>`;
+      const canPostFlight = reservation.status === 'confirmed' && new Date(reservation.starts_at) <= new Date();
+      const canSquawk = ['confirmed','completed'].includes(reservation.status);
+      const log: any = logMap.get(reservation.id);
+      const detail = log?.status === 'approved'
+        ? `${log.actual_aircraft_hours} hr final · ${log.block_hours_applied || 0} block / ${log.payg_hours || 0} pay-as-you-go`
+        : log ? `Post-flight report: ${String(log.status).replace('_',' ')}`
+        : reservation.estimated_flight_hours ? `Estimated flight time: ${reservation.estimated_flight_hours} hr` : 'No estimated flight time entered';
+      return `<article class="reservation-row"><div><span>${formatEasternDate(reservation.starts_at)}</span><strong>${formatEasternTime(reservation.starts_at)}–${formatEasternTime(reservation.ends_at)}</strong><small>${escapeHtml(detail)}</small></div><div class="reservation-row-actions"><span class="status-pill ${escapeHtml(reservation.status)}">${escapeHtml(reservation.status.replace('_',' '))}</span>${canPostFlight && log?.status !== 'approved' ? `<a class="mini-action" href="${base}postflight/?reservation=${encodeURIComponent(reservation.id)}">Post-flight</a>` : ''}${canSquawk ? `<a class="mini-action" href="${base}report-squawk/?reservation=${encodeURIComponent(reservation.id)}">Report issue</a>` : ''}${canCancel ? `<button type="button" data-cancel-reservation="${reservation.id}">Cancel</button>` : ''}</div></article>`;
     }).join('');
-    reservationList.querySelectorAll<HTMLButtonElement>('[data-cancel-reservation]').forEach((button) => {
-      button.addEventListener('click', async () => {
-        if (!confirm('Cancel this reservation request?')) return;
-        button.disabled = true;
-        const { error: cancelError } = await supabase.rpc('cancel_my_reservation', { p_reservation_id: button.dataset.cancelReservation });
-        if (cancelError) alert(cancelError.message);
-        await loadReservations();
-      });
-    });
+    reservationList.querySelectorAll<HTMLButtonElement>('[data-cancel-reservation]').forEach((button) => button.addEventListener('click', async () => {
+      if (!confirm('Cancel this reservation request?')) return;
+      button.disabled = true;
+      const { error: cancelError } = await supabase.rpc('cancel_my_reservation', { p_reservation_id: button.dataset.cancelReservation });
+      if (cancelError) alert(cancelError.message);
+      await loadReservations();
+    }));
   }
+
+  async function loadBilling() {
+    if (!profile) return;
+    const now = new Date();
+    const [{ data: blocks, error: blockError }, { data: payments, error: paymentError }, { data: ledger }] = await Promise.all([
+      supabase.from('block_hour_purchases').select('id,package_hours,remaining_hours,purchased_at,expires_at,status').eq('renter_id', profile.id).order('purchased_at', { ascending: false }),
+      supabase.from('payments').select('id,kind,status,amount_cents,description,method,paid_at,created_at').eq('renter_id', profile.id).order('created_at', { ascending: false }),
+      supabase.from('hour_ledger').select('id,entry_type,hours_delta,note,created_at').eq('renter_id', profile.id).order('created_at', { ascending: false }).limit(6),
+    ]);
+    if (blockError || paymentError) {
+      const error = blockError || paymentError;
+      billingList.innerHTML = `<p class="inline-error">${escapeHtml(error?.message || 'Unable to load billing.')}</p>`;
+      return;
+    }
+    const activeBlocks = (blocks || []).filter((block: any) => block.status !== 'void' && Number(block.remaining_hours) > 0 && new Date(block.expires_at) > now);
+    const balance = activeBlocks.reduce((sum: number, block: any) => sum + Number(block.remaining_hours), 0);
+    const pending = (payments || []).filter((payment: any) => payment.status === 'pending').reduce((sum: number, payment: any) => sum + Number(payment.amount_cents), 0);
+    const nextExpiry = activeBlocks.slice().sort((a: any,b: any) => +new Date(a.expires_at) - +new Date(b.expires_at))[0];
+    document.querySelector<HTMLElement>('[data-block-balance]')!.textContent = `${balance.toFixed(1)} hr`;
+    document.querySelector<HTMLElement>('[data-block-expiry]')!.textContent = nextExpiry ? `Next block expires ${formatEasternDate(nextExpiry.expires_at)}` : 'No active prepaid block';
+    document.querySelector<HTMLElement>('[data-outstanding-balance]')!.textContent = money(pending);
+
+    const paymentRows = (payments || []).slice(0, 8).map((payment: any) => `<div class="billing-activity-row"><div><span>${escapeHtml(String(payment.kind).replace('_',' '))}</span><strong>${escapeHtml(payment.description || 'Account transaction')}</strong><small>${formatEasternDate(payment.created_at)}</small></div><div><strong>${money(payment.amount_cents)}</strong><span class="status-pill ${escapeHtml(payment.status)}">${escapeHtml(payment.status)}</span></div></div>`).join('');
+    const ledgerRows = (ledger || []).map((entry: any) => `<div class="hour-ledger-row"><span>${Number(entry.hours_delta) > 0 ? '+' : ''}${Number(entry.hours_delta).toFixed(1)} hr</span><div><strong>${escapeHtml(entry.note || String(entry.entry_type).replace('_',' '))}</strong><small>${formatEasternDate(entry.created_at)}</small></div></div>`).join('');
+    billingList.innerHTML = `<div class="billing-account-grid"><div><h4>Recent charges & payments</h4>${paymentRows || '<div class="empty-dashboard"><strong>No billing activity yet.</strong></div>'}</div><div><h4>Hour activity</h4>${ledgerRows || '<div class="empty-dashboard"><strong>No block-hour activity yet.</strong></div>'}</div></div>`;
+  }
+
+  async function loadSquawks() {
+    if (!profile) return;
+    const { data, error } = await supabase.from('aircraft_squawks').select('id,title,priority,status,admin_notes,created_at').eq('reported_by', profile.id).order('created_at', { ascending: false }).limit(6);
+    if (error) { squawkList.innerHTML = `<p class="inline-error">${escapeHtml(error.message)}</p>`; return; }
+    if (!data?.length) { squawkList.innerHTML = '<div class="empty-dashboard"><strong>No aircraft issues reported.</strong></div>'; return; }
+    squawkList.innerHTML = data.map((item: any) => `<div class="squawk-account-row"><div><span>${formatEasternDate(item.created_at)} · ${escapeHtml(item.priority)}</span><strong>${escapeHtml(item.title)}</strong>${item.admin_notes ? `<small>${escapeHtml(item.admin_notes)}</small>` : ''}</div><span class="status-pill ${escapeHtml(item.status)}">${escapeHtml(String(item.status).replace('_',' '))}</span></div>`).join('');
+  }
+
+  async function loadAccount() { await Promise.all([loadReservations(), loadBilling(), loadSquawks()]); }
 
   async function renderSession() {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      profile = null;
-      formsWrap.hidden = false;
-      dashboard.hidden = true;
-      return;
-    }
-    try {
-      profile = await getCurrentProfile();
-    } catch (error) {
-      showMessage(error instanceof Error ? error.message : 'Unable to load the account profile. Run the Supabase setup SQL.');
-      return;
-    }
-    formsWrap.hidden = true;
-    dashboard.hidden = false;
+    if (!session) { profile = null; formsWrap.hidden = false; dashboard.hidden = true; return; }
+    try { profile = await getCurrentProfile(); }
+    catch (error) { showMessage(error instanceof Error ? error.message : 'Unable to load the account profile. Run the Supabase setup SQL.'); return; }
+    formsWrap.hidden = true; dashboard.hidden = false;
     dashboard.querySelector<HTMLElement>('[data-dashboard-email]')!.textContent = profile?.email || session.user.email || '';
     const status = dashboard.querySelector<HTMLElement>('[data-approval-status]')!;
     status.textContent = profile?.role === 'admin' ? 'Administrator' : (profile?.approval_status || 'incomplete').replace('_', ' ');
     status.className = `status-value ${profile?.role === 'admin' ? 'approved' : profile?.approval_status}`;
     const guidance = dashboard.querySelector<HTMLElement>('[data-status-guidance]')!;
-    if (profile?.role === 'admin') guidance.textContent = 'Administrator access is active for renter approvals, reservations, and calendar blocks.';
-    else if (profile?.approval_status === 'approved') guidance.textContent = 'Your account can submit aircraft reservation requests from the live calendar.';
+    if (profile?.role === 'admin') guidance.textContent = 'Administrator access is active for renter approvals, billing, post-flight closeouts, squawks, and maintenance.';
+    else if (profile?.approval_status === 'approved') guidance.textContent = 'Your account can request aircraft time, submit post-flight details, and view block-hour and billing activity.';
     else if (profile?.approval_status === 'pending') guidance.textContent = 'Your application is awaiting review. You may view availability, but booking remains locked.';
     else guidance.textContent = 'Complete the renter application to begin the approval process.';
     dashboard.querySelector<HTMLElement>('[data-admin-action]')!.hidden = profile?.role !== 'admin';
-    await loadReservations();
+    dashboard.querySelector<HTMLElement>('[data-squawk-action]')!.hidden = profile?.role !== 'admin' && profile?.approval_status !== 'approved';
+    await loadAccount();
 
     const returnTo = new URLSearchParams(window.location.search).get('returnTo');
     if (returnTo && (profile?.role === 'admin' || profile?.approval_status === 'approved')) {
@@ -179,7 +217,7 @@ const base = import.meta.env.BASE_URL;
   }
 
   document.querySelector('[data-signout]')!.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.href = `${base}account/`; });
-  document.querySelector('[data-refresh-reservations]')!.addEventListener('click', loadReservations);
+  document.querySelector('[data-refresh-account]')!.addEventListener('click', loadAccount);
   supabase.auth.onAuthStateChange(() => window.setTimeout(renderSession, 0));
   await renderSession();
 </script>

@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import '../styles/global.css';
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout title="Report Aircraft Issue | Hutzell Aviation" description="Report an aircraft squawk to Hutzell Aviation for maintenance review.">
+  <Header />
+  <main>
+    <PageHero eyebrow="AIRCRAFT SQUAWK" title="Report something Tyler should inspect." description="Use this form for aircraft discrepancies, equipment issues, or anything that should be reviewed before the next flight." />
+    <section class="section operations-form-section">
+      <div class="container operations-form-wrap">
+        <div class="application-auth-gate" data-squawk-gate><Icon name="shield" size={28}/><div><h2>Approved renter sign-in required</h2><p>Sign in with an approved renter account to submit an aircraft issue.</p></div><a class="button" data-squawk-signin href={`${base}account/`}>Sign In</a></div>
+        <div class="operations-form-card" data-squawk-panel hidden>
+          <div class="form-notice safety-notice"><Icon name="wrench" size={22}/><div><strong>This form does not determine airworthiness.</strong><span>If an issue may affect safe operation, do not dispatch the aircraft. Contact Tyler directly and mark the report urgent.</span></div></div>
+          <form class="operations-form" data-squawk-form>
+            <label>Related reservation<select name="reservation"><option value="">No specific reservation</option></select></label>
+            <div class="form-grid">
+              <label class="full">Short issue title<input name="title" maxlength="120" required placeholder="Example: Landing light intermittent"/></label>
+              <label>Priority<select name="priority"><option value="normal">Normal review</option><option value="urgent">Urgent / inspect before further flight</option></select></label>
+              <label class="full">What did you observe?<textarea name="description" rows="6" maxlength="2000" required placeholder="Describe what happened, when you noticed it, and any indications or symptoms."></textarea></label>
+            </div>
+            <button class="button" type="submit">Submit Aircraft Issue</button>
+            <div class="auth-message" data-squawk-message hidden></div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<script>
+  import { aircraftId, getCurrentProfile, supabase } from '../lib/supabase';
+  import { formatEasternDate, formatEasternTime } from '../lib/calendar';
+
+  const base = import.meta.env.BASE_URL;
+  const requestedReservation = new URLSearchParams(window.location.search).get('reservation') || '';
+  const gate = document.querySelector<HTMLElement>('[data-squawk-gate]')!;
+  const panel = document.querySelector<HTMLElement>('[data-squawk-panel]')!;
+  const form = document.querySelector<HTMLFormElement>('[data-squawk-form]')!;
+  const message = document.querySelector<HTMLElement>('[data-squawk-message]')!;
+
+  function showMessage(text: string, kind: 'success' | 'error' = 'error') {
+    message.className = `auth-message ${kind}`; message.textContent = text; message.hidden = false;
+  }
+
+  async function initialize() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      document.querySelector<HTMLAnchorElement>('[data-squawk-signin]')!.href = `${base}account/?returnTo=${encodeURIComponent(`${base}report-squawk/${requestedReservation ? `?reservation=${requestedReservation}` : ''}`)}`;
+      return;
+    }
+    const profile = await getCurrentProfile().catch(() => null);
+    if (!profile || (profile.role !== 'admin' && profile.approval_status !== 'approved')) return;
+    gate.hidden = true; panel.hidden = false;
+    const { data } = await supabase.from('reservations').select('id,starts_at,ends_at,status').eq('renter_id', profile.id).in('status', ['confirmed','completed']).order('starts_at', { ascending: false }).limit(15);
+    const select = form.elements.namedItem('reservation') as HTMLSelectElement;
+    (data || []).forEach((reservation: any) => {
+      const option = document.createElement('option');
+      option.value = reservation.id;
+      option.textContent = `${formatEasternDate(reservation.starts_at)} · ${formatEasternTime(reservation.starts_at)}–${formatEasternTime(reservation.ends_at)}`;
+      option.selected = reservation.id === requestedReservation;
+      select.appendChild(option);
+    });
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault(); message.hidden = true;
+    const data = new FormData(form);
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    button.disabled = true; button.textContent = 'Submitting…';
+    const reservation = String(data.get('reservation') || '');
+    const { error } = await supabase.rpc('submit_squawk', {
+      p_aircraft_id: aircraftId,
+      p_reservation_id: reservation || null,
+      p_title: String(data.get('title') || ''),
+      p_description: String(data.get('description') || ''),
+      p_priority: String(data.get('priority') || 'normal'),
+    });
+    button.disabled = false; button.textContent = 'Submit Aircraft Issue';
+    if (error) showMessage(error.message);
+    else {
+      showMessage('Aircraft issue submitted. It is now visible in the admin maintenance dashboard.', 'success');
+      form.reset();
+      window.setTimeout(() => window.location.href = `${base}account/`, 1500);
+    }
+  });
+
+  await initialize();
+</script>

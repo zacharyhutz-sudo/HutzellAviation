@@ -1,0 +1,132 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import '../styles/global.css';
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout title="Post-Flight Report | Hutzell Aviation" description="Submit recorded aircraft time and post-flight details for a Hutzell Aviation reservation.">
+  <Header />
+  <main>
+    <PageHero eyebrow="POST-FLIGHT" title="Close out your flight." description="Record aircraft time and return details after a confirmed reservation. Tyler will review the report before final billing and block-hour reconciliation." />
+    <section class="section operations-form-section">
+      <div class="container operations-form-wrap">
+        <div class="application-auth-gate" data-postflight-gate><Icon name="shield" size={28}/><div><h2>Approved renter sign-in required</h2><p>Sign in to submit a post-flight report for one of your confirmed reservations.</p></div><a class="button" data-postflight-signin href={`${base}account/`}>Sign In</a></div>
+        <div class="operations-form-card" data-postflight-panel hidden>
+          <div class="operations-record-heading"><div><p class="eyebrow"><span></span> RESERVATION</p><h2 data-flight-date>Loading flight…</h2><p data-flight-time></p></div><span class="status-pill" data-flight-status>loading</span></div>
+          <div class="auth-message" data-postflight-existing hidden></div>
+          <form class="operations-form" data-postflight-form>
+            <div class="form-grid">
+              <label>Recorded aircraft time (hours)<input type="number" name="actualHours" min="0.1" max="168" step="0.1" required placeholder="2.3"/></label>
+              <label>Fuel added (gallons)<input type="number" name="fuelGallons" min="0" step="0.1" placeholder="Optional"/></label>
+              <label>Hobbs start<input type="number" name="hobbsStart" min="0" step="0.1" placeholder="Optional"/></label>
+              <label>Hobbs end<input type="number" name="hobbsEnd" min="0" step="0.1" placeholder="Optional"/></label>
+              <label>Tach start<input type="number" name="tachStart" min="0" step="0.1" placeholder="Optional"/></label>
+              <label>Tach end<input type="number" name="tachEnd" min="0" step="0.1" placeholder="Optional"/></label>
+              <label class="full checkbox-label"><input type="checkbox" name="returnedToBase" checked/><span>Aircraft returned to KWDR unless another arrangement was approved.</span></label>
+              <label class="full">Post-flight notes<textarea name="notes" rows="5" maxlength="1500" placeholder="Fuel, parking, operational notes, or anything Tyler should know."></textarea></label>
+            </div>
+            <div class="form-notice"><Icon name="wrench" size={21}/><div><strong>Notice an aircraft issue?</strong><span>Submit this report, then use Report Aircraft Issue so the squawk is tracked separately.</span></div></div>
+            <button class="button" type="submit">Submit Post-Flight Report</button>
+            <div class="auth-message" data-postflight-message hidden></div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<script>
+  import { getCurrentProfile, supabase } from '../lib/supabase';
+  import { formatEasternDate, formatEasternTime } from '../lib/calendar';
+
+  const base = import.meta.env.BASE_URL;
+  const reservationId = new URLSearchParams(window.location.search).get('reservation');
+  const gate = document.querySelector<HTMLElement>('[data-postflight-gate]')!;
+  const panel = document.querySelector<HTMLElement>('[data-postflight-panel]')!;
+  const form = document.querySelector<HTMLFormElement>('[data-postflight-form]')!;
+  const message = document.querySelector<HTMLElement>('[data-postflight-message]')!;
+  const existingMessage = document.querySelector<HTMLElement>('[data-postflight-existing]')!;
+  let reservation: any = null;
+
+  function showMessage(text: string, kind: 'success' | 'error' = 'error') {
+    message.className = `auth-message ${kind}`; message.textContent = text; message.hidden = false;
+  }
+  function num(value: FormDataEntryValue | null) { return value === null || String(value).trim() === '' ? null : Number(value); }
+
+  async function initialize() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      document.querySelector<HTMLAnchorElement>('[data-postflight-signin]')!.href = `${base}account/?returnTo=${encodeURIComponent(`${base}postflight/?reservation=${reservationId || ''}`)}`;
+      return;
+    }
+    const profile = await getCurrentProfile().catch(() => null);
+    if (!profile || (profile.role !== 'admin' && profile.approval_status !== 'approved')) return;
+    if (!reservationId) {
+      gate.innerHTML = '<div><h2>Reservation required</h2><p>Open your renter account and choose Post-flight beside the reservation you want to close out.</p></div>';
+      return;
+    }
+    const { data, error } = await supabase.from('reservations').select('id,starts_at,ends_at,status,estimated_flight_hours').eq('id', reservationId).eq('renter_id', profile.id).single();
+    if (error || !data) {
+      gate.innerHTML = '<div><h2>Reservation not found</h2><p>This reservation is not available for your account.</p></div>';
+      return;
+    }
+    reservation = data;
+    gate.hidden = true; panel.hidden = false;
+    document.querySelector<HTMLElement>('[data-flight-date]')!.textContent = formatEasternDate(data.starts_at);
+    document.querySelector<HTMLElement>('[data-flight-time]')!.textContent = `${formatEasternTime(data.starts_at)}–${formatEasternTime(data.ends_at)}${data.estimated_flight_hours ? ` · ${data.estimated_flight_hours} hr estimated` : ''}`;
+    const status = document.querySelector<HTMLElement>('[data-flight-status]')!;
+    status.textContent = data.status; status.className = `status-pill ${data.status}`;
+
+    const { data: log } = await supabase.from('flight_logs').select('status,actual_aircraft_hours,hobbs_start,hobbs_end,tach_start,tach_end,fuel_added_gallons,returned_to_base,renter_notes,admin_notes,block_hours_applied,payg_hours').eq('reservation_id', reservationId).maybeSingle();
+    if (log) {
+      (form.elements.namedItem('actualHours') as HTMLInputElement).value = log.actual_aircraft_hours ?? '';
+      (form.elements.namedItem('hobbsStart') as HTMLInputElement).value = log.hobbs_start ?? '';
+      (form.elements.namedItem('hobbsEnd') as HTMLInputElement).value = log.hobbs_end ?? '';
+      (form.elements.namedItem('tachStart') as HTMLInputElement).value = log.tach_start ?? '';
+      (form.elements.namedItem('tachEnd') as HTMLInputElement).value = log.tach_end ?? '';
+      (form.elements.namedItem('fuelGallons') as HTMLInputElement).value = log.fuel_added_gallons ?? '';
+      (form.elements.namedItem('returnedToBase') as HTMLInputElement).checked = log.returned_to_base !== false;
+      (form.elements.namedItem('notes') as HTMLTextAreaElement).value = log.renter_notes ?? '';
+      existingMessage.hidden = false;
+      if (log.status === 'approved') {
+        existingMessage.className = 'auth-message success';
+        existingMessage.textContent = `Finalized: ${log.actual_aircraft_hours} hr total, ${log.block_hours_applied || 0} hr applied to prepaid blocks, ${log.payg_hours || 0} hr billed pay-as-you-go.`;
+        form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLButtonElement>('input,textarea,button').forEach((el) => el.disabled = true);
+      } else {
+        existingMessage.className = `auth-message ${log.status === 'needs_review' ? 'error' : 'success'}`;
+        existingMessage.textContent = log.status === 'needs_review' ? (log.admin_notes || 'Tyler requested an update to this post-flight report.') : 'Post-flight report submitted and awaiting Tyler’s review. You can update it until it is finalized.';
+      }
+    }
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault(); message.hidden = true;
+    if (!reservationId || !reservation) return;
+    const data = new FormData(form);
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    button.disabled = true; button.textContent = 'Submitting…';
+    const { error } = await supabase.rpc('submit_postflight_report', {
+      p_reservation_id: reservationId,
+      p_actual_aircraft_hours: num(data.get('actualHours')),
+      p_hobbs_start: num(data.get('hobbsStart')),
+      p_hobbs_end: num(data.get('hobbsEnd')),
+      p_tach_start: num(data.get('tachStart')),
+      p_tach_end: num(data.get('tachEnd')),
+      p_fuel_added_gallons: num(data.get('fuelGallons')),
+      p_returned_to_base: data.get('returnedToBase') === 'on',
+      p_notes: String(data.get('notes') || '') || null,
+    });
+    button.disabled = false; button.textContent = 'Submit Post-Flight Report';
+    if (error) showMessage(error.message);
+    else {
+      showMessage('Post-flight report submitted. Tyler will review the final aircraft time and reconcile your block balance or pay-as-you-go charge.', 'success');
+      window.setTimeout(() => window.location.href = `${base}account/`, 1600);
+    }
+  });
+
+  await initialize();
+</script>

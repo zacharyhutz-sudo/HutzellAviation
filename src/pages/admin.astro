@@ -7,16 +7,23 @@ import Icon from '../components/Icon.astro';
 import '../styles/global.css';
 const base = import.meta.env.BASE_URL;
 ---
-<BaseLayout title="Admin Dashboard | Hutzell Aviation" description="Hutzell Aviation renter approvals, reservations, and aircraft availability administration.">
+<BaseLayout title="Admin Dashboard | Hutzell Aviation" description="Hutzell Aviation renter approvals, reservations, billing, post-flight closeouts, squawks, maintenance, and aircraft availability administration.">
   <Header />
   <main>
-    <PageHero eyebrow="ADMINISTRATION" title="Manage renters and aircraft time." description="Approve renter applications, review reservation requests, and block the Piper Cherokee calendar for maintenance or owner use." />
+    <PageHero eyebrow="ADMINISTRATION" title="Manage renters and aircraft operations." description="Review renter access, reservations, prepaid hours, flight closeouts, payments, squawks, maintenance, and aircraft availability from one dashboard." />
     <section class="section admin-section">
       <div class="container" data-admin-root>
-        <div class="admin-gate" data-admin-gate><Icon name="shield" size={30}/><div><h2>Administrator access required</h2><p>Sign in with the initial administrator account to open this dashboard.</p></div><a class="button" href={`${base}account/?returnTo=${encodeURIComponent(`${base}admin/`)}`}>Sign In</a></div>
+        <div class="admin-gate" data-admin-gate><Icon name="shield" size={30}/><div><h2>Administrator access required</h2><p>Sign in with an authorized Hutzell Aviation administrator account to open this dashboard.</p></div><a class="button" href={`${base}account/?returnTo=${encodeURIComponent(`${base}admin/`)}`}>Sign In</a></div>
 
         <div class="admin-dashboard" data-admin-dashboard hidden>
           <div class="admin-toolbar"><div><span>ADMIN ACCOUNT</span><strong data-admin-email></strong></div><button class="button button-outline" type="button" data-admin-refresh>Refresh Dashboard</button></div>
+
+          <section class="admin-summary-grid">
+            <article><span>Pending flight charges</span><strong data-summary-balance>$0.00</strong><small data-summary-payment-count>0 open charges</small></article>
+            <article><span>Active prepaid hours</span><strong data-summary-hours>0.0 hr</strong><small>Across all current renter blocks</small></article>
+            <article><span>Open squawks</span><strong data-summary-squawks>0</strong><small data-summary-urgent>No urgent reports</small></article>
+            <article><span>Maintenance items</span><strong data-summary-maintenance>0</strong><small>Scheduled or in progress</small></article>
+          </section>
 
           <section class="admin-panel">
             <div class="admin-panel-heading"><div><p class="eyebrow"><span></span> RENTER REVIEW</p><h2>Applications</h2></div><span class="count-badge" data-application-count>0</span></div>
@@ -26,6 +33,53 @@ const base = import.meta.env.BASE_URL;
           <section class="admin-panel">
             <div class="admin-panel-heading"><div><p class="eyebrow"><span></span> AIRCRAFT CALENDAR</p><h2>Reservation requests</h2></div><span class="count-badge" data-reservation-count>0</span></div>
             <div class="admin-list" data-admin-reservations><p>Loading reservations…</p></div>
+          </section>
+
+          <section class="admin-panel">
+            <div class="admin-panel-heading"><div><p class="eyebrow"><span></span> FLIGHT CLOSEOUT</p><h2>Post-flight reports</h2></div><span class="count-badge" data-flightlog-count>0</span></div>
+            <p class="admin-panel-copy">Finalizing a flight applies eligible prepaid hours first. Any remainder automatically becomes a pending pay-as-you-go charge at $180/hour.</p>
+            <div class="admin-list" data-admin-flightlogs><p>Loading post-flight reports…</p></div>
+          </section>
+
+          <section class="admin-panel">
+            <div class="admin-panel-heading"><div><p class="eyebrow"><span></span> RENTER BILLING</p><h2>Prepaid blocks & payments</h2></div></div>
+            <div class="admin-grid-two operations-admin-grid">
+              <form class="admin-block-form" data-block-purchase-form>
+                <h3>Record prepaid block purchase</h3>
+                <label>Renter<select name="renter" required><option value="">Choose renter</option></select></label>
+                <label>Package<select name="hours" required><option value="15">15 hours · $2,550</option><option value="25">25 hours · $4,125</option><option value="50">50 hours · $7,500</option></select></label>
+                <label>Payment method<select name="method"><option value="">Not recorded</option><option value="card">Card</option><option value="ach">ACH</option><option value="check">Check</option><option value="cash">Cash</option><option value="other">Other</option></select></label>
+                <label>Reference / check #<input name="reference" maxlength="120"/></label>
+                <label>Internal note<textarea name="notes" rows="3" maxlength="500"></textarea></label>
+                <button class="button" type="submit">Add Paid Block</button>
+                <div class="auth-message" data-block-purchase-message hidden></div>
+              </form>
+              <div><h3>Active renter balances</h3><div class="admin-list compact" data-admin-block-balances><p>Loading balances…</p></div></div>
+            </div>
+            <div class="admin-subsection"><div class="dashboard-section-title"><h3>Payment ledger</h3><span class="admin-hint">Manual payment tracking; no card processor is connected yet.</span></div><div class="admin-list" data-admin-payments><p>Loading payments…</p></div></div>
+          </section>
+
+          <section class="admin-panel">
+            <div class="admin-panel-heading"><div><p class="eyebrow"><span></span> AIRCRAFT DISCREPANCIES</p><h2>Squawks</h2></div><span class="count-badge" data-squawk-count>0</span></div>
+            <div class="admin-list" data-admin-squawks><p>Loading squawks…</p></div>
+          </section>
+
+          <section class="admin-panel">
+            <div class="admin-panel-heading"><div><p class="eyebrow"><span></span> MAINTENANCE</p><h2>Internal maintenance tracker</h2></div></div>
+            <p class="admin-panel-copy">Use this for internal scheduling and issue follow-up. It is not a substitute for required aircraft maintenance records, logbook entries, inspections, or return-to-service documentation.</p>
+            <div class="admin-grid-two operations-admin-grid">
+              <form class="admin-block-form" data-maintenance-form>
+                <h3>Add maintenance item</h3>
+                <label>Title<input name="title" maxlength="140" required placeholder="Example: 100-hour inspection"/></label>
+                <label>Type<select name="type"><option value="inspection">Inspection</option><option value="repair">Repair</option><option value="preventive">Preventive</option><option value="service">Service</option><option value="other">Other</option></select></label>
+                <label>Scheduled date<input type="date" name="scheduled"/></label>
+                <label>Linked squawk<select name="squawk"><option value="">None</option></select></label>
+                <label>Notes<textarea name="notes" rows="3" maxlength="1000"></textarea></label>
+                <button class="button" type="submit">Add Maintenance Item</button>
+                <div class="auth-message" data-maintenance-message hidden></div>
+              </form>
+              <div><h3>Open maintenance</h3><div class="admin-list compact" data-admin-maintenance><p>Loading maintenance…</p></div></div>
+            </div>
           </section>
 
           <section class="admin-grid-two">
@@ -53,109 +107,197 @@ const base = import.meta.env.BASE_URL;
 </BaseLayout>
 
 <script>
-  import { aircraftId, aviationTimeZone, getCurrentProfile, supabase } from '../lib/supabase';
+  import { aircraftId, getCurrentProfile, supabase } from '../lib/supabase';
   import { formatEasternDate, formatEasternTime, zonedDateTimeToUtc } from '../lib/calendar';
 
   const gate = document.querySelector<HTMLElement>('[data-admin-gate]')!;
   const dashboard = document.querySelector<HTMLElement>('[data-admin-dashboard]')!;
   const applicationsEl = document.querySelector<HTMLElement>('[data-admin-applications]')!;
   const reservationsEl = document.querySelector<HTMLElement>('[data-admin-reservations]')!;
+  const flightlogsEl = document.querySelector<HTMLElement>('[data-admin-flightlogs]')!;
+  const paymentsEl = document.querySelector<HTMLElement>('[data-admin-payments]')!;
+  const blockBalancesEl = document.querySelector<HTMLElement>('[data-admin-block-balances]')!;
+  const squawksEl = document.querySelector<HTMLElement>('[data-admin-squawks]')!;
+  const maintenanceEl = document.querySelector<HTMLElement>('[data-admin-maintenance]')!;
   const blocksEl = document.querySelector<HTMLElement>('[data-admin-blocks]')!;
   const blockForm = document.querySelector<HTMLFormElement>('[data-block-form]')!;
   const blockMessage = document.querySelector<HTMLElement>('[data-block-message]')!;
+  const purchaseForm = document.querySelector<HTMLFormElement>('[data-block-purchase-form]')!;
+  const purchaseMessage = document.querySelector<HTMLElement>('[data-block-purchase-message]')!;
+  const maintenanceForm = document.querySelector<HTMLFormElement>('[data-maintenance-form]')!;
+  const maintenanceMessage = document.querySelector<HTMLElement>('[data-maintenance-message]')!;
+  let renterProfiles: any[] = [];
+  let openSquawks: any[] = [];
 
-  function escapeHtml(value: unknown) {
-    return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#039;', '"':'&quot;' })[char]!);
-  }
+  function escapeHtml(value: unknown) { return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#039;', '"':'&quot;' })[char]!); }
+  function money(cents: number) { return new Intl.NumberFormat('en-US', { style:'currency', currency:'USD' }).format((cents || 0) / 100); }
+  function formatDateOnly(value: string | null) { if (!value) return 'Not scheduled'; return new Intl.DateTimeFormat('en-US', { month:'short', day:'numeric', year:'numeric', timeZone:'UTC' }).format(new Date(`${value}T12:00:00Z`)); }
+  function profileName(profile: any) { return profile?.full_name || profile?.email || 'Renter'; }
 
   async function requireAdmin() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return false;
-    try {
-      const profile = await getCurrentProfile();
-      if (profile?.role !== 'admin') return false;
-      document.querySelector<HTMLElement>('[data-admin-email]')!.textContent = profile.email;
-      return true;
-    } catch { return false; }
+    try { const profile = await getCurrentProfile(); if (profile?.role !== 'admin') return false; document.querySelector<HTMLElement>('[data-admin-email]')!.textContent = profile.email; return true; }
+    catch { return false; }
+  }
+
+  async function loadProfiles() {
+    const { data } = await supabase.from('profiles').select('id,full_name,email,approval_status,role').order('full_name', { ascending: true });
+    renterProfiles = (data || []).filter((item: any) => item.role === 'renter');
+    const select = purchaseForm.elements.namedItem('renter') as HTMLSelectElement;
+    const current = select.value;
+    select.innerHTML = '<option value="">Choose renter</option>' + renterProfiles.map((item: any) => `<option value="${item.id}">${escapeHtml(profileName(item))}${item.approval_status === 'approved' ? '' : ` · ${escapeHtml(item.approval_status)}`}</option>`).join('');
+    select.value = current;
   }
 
   async function loadApplications() {
-    const { data, error } = await supabase
-      .from('renter_applications')
-      .select('user_id,legal_first_name,legal_last_name,phone,certificate,rental_purpose,total_time,cherokee_time,status,admin_notes,submitted_at,profiles!renter_applications_user_id_fkey(email)')
-      .order('submitted_at', { ascending: false });
+    const { data, error } = await supabase.from('renter_applications').select('user_id,legal_first_name,legal_last_name,phone,certificate,rental_purpose,total_time,cherokee_time,status,admin_notes,submitted_at,profiles!renter_applications_user_id_fkey(email)').order('submitted_at', { ascending:false });
     if (error) { applicationsEl.innerHTML = `<p class="inline-error">${escapeHtml(error.message)}</p>`; return; }
     document.querySelector<HTMLElement>('[data-application-count]')!.textContent = String(data?.length || 0);
     if (!data?.length) { applicationsEl.innerHTML = '<div class="empty-dashboard"><strong>No applications yet.</strong></div>'; return; }
     applicationsEl.innerHTML = data.map((application: any) => `<article class="admin-row"><div class="admin-row-main"><span>${escapeHtml(application.certificate)} · ${escapeHtml(application.rental_purpose)}</span><strong>${escapeHtml(application.legal_first_name)} ${escapeHtml(application.legal_last_name)}</strong><small>${escapeHtml(application.profiles?.email || '')} · ${escapeHtml(application.phone)} · ${application.total_time ?? '—'} total hours · ${application.cherokee_time ?? '—'} Cherokee hours</small></div><div class="admin-row-actions"><span class="status-pill ${escapeHtml(application.status)}">${escapeHtml(String(application.status).replace('_',' '))}</span><select data-app-status="${application.user_id}"><option value="pending" ${application.status === 'pending' ? 'selected' : ''}>Pending</option><option value="needs_information" ${application.status === 'needs_information' ? 'selected' : ''}>Needs information</option><option value="approved" ${application.status === 'approved' ? 'selected' : ''}>Approved</option><option value="rejected" ${application.status === 'rejected' ? 'selected' : ''}>Rejected</option><option value="suspended" ${application.status === 'suspended' ? 'selected' : ''}>Suspended</option></select><button type="button" data-save-app="${application.user_id}">Save</button></div></article>`).join('');
     applicationsEl.querySelectorAll<HTMLButtonElement>('[data-save-app]').forEach((button) => button.addEventListener('click', async () => {
-      const userId = button.dataset.saveApp!;
-      const select = applicationsEl.querySelector<HTMLSelectElement>(`[data-app-status="${userId}"]`)!;
-      button.disabled = true;
-      const { error: updateError } = await supabase.rpc('admin_set_application_status', { p_user_id: userId, p_status: select.value, p_admin_notes: null });
-      if (updateError) alert(updateError.message);
-      await loadApplications();
+      const userId = button.dataset.saveApp!; const select = applicationsEl.querySelector<HTMLSelectElement>(`[data-app-status="${userId}"]`)!; button.disabled = true;
+      const { error: updateError } = await supabase.rpc('admin_set_application_status', { p_user_id:userId, p_status:select.value, p_admin_notes:null }); if (updateError) alert(updateError.message); await Promise.all([loadApplications(), loadProfiles()]);
     }));
   }
 
   async function loadReservations() {
-    const { data, error } = await supabase
-      .from('reservations')
-      .select('id,renter_id,starts_at,ends_at,status,estimated_flight_hours,renter_notes,profiles!reservations_renter_id_fkey(full_name,email)')
-      .gte('ends_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-      .order('starts_at', { ascending: true });
+    const cutoff = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    const [{ data, error }, { data: logs }] = await Promise.all([
+      supabase.from('reservations').select('id,renter_id,starts_at,ends_at,status,estimated_flight_hours,actual_aircraft_hours,renter_notes,profiles!reservations_renter_id_fkey(full_name,email)').gte('ends_at', cutoff).order('starts_at', { ascending:true }),
+      supabase.from('flight_logs').select('reservation_id,status'),
+    ]);
     if (error) { reservationsEl.innerHTML = `<p class="inline-error">${escapeHtml(error.message)}</p>`; return; }
     document.querySelector<HTMLElement>('[data-reservation-count]')!.textContent = String(data?.length || 0);
-    if (!data?.length) { reservationsEl.innerHTML = '<div class="empty-dashboard"><strong>No upcoming reservations.</strong></div>'; return; }
-    reservationsEl.innerHTML = data.map((reservation: any) => `<article class="admin-row"><div class="admin-row-main"><span>${formatEasternDate(reservation.starts_at)}</span><strong>${formatEasternTime(reservation.starts_at)}–${formatEasternTime(reservation.ends_at)} · ${escapeHtml(reservation.profiles?.full_name || reservation.profiles?.email || 'Renter')}</strong><small>${reservation.estimated_flight_hours ? `${reservation.estimated_flight_hours} estimated flight hours` : 'No flight-time estimate'}${reservation.renter_notes ? ` · ${escapeHtml(reservation.renter_notes)}` : ''}</small></div><div class="admin-row-actions"><span class="status-pill ${escapeHtml(reservation.status)}">${escapeHtml(reservation.status)}</span><select data-res-status="${reservation.id}"><option value="pending" ${reservation.status === 'pending' ? 'selected' : ''}>Pending</option><option value="confirmed" ${reservation.status === 'confirmed' ? 'selected' : ''}>Confirmed</option><option value="completed" ${reservation.status === 'completed' ? 'selected' : ''}>Completed</option><option value="cancelled" ${reservation.status === 'cancelled' ? 'selected' : ''}>Cancelled</option><option value="rejected" ${reservation.status === 'rejected' ? 'selected' : ''}>Rejected</option></select><button type="button" data-save-res="${reservation.id}">Save</button></div></article>`).join('');
+    if (!data?.length) { reservationsEl.innerHTML = '<div class="empty-dashboard"><strong>No current reservations.</strong></div>'; return; }
+    const logMap = new Map((logs || []).map((log: any) => [log.reservation_id, log.status]));
+    reservationsEl.innerHTML = data.map((reservation: any) => {
+      const logStatus = logMap.get(reservation.id);
+      const canAdminClose = reservation.status === 'confirmed' && new Date(reservation.starts_at) <= new Date() && !logStatus;
+      const statusControl = reservation.status === 'completed' ? `<span class="status-pill completed">completed</span>` : `<select data-res-status="${reservation.id}"><option value="pending" ${reservation.status === 'pending' ? 'selected' : ''}>Pending</option><option value="confirmed" ${reservation.status === 'confirmed' ? 'selected' : ''}>Confirmed</option><option value="cancelled" ${reservation.status === 'cancelled' ? 'selected' : ''}>Cancelled</option><option value="rejected" ${reservation.status === 'rejected' ? 'selected' : ''}>Rejected</option></select><button type="button" data-save-res="${reservation.id}">Save</button>`;
+      return `<article class="admin-row"><div class="admin-row-main"><span>${formatEasternDate(reservation.starts_at)}</span><strong>${formatEasternTime(reservation.starts_at)}–${formatEasternTime(reservation.ends_at)} · ${escapeHtml(profileName(reservation.profiles))}</strong><small>${reservation.actual_aircraft_hours ? `${reservation.actual_aircraft_hours} final hr` : reservation.estimated_flight_hours ? `${reservation.estimated_flight_hours} estimated hr` : 'No flight-time estimate'}${logStatus ? ` · post-flight ${escapeHtml(String(logStatus).replace('_',' '))}` : ''}${reservation.renter_notes ? ` · ${escapeHtml(reservation.renter_notes)}` : ''}</small>${canAdminClose ? `<div class="inline-closeout"><input type="number" min="0.1" step="0.1" placeholder="Actual hr" data-admin-close-hours="${reservation.id}"/><button type="button" data-admin-close="${reservation.id}">Admin closeout</button></div>` : ''}</div><div class="admin-row-actions"><span class="status-pill ${escapeHtml(reservation.status)}">${escapeHtml(reservation.status)}</span>${statusControl}</div></article>`;
+    }).join('');
     reservationsEl.querySelectorAll<HTMLButtonElement>('[data-save-res]').forEach((button) => button.addEventListener('click', async () => {
-      const id = button.dataset.saveRes!;
-      const select = reservationsEl.querySelector<HTMLSelectElement>(`[data-res-status="${id}"]`)!;
-      button.disabled = true;
-      const { error: updateError } = await supabase.rpc('admin_set_reservation_status', { p_reservation_id: id, p_status: select.value, p_admin_notes: null, p_actual_aircraft_hours: null });
-      if (updateError) alert(updateError.message);
-      await loadReservations();
+      const id = button.dataset.saveRes!; const select = reservationsEl.querySelector<HTMLSelectElement>(`[data-res-status="${id}"]`)!; button.disabled = true;
+      const { error: updateError } = await supabase.rpc('admin_set_reservation_status', { p_reservation_id:id, p_status:select.value, p_admin_notes:null, p_actual_aircraft_hours:null }); if (updateError) alert(updateError.message); await loadReservations();
+    }));
+    reservationsEl.querySelectorAll<HTMLButtonElement>('[data-admin-close]').forEach((button) => button.addEventListener('click', async () => {
+      const id = button.dataset.adminClose!; const input = reservationsEl.querySelector<HTMLInputElement>(`[data-admin-close-hours="${id}"]`)!; const hours = Number(input.value);
+      if (!hours || hours <= 0) { alert('Enter the final recorded aircraft hours.'); return; }
+      if (!confirm(`Finalize this flight at ${hours.toFixed(1)} aircraft hours? This will apply prepaid hours and create any remaining pay-as-you-go charge.`)) return;
+      button.disabled = true; const { error: closeError } = await supabase.rpc('admin_finalize_flight', { p_reservation_id:id, p_actual_aircraft_hours:hours, p_admin_notes:'Administrative closeout without renter post-flight submission.' }); if (closeError) alert(closeError.message); await loadDashboard();
+    }));
+  }
+
+  async function loadFlightLogs() {
+    const { data, error } = await supabase.from('flight_logs').select('reservation_id,renter_id,status,actual_aircraft_hours,hobbs_start,hobbs_end,tach_start,tach_end,fuel_added_gallons,returned_to_base,renter_notes,admin_notes,submitted_at,profiles!flight_logs_renter_id_fkey(full_name,email),reservations!flight_logs_reservation_id_fkey(starts_at,ends_at)').in('status', ['submitted','needs_review']).order('submitted_at', { ascending:true });
+    if (error) { flightlogsEl.innerHTML = `<p class="inline-error">${escapeHtml(error.message)}</p>`; return; }
+    document.querySelector<HTMLElement>('[data-flightlog-count]')!.textContent = String(data?.length || 0);
+    if (!data?.length) { flightlogsEl.innerHTML = '<div class="empty-dashboard"><strong>No post-flight reports waiting for review.</strong></div>'; return; }
+    flightlogsEl.innerHTML = data.map((log: any) => `<article class="admin-row flight-review-row"><div class="admin-row-main"><span>${formatEasternDate(log.reservations?.starts_at)} · ${escapeHtml(profileName(log.profiles))}</span><strong>${log.actual_aircraft_hours} reported aircraft hours</strong><small>${log.hobbs_start != null || log.hobbs_end != null ? `Hobbs ${log.hobbs_start ?? '—'} → ${log.hobbs_end ?? '—'} · ` : ''}${log.tach_start != null || log.tach_end != null ? `Tach ${log.tach_start ?? '—'} → ${log.tach_end ?? '—'} · ` : ''}${log.fuel_added_gallons != null ? `${log.fuel_added_gallons} gal fuel · ` : ''}${log.returned_to_base ? 'Returned to KWDR' : 'Return location differs'}${log.renter_notes ? ` · ${escapeHtml(log.renter_notes)}` : ''}</small><div class="flight-review-inputs"><label>Final hours<input type="number" min="0.1" step="0.1" value="${log.actual_aircraft_hours}" data-final-hours="${log.reservation_id}"/></label><label>Admin note<input maxlength="500" value="${escapeHtml(log.admin_notes || '')}" data-final-note="${log.reservation_id}"/></label></div></div><div class="admin-row-actions vertical-actions"><span class="status-pill ${escapeHtml(log.status)}">${escapeHtml(String(log.status).replace('_',' '))}</span><button type="button" class="primary-mini" data-finalize-flight="${log.reservation_id}">Finalize Flight</button><button type="button" data-request-change="${log.reservation_id}">Needs update</button></div></article>`).join('');
+    flightlogsEl.querySelectorAll<HTMLButtonElement>('[data-finalize-flight]').forEach((button) => button.addEventListener('click', async () => {
+      const id = button.dataset.finalizeFlight!; const hours = Number(flightlogsEl.querySelector<HTMLInputElement>(`[data-final-hours="${id}"]`)!.value); const notes = flightlogsEl.querySelector<HTMLInputElement>(`[data-final-note="${id}"]`)!.value;
+      if (!hours || hours <= 0) return alert('Enter valid final aircraft hours.');
+      if (!confirm(`Finalize at ${hours.toFixed(1)} hours and reconcile the renter’s billing?`)) return;
+      button.disabled = true; const { error: finalizeError } = await supabase.rpc('admin_finalize_flight', { p_reservation_id:id, p_actual_aircraft_hours:hours, p_admin_notes:notes || null }); if (finalizeError) alert(finalizeError.message); await loadDashboard();
+    }));
+    flightlogsEl.querySelectorAll<HTMLButtonElement>('[data-request-change]').forEach((button) => button.addEventListener('click', async () => {
+      const id = button.dataset.requestChange!; const note = prompt('What should the renter update?'); if (!note) return;
+      const { error: updateError } = await supabase.rpc('admin_set_flight_log_status', { p_reservation_id:id, p_status:'needs_review', p_admin_notes:note }); if (updateError) alert(updateError.message); await loadFlightLogs();
+    }));
+  }
+
+  async function loadBilling() {
+    const nowIso = new Date().toISOString();
+    const [{ data: payments, error: paymentError }, { data: blocks, error: blockError }] = await Promise.all([
+      supabase.from('payments').select('id,renter_id,kind,status,amount_cents,method,description,reference,paid_at,created_at,profiles!payments_renter_id_fkey(full_name,email)').order('created_at', { ascending:false }),
+      supabase.from('block_hour_purchases').select('id,renter_id,package_hours,remaining_hours,expires_at,status,profiles!block_hour_purchases_renter_id_fkey(full_name,email)').order('expires_at', { ascending:true }),
+    ]);
+    if (paymentError || blockError) { const error = paymentError || blockError; paymentsEl.innerHTML = `<p class="inline-error">${escapeHtml(error?.message || 'Unable to load billing.')}</p>`; return; }
+    const pendingPayments = (payments || []).filter((item: any) => item.status === 'pending');
+    const pendingTotal = pendingPayments.reduce((sum: number,item: any) => sum + Number(item.amount_cents), 0);
+    document.querySelector<HTMLElement>('[data-summary-balance]')!.textContent = money(pendingTotal);
+    document.querySelector<HTMLElement>('[data-summary-payment-count]')!.textContent = `${pendingPayments.length} open charge${pendingPayments.length === 1 ? '' : 's'}`;
+    const activeBlocks = (blocks || []).filter((item: any) => item.status !== 'void' && Number(item.remaining_hours) > 0 && item.expires_at > nowIso);
+    const totalHours = activeBlocks.reduce((sum: number,item: any) => sum + Number(item.remaining_hours), 0);
+    document.querySelector<HTMLElement>('[data-summary-hours]')!.textContent = `${totalHours.toFixed(1)} hr`;
+    blockBalancesEl.innerHTML = activeBlocks.length ? activeBlocks.map((block: any) => `<article class="admin-row compact-row"><div class="admin-row-main"><span>${block.package_hours}-hour block · expires ${formatEasternDate(block.expires_at)}</span><strong>${escapeHtml(profileName(block.profiles))}</strong><small>${Number(block.remaining_hours).toFixed(1)} hours remaining</small></div><strong class="balance-number">${Number(block.remaining_hours).toFixed(1)} hr</strong></article>`).join('') : '<div class="empty-dashboard"><strong>No active prepaid blocks.</strong></div>';
+    paymentsEl.innerHTML = (payments || []).length ? (payments || []).slice(0, 40).map((payment: any) => `<article class="admin-row"><div class="admin-row-main"><span>${formatEasternDate(payment.created_at)} · ${escapeHtml(String(payment.kind).replace('_',' '))}</span><strong>${escapeHtml(profileName(payment.profiles))} · ${money(payment.amount_cents)}</strong><small>${escapeHtml(payment.description || 'Account transaction')}${payment.reference ? ` · Ref: ${escapeHtml(payment.reference)}` : ''}${payment.method ? ` · ${escapeHtml(payment.method)}` : ''}</small></div><div class="admin-row-actions"><span class="status-pill ${escapeHtml(payment.status)}">${escapeHtml(payment.status)}</span>${payment.status === 'pending' ? `<select data-payment-method="${payment.id}"><option value="card">Card</option><option value="ach">ACH</option><option value="check">Check</option><option value="cash">Cash</option><option value="other">Other</option></select><button type="button" data-mark-paid="${payment.id}">Mark paid</button><button type="button" class="danger-button" data-void-payment="${payment.id}">Void</button>` : ''}</div></article>`).join('') : '<div class="empty-dashboard"><strong>No payment activity yet.</strong></div>';
+    paymentsEl.querySelectorAll<HTMLButtonElement>('[data-mark-paid]').forEach((button) => button.addEventListener('click', async () => {
+      const id = button.dataset.markPaid!; const method = paymentsEl.querySelector<HTMLSelectElement>(`[data-payment-method="${id}"]`)!.value; const reference = prompt('Optional payment reference / check number:') || null;
+      const { error } = await supabase.rpc('admin_set_payment_status', { p_payment_id:id, p_status:'paid', p_method:method, p_reference:reference }); if (error) alert(error.message); await loadBilling();
+    }));
+    paymentsEl.querySelectorAll<HTMLButtonElement>('[data-void-payment]').forEach((button) => button.addEventListener('click', async () => {
+      if (!confirm('Void this pending charge?')) return; const { error } = await supabase.rpc('admin_set_payment_status', { p_payment_id:button.dataset.voidPayment, p_status:'void', p_method:null, p_reference:null }); if (error) alert(error.message); await loadBilling();
+    }));
+  }
+
+  async function loadSquawks() {
+    const { data, error } = await supabase.from('aircraft_squawks').select('id,title,description,priority,status,admin_notes,created_at,profiles!aircraft_squawks_reported_by_fkey(full_name,email)').order('created_at', { ascending:false });
+    if (error) { squawksEl.innerHTML = `<p class="inline-error">${escapeHtml(error.message)}</p>`; return; }
+    openSquawks = (data || []).filter((item: any) => item.status !== 'resolved');
+    const urgent = openSquawks.filter((item: any) => item.priority === 'urgent').length;
+    document.querySelector<HTMLElement>('[data-squawk-count]')!.textContent = String(openSquawks.length);
+    document.querySelector<HTMLElement>('[data-summary-squawks]')!.textContent = String(openSquawks.length);
+    document.querySelector<HTMLElement>('[data-summary-urgent]')!.textContent = urgent ? `${urgent} urgent report${urgent === 1 ? '' : 's'}` : 'No urgent reports';
+    const linkedSelect = maintenanceForm.elements.namedItem('squawk') as HTMLSelectElement;
+    const current = linkedSelect.value;
+    linkedSelect.innerHTML = '<option value="">None</option>' + openSquawks.map((item: any) => `<option value="${item.id}">${escapeHtml(item.title)} · ${escapeHtml(profileName(item.profiles))}</option>`).join(''); linkedSelect.value = current;
+    if (!openSquawks.length) { squawksEl.innerHTML = '<div class="empty-dashboard"><strong>No open squawks.</strong></div>'; return; }
+    squawksEl.innerHTML = openSquawks.map((item: any) => `<article class="admin-row squawk-admin-row ${item.priority === 'urgent' ? 'urgent-squawk' : ''}"><div class="admin-row-main"><span>${formatEasternDate(item.created_at)} · ${escapeHtml(item.priority)} · ${escapeHtml(profileName(item.profiles))}</span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.description)}${item.admin_notes ? ` · Admin: ${escapeHtml(item.admin_notes)}` : ''}</small></div><div class="admin-row-actions"><span class="status-pill ${escapeHtml(item.status)}">${escapeHtml(String(item.status).replace('_',' '))}</span><select data-squawk-status="${item.id}"><option value="open" ${item.status === 'open' ? 'selected' : ''}>Open</option><option value="in_progress" ${item.status === 'in_progress' ? 'selected' : ''}>In progress</option><option value="deferred" ${item.status === 'deferred' ? 'selected' : ''}>Deferred</option><option value="resolved" ${item.status === 'resolved' ? 'selected' : ''}>Resolved</option></select><button type="button" data-save-squawk="${item.id}">Save</button><button type="button" data-maintenance-from="${item.id}" data-squawk-title="${escapeHtml(item.title)}">Add maintenance</button></div></article>`).join('');
+    squawksEl.querySelectorAll<HTMLButtonElement>('[data-save-squawk]').forEach((button) => button.addEventListener('click', async () => {
+      const id = button.dataset.saveSquawk!; const status = squawksEl.querySelector<HTMLSelectElement>(`[data-squawk-status="${id}"]`)!.value; const note = prompt('Optional admin note (Cancel to keep blank):');
+      const { error } = await supabase.rpc('admin_set_squawk_status', { p_squawk_id:id, p_status:status, p_admin_notes:note }); if (error) alert(error.message); await loadSquawks();
+    }));
+    squawksEl.querySelectorAll<HTMLButtonElement>('[data-maintenance-from]').forEach((button) => button.addEventListener('click', () => {
+      (maintenanceForm.elements.namedItem('squawk') as HTMLSelectElement).value = button.dataset.maintenanceFrom!;
+      (maintenanceForm.elements.namedItem('title') as HTMLInputElement).value = button.dataset.squawkTitle || '';
+      maintenanceForm.scrollIntoView({ behavior:'smooth', block:'center' });
+    }));
+  }
+
+  async function loadMaintenance() {
+    const { data, error } = await supabase.from('maintenance_records').select('id,title,maintenance_type,status,scheduled_for,completed_at,hobbs_at_completion,tach_at_completion,notes,squawk_id').in('status', ['scheduled','in_progress']).order('scheduled_for', { ascending:true, nullsFirst:false });
+    if (error) { maintenanceEl.innerHTML = `<p class="inline-error">${escapeHtml(error.message)}</p>`; return; }
+    document.querySelector<HTMLElement>('[data-summary-maintenance]')!.textContent = String(data?.length || 0);
+    if (!data?.length) { maintenanceEl.innerHTML = '<div class="empty-dashboard"><strong>No open maintenance items.</strong></div>'; return; }
+    maintenanceEl.innerHTML = data.map((item: any) => `<article class="admin-row compact-row"><div class="admin-row-main"><span>${escapeHtml(String(item.maintenance_type).replace('_',' '))} · ${formatDateOnly(item.scheduled_for)}</span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.notes || 'No notes')}</small></div><div class="admin-row-actions"><select data-maint-status="${item.id}"><option value="scheduled" ${item.status === 'scheduled' ? 'selected' : ''}>Scheduled</option><option value="in_progress" ${item.status === 'in_progress' ? 'selected' : ''}>In progress</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select><button type="button" data-save-maint="${item.id}">Save</button></div></article>`).join('');
+    maintenanceEl.querySelectorAll<HTMLButtonElement>('[data-save-maint]').forEach((button) => button.addEventListener('click', async () => {
+      const id = button.dataset.saveMaint!; const status = maintenanceEl.querySelector<HTMLSelectElement>(`[data-maint-status="${id}"]`)!.value; let hobbs:number|null = null; let tach:number|null = null; let notes:string|null = null;
+      if (status === 'completed') { const h = prompt('Hobbs at completion (optional):'); const t = prompt('Tach at completion (optional):'); hobbs = h ? Number(h) : null; tach = t ? Number(t) : null; notes = prompt('Completion note (optional):'); }
+      const { error } = await supabase.rpc('admin_set_maintenance_status', { p_maintenance_id:id, p_status:status, p_hobbs:hobbs, p_tach:tach, p_notes:notes }); if (error) alert(error.message); await Promise.all([loadMaintenance(), loadSquawks()]);
     }));
   }
 
   async function loadBlocks() {
-    const { data, error } = await supabase
-      .from('aircraft_blocks')
-      .select('id,starts_at,ends_at,block_type,notes')
-      .gte('ends_at', new Date().toISOString())
-      .order('starts_at', { ascending: true });
+    const { data, error } = await supabase.from('aircraft_blocks').select('id,starts_at,ends_at,block_type,notes').gte('ends_at', new Date().toISOString()).order('starts_at', { ascending:true });
     if (error) { blocksEl.innerHTML = `<p class="inline-error">${escapeHtml(error.message)}</p>`; return; }
     if (!data?.length) { blocksEl.innerHTML = '<div class="empty-dashboard"><strong>No upcoming blocks.</strong></div>'; return; }
     blocksEl.innerHTML = data.map((block: any) => `<article class="admin-row compact-row"><div class="admin-row-main"><span>${escapeHtml(String(block.block_type).replace('_',' '))}</span><strong>${formatEasternDate(block.starts_at)}</strong><small>${formatEasternTime(block.starts_at)}–${formatEasternTime(block.ends_at)}${block.notes ? ` · ${escapeHtml(block.notes)}` : ''}</small></div><button type="button" class="danger-button" data-delete-block="${block.id}">Remove</button></article>`).join('');
-    blocksEl.querySelectorAll<HTMLButtonElement>('[data-delete-block]').forEach((button) => button.addEventListener('click', async () => {
-      if (!confirm('Remove this unavailable-time block?')) return;
-      const { error: deleteError } = await supabase.rpc('admin_delete_aircraft_block', { p_block_id: button.dataset.deleteBlock });
-      if (deleteError) alert(deleteError.message);
-      await loadBlocks();
-    }));
+    blocksEl.querySelectorAll<HTMLButtonElement>('[data-delete-block]').forEach((button) => button.addEventListener('click', async () => { if (!confirm('Remove this unavailable-time block?')) return; const { error:deleteError } = await supabase.rpc('admin_delete_aircraft_block', { p_block_id:button.dataset.deleteBlock }); if (deleteError) alert(deleteError.message); await loadBlocks(); }));
   }
 
-  async function loadDashboard() { await Promise.all([loadApplications(), loadReservations(), loadBlocks()]); }
+  async function loadDashboard() { await loadProfiles(); await Promise.all([loadApplications(), loadReservations(), loadFlightLogs(), loadBilling(), loadSquawks(), loadMaintenance(), loadBlocks()]); }
+
+  purchaseForm.addEventListener('submit', async (event) => {
+    event.preventDefault(); const data = new FormData(purchaseForm); const button = purchaseForm.querySelector<HTMLButtonElement>('button[type="submit"]')!; button.disabled = true; button.textContent = 'Adding…'; purchaseMessage.hidden = true;
+    const { error } = await supabase.rpc('admin_record_block_purchase', { p_renter_id:String(data.get('renter')), p_package_hours:Number(data.get('hours')), p_payment_method:String(data.get('method') || '') || null, p_reference:String(data.get('reference') || '') || null, p_notes:String(data.get('notes') || '') || null });
+    button.disabled = false; button.textContent = 'Add Paid Block'; purchaseMessage.className = `auth-message ${error ? 'error' : 'success'}`; purchaseMessage.textContent = error ? error.message : 'Prepaid block recorded and immediately added to the renter’s balance.'; purchaseMessage.hidden = false; if (!error) { purchaseForm.reset(); await loadBilling(); }
+  });
+
+  maintenanceForm.addEventListener('submit', async (event) => {
+    event.preventDefault(); const data = new FormData(maintenanceForm); const button = maintenanceForm.querySelector<HTMLButtonElement>('button[type="submit"]')!; button.disabled = true; button.textContent = 'Adding…'; maintenanceMessage.hidden = true;
+    const { error } = await supabase.rpc('admin_create_maintenance_record', { p_aircraft_id:aircraftId, p_title:String(data.get('title')), p_maintenance_type:String(data.get('type')), p_scheduled_for:String(data.get('scheduled') || '') || null, p_notes:String(data.get('notes') || '') || null, p_squawk_id:String(data.get('squawk') || '') || null });
+    button.disabled = false; button.textContent = 'Add Maintenance Item'; maintenanceMessage.className = `auth-message ${error ? 'error' : 'success'}`; maintenanceMessage.textContent = error ? error.message : 'Maintenance item added.'; maintenanceMessage.hidden = false; if (!error) { maintenanceForm.reset(); await Promise.all([loadMaintenance(), loadSquawks()]); }
+  });
 
   blockForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const data = new FormData(blockForm);
-    const date = String(data.get('date'));
-    const startsAt = zonedDateTimeToUtc(date, String(data.get('start')));
-    const endsAt = zonedDateTimeToUtc(date, String(data.get('end')));
-    const button = blockForm.querySelector<HTMLButtonElement>('button[type="submit"]')!;
-    button.disabled = true; button.textContent = 'Adding…'; blockMessage.hidden = true;
-    const { error } = await supabase.rpc('admin_create_aircraft_block', { p_aircraft_id: aircraftId, p_starts_at: startsAt.toISOString(), p_ends_at: endsAt.toISOString(), p_block_type: String(data.get('type')), p_notes: String(data.get('notes') || '') || null });
-    button.disabled = false; button.textContent = 'Add Calendar Block';
-    blockMessage.className = `auth-message ${error ? 'error' : 'success'}`;
-    blockMessage.textContent = error ? error.message : 'Aircraft block added to the live calendar.';
-    blockMessage.hidden = false;
-    if (!error) { blockForm.reset(); await loadBlocks(); }
+    event.preventDefault(); const data = new FormData(blockForm); const date = String(data.get('date')); const startsAt = zonedDateTimeToUtc(date, String(data.get('start'))); const endsAt = zonedDateTimeToUtc(date, String(data.get('end'))); const button = blockForm.querySelector<HTMLButtonElement>('button[type="submit"]')!; button.disabled = true; button.textContent = 'Adding…'; blockMessage.hidden = true;
+    const { error } = await supabase.rpc('admin_create_aircraft_block', { p_aircraft_id:aircraftId, p_starts_at:startsAt.toISOString(), p_ends_at:endsAt.toISOString(), p_block_type:String(data.get('type')), p_notes:String(data.get('notes') || '') || null });
+    button.disabled = false; button.textContent = 'Add Calendar Block'; blockMessage.className = `auth-message ${error ? 'error' : 'success'}`; blockMessage.textContent = error ? error.message : 'Aircraft block added to the live calendar.'; blockMessage.hidden = false; if (!error) { blockForm.reset(); await loadBlocks(); }
   });
 
   document.querySelector('[data-admin-refresh]')!.addEventListener('click', loadDashboard);
-  const allowed = await requireAdmin();
-  gate.hidden = allowed;
-  dashboard.hidden = !allowed;
-  if (allowed) await loadDashboard();
+  const allowed = await requireAdmin(); gate.hidden = allowed; dashboard.hidden = !allowed; if (allowed) await loadDashboard();
 </script>

@@ -1204,3 +1204,86 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); outline: 
   .primary-nav { max-height: calc(100dvh - 72px); }
   .footer-logo { width: 136px; }
 }
+
+/* Operations + billing — Phase 2 */
+.account-portal-card { align-self: start; }
+.account-ops-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.account-metric { padding: 17px; border: 1px solid var(--line); border-radius: 12px; background: #fff; box-shadow: 0 8px 24px rgba(8,43,69,.05); }
+.account-metric > span { display: block; color: var(--blue); font-size: .66rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.account-metric > strong { display: block; margin: 3px 0; color: var(--navy); font-family: 'League Spartan',sans-serif; font-size: 1.65rem; }
+.account-metric > small { display: block; color: var(--muted); font-size: .73rem; line-height: 1.35; }
+.dashboard-operations { padding-top: 2px; }
+.mini-action { padding: 5px 9px; border: 1px solid #b9d0dc; border-radius: 7px; color: var(--blue); background: #f7fbfd; font-size: .7rem; font-weight: 900; white-space: nowrap; }
+.billing-account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.billing-account-grid h4 { margin: 0 0 8px; color: var(--navy); font-family: 'League Spartan',sans-serif; font-size: 1rem; }
+.billing-activity-row, .squawk-account-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); }
+.billing-activity-row > div, .squawk-account-row > div { display: flex; min-width: 0; flex-direction: column; }
+.billing-activity-row > div:last-child { align-items: flex-end; }
+.billing-activity-row span, .squawk-account-row div > span { color: var(--blue); font-size: .63rem; font-weight: 900; text-transform: uppercase; }
+.billing-activity-row strong, .squawk-account-row strong { color: var(--navy); font-size: .83rem; }
+.billing-activity-row small, .squawk-account-row small { color: var(--muted); font-size: .7rem; }
+.hour-ledger-row { display: flex; align-items: center; gap: 11px; padding: 11px 0; border-top: 1px solid var(--line); }
+.hour-ledger-row > span { min-width: 62px; color: var(--navy); font-weight: 900; }
+.hour-ledger-row > div { display: flex; flex-direction: column; }
+.hour-ledger-row strong { color: var(--navy); font-size: .8rem; }
+.hour-ledger-row small { color: var(--muted); font-size: .68rem; }
+.status-pill.paid, .status-pill.resolved { color: #206d4b; background: #e7f5ed; }
+.status-pill.open, .status-pill.in_progress, .status-pill.submitted { color: #8d5b08; background: #fff1d7; }
+.status-pill.urgent { color: #833a3a; background: #fae8e8; }
+.status-pill.deferred, .status-pill.void, .status-pill.refunded { color: var(--steel); background: #edf1f3; }
+
+.operations-form-section { background: var(--cloud); }
+.operations-form-wrap { max-width: 880px; }
+.operations-form-card { padding: 34px; border: 1px solid var(--line); border-radius: 20px; background: #fff; box-shadow: var(--shadow-soft); }
+.operations-record-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding-bottom: 22px; margin-bottom: 22px; border-bottom: 1px solid var(--line); }
+.operations-record-heading .eyebrow { margin-bottom: 8px; }
+.operations-record-heading h2 { margin-bottom: 6px; font-size: 2.1rem; }
+.operations-record-heading p { margin: 0; }
+.operations-form { display: grid; gap: 18px; }
+.operations-form > label, .operations-form .form-grid label { display: flex; flex-direction: column; gap: 7px; color: var(--navy); font-size: .82rem; font-weight: 900; }
+.operations-form .checkbox-label { display: grid; grid-template-columns: auto 1fr; align-items: start; gap: 10px; }
+.operations-form .checkbox-label input { width: 18px; height: 18px; margin-top: 4px; }
+.operations-form .button { justify-self: start; }
+.safety-notice { border-color: #e4c48e; }
+
+.admin-summary-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; }
+.admin-summary-grid article { padding: 20px; border: 1px solid var(--line); border-radius: 15px; background: #fff; box-shadow: var(--shadow-soft); }
+.admin-summary-grid span { display: block; color: var(--blue); font-size: .65rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.admin-summary-grid strong { display: block; margin: 5px 0 3px; color: var(--navy); font-family: 'League Spartan',sans-serif; font-size: 1.75rem; }
+.admin-summary-grid small { display: block; color: var(--muted); font-size: .72rem; line-height: 1.4; }
+.admin-panel-copy { margin: -9px 0 18px; font-size: .83rem; }
+.operations-admin-grid { grid-template-columns: 1fr 1fr; }
+.operations-admin-grid h3 { margin-bottom: 14px; font-size: 1.25rem; }
+.admin-subsection { padding-top: 26px; margin-top: 26px; border-top: 1px solid var(--line); }
+.admin-hint { color: var(--muted); font-size: .72rem; text-align: right; }
+.balance-number { flex: 0 0 auto; color: var(--navy); font-family: 'League Spartan',sans-serif; }
+.inline-closeout { display: flex; gap: 7px; margin-top: 9px; }
+.inline-closeout input { width: 115px; height: 36px; font-size: .78rem; }
+.inline-closeout button, .primary-mini { padding: 6px 10px; border: 1px solid var(--gold); border-radius: 7px; color: var(--navy); background: var(--gold); font-size: .72rem; font-weight: 900; cursor: pointer; }
+.flight-review-row { align-items: flex-start; }
+.flight-review-inputs { display: grid; grid-template-columns: 120px minmax(200px,1fr); gap: 8px; margin-top: 11px; }
+.flight-review-inputs label { display: flex; flex-direction: column; gap: 4px; color: var(--navy); font-size: .68rem; font-weight: 900; }
+.flight-review-inputs input { height: 38px; font-size: .78rem; }
+.vertical-actions { align-items: stretch; flex-direction: column; }
+.urgent-squawk { border-color: #dfb4b4; background: #fff8f8; }
+.urgent-squawk .admin-row-main > span { color: var(--red); }
+
+@media (max-width: 1000px) {
+  .admin-summary-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .operations-admin-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 680px) {
+  .account-ops-grid, .billing-account-grid, .admin-summary-grid { grid-template-columns: 1fr; }
+  .operations-form-card { padding: 22px 18px; }
+  .operations-record-heading { flex-direction: column; }
+  .operations-form .button { width: 100%; }
+  .flight-review-inputs { grid-template-columns: 1fr; }
+  .inline-closeout { flex-wrap: wrap; }
+  .inline-closeout input { width: 100%; }
+  .vertical-actions { width: 100%; }
+  .admin-hint { text-align: left; }
+  .billing-activity-row, .squawk-account-row { align-items: flex-start; flex-direction: column; }
+  .billing-activity-row > div:last-child { width: 100%; align-items: flex-start; flex-direction: row; justify-content: space-between; }
+  .reservation-row-actions { flex-wrap: wrap; justify-content: flex-start; }
+}

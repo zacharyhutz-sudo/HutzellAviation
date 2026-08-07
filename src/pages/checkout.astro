@@ -6,11 +6,11 @@ import Icon from '../components/Icon.astro';
 import '../styles/global.css';
 const base = import.meta.env.BASE_URL;
 ---
-<BaseLayout title="Reservation Payments | Hutzell Aviation" description="Online payment and prepaid-hour checkout will be configured after Hutzell Aviation acquires the aircraft and selects its payment workflow.">
+<BaseLayout title="Rental Billing | Hutzell Aviation" description="Hutzell Aviation renter billing, prepaid block-hour balances, and post-flight reconciliation.">
   <Header />
   <main>
-    <section class="checkout-hero"><div class="container"><p class="eyebrow light"><span></span> RESERVATION PAYMENTS</p><h1>Rental pricing is set. Payment setup comes after acquisition.</h1><p>Approved renters can request open aircraft time from the live calendar. Online payment and prepaid-hour purchasing will be configured after Hutzell Aviation acquires the aircraft and selects the final checkout workflow.</p></div></section>
-    <section class="section checkout-section"><div class="container"><div class="checkout-form-card payment-roadmap"><Icon name="calendar" size={34}/><h2>Request time through the calendar</h2><p>The calendar checks live reservations and aircraft blocks, verifies renter approval, and saves conflict-free requests to Supabase.</p><div class="account-actions"><a class="button" href={`${base}availability/`}>View Availability</a><a class="button button-outline" href={`${base}account/`}>Open Renter Account</a></div></div></div></section>
+    <section class="checkout-hero"><div class="container"><p class="eyebrow light"><span></span> RENTER BILLING</p><h1>Flight balances now live in your renter account.</h1><p>Prepaid 15-, 25-, and 50-hour packages are tracked against actual finalized aircraft time. If a flight exceeds your eligible prepaid balance, the remainder appears as a pay-as-you-go charge.</p></div></section>
+    <section class="section checkout-section"><div class="container"><div class="checkout-form-card payment-roadmap"><Icon name="dollar" size={34}/><h2>Billing ledger active. Online card checkout comes next.</h2><p>Tyler can record prepaid block purchases and received payments in the admin dashboard. Renters can see current block hours, expiration dates, payment status, and flight reconciliation from their account. A direct online card processor is intentionally not enabled until a merchant/payment provider is connected.</p><div class="account-actions"><a class="button" href={`${base}account/`}>Open Renter Account</a><a class="button button-outline" href={`${base}pricing/`}>View Rental Rates</a></div></div></div></section>
   </main>
   <Footer />
 </BaseLayout>

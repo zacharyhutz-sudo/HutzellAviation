@@ -1,13 +1,31 @@
-# Calendar visibility patch
+# Phase 2 Operations Patch — August 7, 2026
 
-This patch fixes the selected-date booking panel appearing below the calendar on common laptop-width viewports.
+This patch adds the renter-operations features discussed after the initial calendar/account launch.
 
-Changes:
+## Added
 
-- Keeps the calendar and booking panel side-by-side above 820px.
-- Stacks the booking panel only on smaller screens.
-- Automatically scrolls the booking panel into view after a date is selected on mobile/tablet layouts.
-- Adds explicit hidden-state rules so the empty-state and booking form cannot overlap.
-- Adds safe focus handling for keyboard and screen-reader users.
+- Prepaid 15-, 25-, and 50-hour block balances
+- Three-month block expiration tracking
+- Renter hour ledger
+- Payment ledger and outstanding balances
+- Manual admin payment reconciliation
+- Renter post-flight report page
+- Automatic block-hour deduction when admin finalizes a flight
+- Automatic $180/hour pay-as-you-go charge for uncovered finalized time
+- Renter aircraft squawk reporting
+- Admin squawk workflow
+- Maintenance record tracking with optional squawk links
+- Admin operational summary cards
+- Tyler (`tylerhutzell4@gmail.com`) on the administrator allow-list
 
-No Supabase SQL changes are required for this patch.
+## New files
+
+- `src/pages/postflight.astro`
+- `src/pages/report-squawk.astro`
+- `supabase/phase2.sql`
+
+## Required deployment step
+
+Before deploying the updated site, run `supabase/phase2.sql` once in the Supabase SQL Editor.
+
+Direct online card processing is **not** included in this patch because no merchant/payment-provider credentials are connected. The internal payment ledger is live and ready for a future Stripe or other checkout integration.
