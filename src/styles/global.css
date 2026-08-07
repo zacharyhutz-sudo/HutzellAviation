@@ -27,7 +27,8 @@ html { scroll-behavior: smooth; scroll-padding-top: 110px; }
 body { margin: 0; min-width: 320px; color: var(--text); background: var(--white); font-family: 'Lato', Arial, sans-serif; font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
 body.nav-open { overflow: hidden; }
 body, button, input, select, textarea, a { font-family: 'Lato', Arial, sans-serif; }
-img, svg { display: block; max-width: 100%; }
+img { display: block; max-width: 100%; height: auto; }
+svg { display: block; max-width: 100%; }
 button, a { -webkit-tap-highlight-color: transparent; }
 a { color: inherit; text-decoration: none; }
 p, h1, h2, h3, ul, ol { margin-top: 0; }
@@ -1027,88 +1028,179 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); outline: 
 }
 
 
-/* Logo sizing and footer-brand cleanup patch */
-.brand-image {
-  display: inline-flex;
-  align-items: center;
-  width: auto;
-  height: auto;
-  padding: 0;
+/* Site-wide spacing and visual refinement — August 2026 */
+:root {
+  --container: 1240px;
+  --shadow: 0 22px 60px rgba(8, 43, 69, 0.1);
+  --shadow-soft: 0 12px 32px rgba(8, 43, 69, 0.07);
 }
 
+.section { padding-block: 96px; }
+.section-heading { margin-bottom: 48px; }
+
+/* Header and brand */
+.announcement-inner { min-height: 34px; }
+.header-inner { min-height: 96px; }
+.brand-image {
+  display: inline-flex;
+  width: 92px;
+  height: auto;
+  padding: 0;
+  align-items: center;
+  overflow: visible;
+}
 .brand-image img {
-  width: auto;
-  height: 88px;
+  width: 100%;
+  height: auto;
   max-width: none;
   object-fit: contain;
   object-position: left center;
 }
+.primary-nav { gap: 20px; }
+.primary-nav > a:not(.button) { padding-block: 34px; }
+.primary-nav > a:not(.button)::after { bottom: 24px; }
 
-.header-inner {
-  min-height: 104px;
+/* Hero and section rhythm */
+.page-hero-inner { padding-block: 88px 96px; }
+.page-hero h1 {
+  max-width: 1080px;
+  font-size: clamp(3.2rem, 6vw, 5.8rem);
+  text-wrap: balance;
 }
+.page-hero-inner > p:last-child { max-width: 790px; }
+.home-hero { padding-block: 68px 76px; }
+.home-hero-grid { gap: 56px; }
+.split-intro { gap: 64px; align-items: center; }
+.intro-copy { padding-top: 0; }
+.aircraft-preview-grid,
+.about-preview-grid { gap: 64px; }
+.biography-grid { gap: 72px; }
+.aircraft-detail-grid,
+.requirements-grid,
+.billing-grid,
+.faq-grid { gap: 60px; }
 
+/* Cards */
+.feature-card { border-radius: 20px; }
+.mini-price-card { min-height: 205px; padding: 26px; }
+.operations-grid > div {
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--gold);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(8, 43, 69, 0.045);
+}
+.price-card,
+.aircraft-showcase,
+.aircraft-photo-card,
+.portrait-photo,
+.tyler-card { box-shadow: var(--shadow-soft); }
+
+/* CTA */
+.cta-section { padding-block: 68px; }
+.cta-shell {
+  gap: 36px;
+  padding: 46px 50px;
+  border-radius: 22px;
+}
+.cta-shell h2 { max-width: 740px; }
+
+/* Footer */
+.site-footer { padding-top: 62px; }
+.footer-grid {
+  align-items: start;
+  gap: 48px;
+  padding-bottom: 48px;
+}
 .footer-brand {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
-
 .footer-logo {
   display: block;
-  width: 184px;
+  width: 165px;
   height: auto;
   padding: 0;
   overflow: visible;
   border-radius: 0;
   background: transparent;
-  flex: 0 0 auto;
 }
+.footer-logo img { width: 100%; height: auto; object-fit: contain; }
+.footer-brand > p { max-width: 270px; margin-top: 16px; }
+.site-footer nav a,
+.site-footer .footer-grid > div > a,
+.site-footer .footer-grid > div > span { line-height: 1.45; }
+.footer-bottom { padding-block: 22px; }
+.footer-bottom p { font-size: .76rem; line-height: 1.5; }
 
-.footer-logo img {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-}
-
-.footer-brand > p {
-  margin-top: 16px;
+@media (max-width: 1080px) {
+  .header-inner { min-height: 88px; }
+  .brand-image { width: 82px; }
+  .primary-nav { gap: 13px; }
+  .primary-nav > a:not(.button) { padding-block: 31px; }
+  .primary-nav > a:not(.button)::after { bottom: 22px; }
 }
 
 @media (max-width: 900px) {
-  .brand-image img {
-    height: 76px;
-  }
-
-  .header-inner {
-    min-height: 90px;
-  }
+  .section { padding-block: 74px; }
+  .section-heading { margin-bottom: 40px; }
+  .header-inner { min-height: 82px; }
+  .brand-image { width: 76px; }
+  .primary-nav { max-height: calc(100dvh - 82px); }
+  .page-hero-inner { padding-block: 66px 74px; }
+  .page-hero h1 { font-size: clamp(2.8rem, 8.5vw, 4.7rem); }
+  .home-hero { padding-block: 46px 60px; }
+  .home-hero-grid { gap: 40px; }
+  .split-intro,
+  .aircraft-preview-grid,
+  .about-preview-grid,
+  .biography-grid,
+  .aircraft-detail-grid,
+  .requirements-grid,
+  .billing-grid,
+  .faq-grid,
+  .application-grid,
+  .account-login-grid { gap: 42px; }
+  .intro-copy { padding-top: 0; }
+  .cta-section { padding-block: 58px; }
+  .cta-shell { padding: 40px; }
+  .footer-grid { gap: 38px; }
+  .footer-logo { width: 154px; }
 }
 
 @media (max-width: 600px) {
-  .brand-image img {
-    height: 64px;
-  }
-
-  .header-inner {
-    min-height: 78px;
-  }
-
-  .footer-logo {
-    width: 160px;
-  }
+  .section { padding-block: 60px; }
+  .section-heading { margin-bottom: 34px; }
+  .header-inner { min-height: 76px; }
+  .brand-image { width: 68px; }
+  .primary-nav { max-height: calc(100dvh - 76px); }
+  .page-hero-inner { padding-block: 52px 58px; }
+  .page-hero h1 { font-size: clamp(2.35rem, 11vw, 3.2rem); }
+  .home-hero { padding-block: 38px 50px; }
+  .split-intro,
+  .aircraft-preview-grid,
+  .about-preview-grid,
+  .biography-grid,
+  .aircraft-detail-grid,
+  .requirements-grid,
+  .billing-grid,
+  .faq-grid,
+  .application-grid,
+  .account-login-grid { gap: 30px; }
+  .mini-price-card { min-height: 0; }
+  .operations-grid > div { padding: 22px; }
+  .cta-section { padding-block: 50px; }
+  .cta-shell { gap: 26px; padding: 30px 22px; }
+  .site-footer { padding-top: 48px; }
+  .footer-grid { gap: 30px; padding-bottom: 36px; }
+  .footer-logo { width: 144px; }
+  .footer-bottom { padding-block: 18px; }
 }
 
 @media (max-width: 420px) {
-  .brand-image img {
-    height: 58px;
-  }
-
-  .header-inner {
-    min-height: 72px;
-  }
-
-  .footer-logo {
-    width: 146px;
-  }
+  .header-inner { min-height: 72px; }
+  .brand-image { width: 64px; }
+  .primary-nav { max-height: calc(100dvh - 72px); }
+  .footer-logo { width: 136px; }
 }
