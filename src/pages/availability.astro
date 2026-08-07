@@ -7,22 +7,22 @@ import Icon from '../components/Icon.astro';
 import '../styles/global.css';
 const base = import.meta.env.BASE_URL;
 ---
-<BaseLayout title="Aircraft Availability | Hutzell Aviation" description="See live Piper Cherokee availability and request an aircraft rental in the Athens, Georgia area.">
+<BaseLayout title="Aircraft Availability | Hutzell Aviation" description="See live Piper PA-28-140 availability and request an aircraft rental at KWDR Barrow County Airport in Winder, Georgia.">
   <Header />
   <main>
-    <PageHero eyebrow="LIVE AIRCRAFT CALENDAR" title="Choose your time to fly." description="Review open time, sign in with an approved renter account, and request the Piper Cherokee directly from the calendar." />
+    <PageHero eyebrow="LIVE AIRCRAFT CALENDAR" title="Choose your time to fly." description="Review open time any day of the week, sign in with an approved renter account, and request N8491F directly from the calendar. Tyler approves every reservation." />
 
     <section class="section calendar-section">
       <div class="container">
         <div class="live-banner" data-calendar-connection>
           <span class="live-dot"></span>
-          <div><strong>Connecting to live availability…</strong><span>Times are displayed in Athens local time (Eastern).</span></div>
+          <div><strong>Connecting to live availability…</strong><span>Times are displayed in Winder local time (Eastern).</span></div>
         </div>
 
         <div class="calendar-shell" data-rental-calendar>
           <div class="calendar-main">
             <div class="calendar-toolbar">
-              <div><p class="calendar-kicker">PIPER CHEROKEE</p><h2 data-month-label></h2></div>
+              <div><p class="calendar-kicker">PA-28-140 · N8491F</p><h2 data-month-label></h2></div>
               <div class="calendar-nav"><button type="button" data-prev-month aria-label="Previous month">←</button><button type="button" data-today>Today</button><button type="button" data-refresh-calendar aria-label="Refresh availability">Refresh</button><button type="button" data-next-month aria-label="Next month">→</button></div>
             </div>
             <div class="calendar-legend" aria-label="Calendar legend"><span><i class="legend-dot available"></i>Open</span><span><i class="legend-dot limited"></i>Partially booked</span><span><i class="legend-dot reserved"></i>Unavailable</span><span><i class="legend-dot maintenance"></i>Maintenance</span></div>
@@ -59,7 +59,7 @@ const base = import.meta.env.BASE_URL;
     <section class="section calendar-explainer">
       <div class="container">
         <div class="section-heading centered reveal"><p class="eyebrow centered-eyebrow"><span></span> HOW BOOKING WORKS <span></span></p><h2>Availability backed by the database.</h2><p>The calendar publishes only busy time—not renter identities or trip details. The database rejects overlapping reservations even when two pilots choose the same period at nearly the same moment.</p></div>
-        <div class="calendar-feature-grid"><article class="reveal"><span><Icon name="user" size={25}/></span><h3>Sign in</h3><p>Create an account and submit the renter application before booking privileges are activated.</p></article><article class="reveal reveal-1"><span><Icon name="shield" size={25}/></span><h3>Get approved</h3><p>Tyler reviews each renter before the account can place aircraft reservation requests.</p></article><article class="reveal reveal-2"><span><Icon name="calendar" size={25}/></span><h3>Choose a window</h3><p>Select a same-day departure and return time that does not overlap a reservation or aircraft block.</p></article><article class="reveal reveal-3"><span><Icon name="check" size={25}/></span><h3>Track status</h3><p>View pending, confirmed, completed, or cancelled reservations from the renter dashboard.</p></article></div>
+        <div class="calendar-feature-grid"><article class="reveal"><span><Icon name="user" size={25}/></span><h3>Sign in</h3><p>Create an account and submit the renter application before booking privileges are activated.</p></article><article class="reveal reveal-1"><span><Icon name="shield" size={25}/></span><h3>Get approved</h3><p>Tyler reviews each renter and must approve every reservation request.</p></article><article class="reveal reveal-2"><span><Icon name="calendar" size={25}/></span><h3>Choose a window</h3><p>Select a same-day departure and return time that does not overlap a reservation or aircraft block.</p></article><article class="reveal reveal-3"><span><Icon name="check" size={25}/></span><h3>Track status</h3><p>View pending, confirmed, completed, or cancelled reservations from the renter dashboard.</p></article></div>
       </div>
     </section>
   </main>

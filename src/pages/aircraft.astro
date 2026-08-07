@@ -11,50 +11,51 @@ const aircraftExterior = 'https://upload.wikimedia.org/wikipedia/commons/8/8b/Pi
 const aircraftCockpit = 'https://upload.wikimedia.org/wikipedia/commons/2/29/Cockpit_of_Piper_PA-28-151_%28G-BOYH%29_at_Bristol_Airport%2C_England_15May2016_arp.jpg';
 const aircraftLanding = 'https://upload.wikimedia.org/wikipedia/commons/2/24/Piper_PA-28_Cherokee_Landing_03.JPG';
 ---
-<BaseLayout title="Piper Cherokee Rental Aircraft | Hutzell Aviation" description="Explore the Piper Cherokee planned for Hutzell Aviation aircraft rental and pilot time building in the Athens, Georgia area.">
+<BaseLayout title="1974 Piper PA-28-140 N8491F | Hutzell Aviation" description="Explore the 1974 Piper PA-28-140 N8491F planned for wet rental at KWDR Barrow County Airport in Winder, Georgia.">
   <Header />
   <main>
-    <PageHero eyebrow="THE AIRCRAFT" title="Piper Cherokee" description="A familiar single-engine platform being prepared for approved renters, local flying, and pilot time building." />
+    <PageHero eyebrow="THE AIRCRAFT" title="1974 Piper PA-28-140 · N8491F" description="A 160 HP, Garmin-equipped Piper Cherokee based at KWDR for approved renters, personal flying, and time building." />
 
     <section class="section aircraft-detail-section">
       <div class="container aircraft-detail-grid">
         <figure class="aircraft-showcase reveal">
-          <div class="aircraft-showcase-head"><span>PIPER CHEROKEE</span><span class="draft-pill">Representative photo</span></div>
+          <div class="aircraft-showcase-head"><span>PIPER PA-28-140</span><span class="draft-pill">Representative photo</span></div>
           <img class="aircraft-showcase-photo" src={aircraftExterior} alt="Representative Piper PA-28 Cherokee parked on an airfield" width="4259" height="2842" decoding="async" />
-          <figcaption>Filler photography of a Piper PA-28 Cherokee. Replace this image with the actual Hutzell Aviation aircraft when those photos are available.</figcaption>
+          <figcaption>This is representative Piper PA-28 photography. Photos of N8491F will replace it after the aircraft is acquired.</figcaption>
         </figure>
-        <div class="aircraft-detail-copy reveal reveal-delay"><p class="eyebrow"><span></span> RENTAL PLATFORM</p><h2>Aircraft details renters need before they apply.</h2><p class="lead">This page separates confirmed facts from placeholders so the site does not accidentally publish incorrect aircraft specifications.</p><div class="spec-grid">{aircraftSpecs.map((spec) => <div><span>{spec.label}</span><strong>{spec.value}</strong></div>)}</div></div>
+        <div class="aircraft-detail-copy reveal reveal-delay"><p class="eyebrow"><span></span> RENTAL PLATFORM</p><h2>Useful performance with a modernized panel.</h2><p class="lead">N8491F is a 1974 Piper PA-28-140 powered by a 160 HP Lycoming O-320-E2A. It offers three seats, a 950-pound useful load, 50 gallons of fuel, and an approximately 115-knot cruise speed.</p><div class="spec-grid">{aircraftSpecs.map((spec) => <div><span>{spec.label}</span><strong>{spec.value}</strong></div>)}</div></div>
       </div>
     </section>
 
     <section class="section requirements-section">
       <div class="container requirements-grid">
-        <div class="section-heading reveal"><p class="eyebrow light"><span></span> RENTER REQUIREMENTS</p><h2>Approval before access.</h2><p>Final requirements must follow the aircraft insurance policy and Tyler’s rental agreement. The site is ready for those exact rules once confirmed.</p></div>
-        <div class="requirement-cards"><article class="reveal"><Icon name="document" size={26} /><h3>Pilot documentation</h3><p>Certificate, medical or BasicMed information when applicable, recent experience, and other insurer-required records.</p></article><article class="reveal reveal-1"><Icon name="shield" size={26} /><h3>Renter approval</h3><p>Tyler reviews each application before the renter can reserve the aircraft online.</p></article><article class="reveal reveal-2"><Icon name="plane" size={26} /><h3>Aircraft checkout</h3><p>A familiarization or checkout requirement can be tracked before booking privileges are activated.</p></article></div>
+        <div class="section-heading reveal"><p class="eyebrow light"><span></span> RENTER REQUIREMENTS</p><h2>Approval before access.</h2><p>Tyler reviews every applicant and personally approves each reservation. Meeting the minimums does not guarantee approval.</p></div>
+        <div class="requirement-cards"><article class="reveal"><Icon name="document" size={26} /><h3>Pilot minimums</h3><p>At least a Private Pilot certificate, 75 hours total time, and age 16 or older.</p></article><article class="reveal reveal-1"><Icon name="shield" size={26} /><h3>Medical and insurance</h3><p>A valid third-class medical or BasicMed and active renter’s insurance are required.</p></article><article class="reveal reveal-2"><Icon name="plane" size={26} /><h3>Documents and checkout</h3><p>Provide insurance and medical documentation, show photo ID, bring your logbook for review, and complete a check flight with Tyler.</p></article></div>
       </div>
     </section>
 
     <section class="section operations-section">
       <div class="container">
-        <div class="section-heading centered reveal"><p class="eyebrow centered-eyebrow"><span></span> OPERATING INFORMATION <span></span></p><h2>Policies the final aircraft page will publish.</h2></div>
-        <div class="operations-grid"><div><span>01</span><h3>Home airport</h3><p>Aircraft location, access instructions, and normal operating hours.</p></div><div><span>02</span><h3>Fuel policy</h3><p>Wet or dry rate, reimbursement process, and required fuel level on return.</p></div><div><span>03</span><h3>Overnight use</h3><p>Approval process, daily minimums, and return-time expectations.</p></div><div><span>04</span><h3>Squawk reporting</h3><p>A clear process for reporting maintenance or operational concerns.</p></div></div>
+        <div class="section-heading centered reveal"><p class="eyebrow centered-eyebrow"><span></span> OPERATING POLICIES <span></span></p><h2>Know the expectations before each flight.</h2></div>
+        <div class="operations-grid"><div><span>01</span><h3>Return to KWDR</h3><p>The aircraft must return to KWDR after each flight unless Tyler approves another arrangement.</p></div><div><span>02</span><h3>Reservations</h3><p>A one-hour daily minimum applies, and at least 45 minutes must remain between reservations.</p></div><div><span>03</span><h3>Overnight and no-shows</h3><p>Overnight rental is available at an increased cost with approval. No-shows are subject to a $50 fee.</p></div><div><span>04</span><h3>Aircraft care</h3><p>No grass strips. Renters who return the aircraft with trash or excessive mess may be charged a $50 cleaning fee.</p></div></div>
+        <p class="lead">Weather decisions remain the renter’s responsibility as pilot in command and must stay within applicable regulations, aircraft limitations, and the pilot’s personal minimums.</p>
       </div>
     </section>
 
     <section class="section gallery-section">
       <div class="container">
-        <div class="section-heading reveal"><p class="eyebrow"><span></span> AIRCRAFT GALLERY</p><h2>Representative Piper Cherokee photography.</h2><p>These public-domain filler images show the type of photography the finished page needs. They are not photos of the specific Hutzell Aviation aircraft.</p></div>
+        <div class="section-heading reveal"><p class="eyebrow"><span></span> AIRCRAFT GALLERY</p><h2>Representative Piper Cherokee photography.</h2><p>These public-domain images show the aircraft type and will be replaced with photographs of N8491F after acquisition.</p></div>
         <div class="gallery-grid">
-          <figure class="gallery-photo wide"><img src={aircraftExterior} alt="Representative Piper PA-28 Cherokee exterior" width="4259" height="2842" loading="lazy" decoding="async" /><figcaption>Exterior profile</figcaption></figure>
-          <figure class="gallery-photo"><img src={aircraftCockpit} alt="Representative Piper PA-28 cockpit" width="3852" height="2564" loading="lazy" decoding="async" /><figcaption>Panel and avionics</figcaption></figure>
-          <figure class="gallery-photo"><img src={aircraftLanding} alt="Representative Piper PA-28 Cherokee landing" width="1600" height="1200" loading="lazy" decoding="async" /><figcaption>Aircraft in operation</figcaption></figure>
+          <figure class="gallery-photo wide"><img src={aircraftExterior} alt="Representative Piper PA-28 Cherokee exterior" width="4259" height="2842" loading="lazy" decoding="async" /><figcaption>Representative exterior profile</figcaption></figure>
+          <figure class="gallery-photo"><img src={aircraftCockpit} alt="Representative Piper PA-28 cockpit" width="3852" height="2564" loading="lazy" decoding="async" /><figcaption>Representative panel</figcaption></figure>
+          <figure class="gallery-photo"><img src={aircraftLanding} alt="Representative Piper PA-28 Cherokee landing" width="1600" height="1200" loading="lazy" decoding="async" /><figcaption>Representative aircraft in operation</figcaption></figure>
           <figure class="gallery-photo aircraft-detail-crop"><img src={aircraftExterior} alt="Representative Piper Cherokee fuselage and wing detail" width="4259" height="2842" loading="lazy" decoding="async" /><figcaption>Fuselage and wing detail</figcaption></figure>
           <figure class="gallery-photo cockpit-detail-crop"><img src={aircraftCockpit} alt="Representative Piper PA-28 instrument detail" width="3852" height="2564" loading="lazy" decoding="async" /><figcaption>Instrument detail</figcaption></figure>
         </div>
       </div>
     </section>
 
-    <CallToAction title="Ready to review open time?" text="Check the public calendar, then apply to become an approved renter when the aircraft and policies are finalized." />
+    <CallToAction title="Ready to apply for access?" text="Review the requirements, submit your renter application, and complete Tyler’s document review and aircraft check flight." />
   </main>
   <Footer />
 </BaseLayout>
