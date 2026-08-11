@@ -29,8 +29,8 @@ jobs:
           package-manager: npm@latest
           cache: false
         env:
-          BASE_PATH: /${{ github.event.repository.name }}
-          SITE_URL: https://${{ github.repository_owner }}.github.io
+          BASE_PATH: /
+          SITE_URL: https://hutzellaviation.com
 
   deploy:
     needs: build
