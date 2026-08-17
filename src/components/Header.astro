@@ -25,12 +25,20 @@ const activeFor = (href: string) => href === '' ? pathname === base || pathname 
       {navItems.map((item) => <a class:list={[{ active: activeFor(item.href) }]} href={`${base}${item.href}`}>{item.label}</a>)}
       <a class="nav-admin" href={`${base}admin/`} data-admin-link hidden>Admin</a>
       <a class="nav-account" href={`${base}account/`} data-account-link><Icon name="user" size={17} /> <span data-account-label>Account</span></a>
-      <a class="button button-small" href={`${base}apply/`}>Apply to Rent</a>
+      <a
+        class="button button-small"
+        href={`${base}account/`}
+        data-renter-action
+        data-unapproved-label="Apply to Rent"
+        data-approved-label="Renter Portal"
+        data-unapproved-href={`${base}apply/`}
+        data-approved-href={`${base}account/`}
+      ><span data-renter-action-label>Renter Access</span></a>
     </nav>
   </div>
 </header>
 <script>
-  import { getCurrentProfile, supabase } from '../lib/supabase';
+  import { getCurrentProfile, supabase, type Profile } from '../lib/supabase';
 
   const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
   const nav = document.querySelector<HTMLElement>('[data-nav]');
@@ -71,20 +79,40 @@ const activeFor = (href: string) => href === '' ? pathname === base || pathname 
   }
 
   const accountLabel = document.querySelector('[data-account-label]');
+  const accountLink = document.querySelector<HTMLElement>('[data-account-link]');
   const adminLink = document.querySelector<HTMLElement>('[data-admin-link]');
+
+  function updateRenterActions(profile: Profile | null) {
+    const approved = profile?.role === 'admin' || profile?.approval_status === 'approved';
+    document.querySelectorAll<HTMLAnchorElement>('[data-renter-action]').forEach((link) => {
+      const label = approved ? link.dataset.approvedLabel : link.dataset.unapprovedLabel;
+      const href = approved ? link.dataset.approvedHref : link.dataset.unapprovedHref;
+      const labelEl = link.querySelector<HTMLElement>('[data-renter-action-label]');
+      if (label && labelEl) labelEl.textContent = label;
+      if (href) link.href = href;
+    });
+  }
+
   async function updateHeaderAccount() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         if (accountLabel) accountLabel.textContent = 'Account';
+        if (accountLink) accountLink.hidden = false;
         if (adminLink) adminLink.hidden = true;
+        updateRenterActions(null);
         return;
       }
       const profile = await getCurrentProfile();
+      const approved = profile?.role === 'admin' || profile?.approval_status === 'approved';
       if (accountLabel) accountLabel.textContent = 'Dashboard';
+      if (accountLink) accountLink.hidden = approved;
       if (adminLink) adminLink.hidden = profile?.role !== 'admin';
+      updateRenterActions(profile);
     } catch {
+      if (accountLink) accountLink.hidden = false;
       if (adminLink) adminLink.hidden = true;
+      updateRenterActions(null);
     }
   }
   updateHeaderAccount();

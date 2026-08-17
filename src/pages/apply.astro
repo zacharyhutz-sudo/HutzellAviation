@@ -64,6 +64,10 @@ const base = import.meta.env.BASE_URL;
     setValue('email', user.email || '');
     try {
       const profile = await getCurrentProfile();
+      if (profile?.role === 'admin' || profile?.approval_status === 'approved') {
+        window.location.replace(`${base}account/`);
+        return;
+      }
       setValue('phone', profile?.phone || '');
       const names = (profile?.full_name || '').trim().split(/\s+/);
       if (names.length) setValue('firstName', names[0]);

@@ -2,35 +2,27 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import PageHero from '../components/PageHero.astro';
-import CallToAction from '../components/CallToAction.astro';
 import Icon from '../components/Icon.astro';
-import { pricingPlans, rentalFaqs } from '../data/site';
 import '../styles/global.css';
 const base = import.meta.env.BASE_URL;
 ---
-<BaseLayout title="Aircraft Rental Pricing | Hutzell Aviation" description="Compare wet pay-as-you-go, 15-hour, 25-hour, and 50-hour Piper PA-28-140 rental options from Hutzell Aviation.">
+<BaseLayout title="Renter Portal | Hutzell Aviation" description="Approved Hutzell Aviation renters can purchase block hours and manage rental activity from the renter portal.">
   <Header />
   <main>
-    <PageHero eyebrow="RENTAL PRICING" title="Flexible options for occasional flying and serious time building." description="Choose a wet pay-as-you-go rate or save with a prepaid 15-, 25-, or 50-hour package. All packages expire after three months." />
-
-    <section class="section pricing-section">
+    <section class="section checkout-section">
       <div class="container">
-        <div class="draft-notice"><Icon name="check" size={22}/><div><strong>All rates are wet</strong><span>Fuel is included. Prepaid 15-, 25-, and 50-hour packages expire three months after purchase.</span></div></div>
-        <div class="pricing-grid">{pricingPlans.map((plan) => <article class:list={['price-card','reveal',{featured: plan.badge === 'Most Popular'}]}>{plan.badge && <span class="plan-badge">{plan.badge}</span>}<p class="price-hours">{plan.hours}</p><h2>{plan.name}</h2><div class="price-rate"><strong>{plan.rate}</strong><span>{plan.total}</span></div><p>{plan.description}</p><ul>{plan.features.map((feature) => <li><Icon name="check" size={17}/>{feature}</li>)}</ul><a class:list={['button',{ 'button-outline': !plan.badge }]} href={`${base}apply/`}>Apply for Access</a></article>)}</div>
+        <div class="checkout-form-card payment-roadmap">
+          <Icon name="dollar" size={34}/>
+          <h1>Rental purchases have moved to the renter portal.</h1>
+          <p>Approved renters can purchase 15-, 25-, or 50-hour blocks and manage their account from one place.</p>
+          <div class="account-actions"><a class="button" href={`${base}account/#purchase-hours`}>Open Renter Portal</a></div>
+        </div>
       </div>
     </section>
-
-    <section class="section billing-section">
-      <div class="container billing-grid"><div class="section-heading reveal"><p class="eyebrow light"><span></span> HOW BILLING WORKS</p><h2>Reserve the window. Pay for the recorded flight time.</h2><p>Your reservation protects the full scheduled window, while the selected wet hourly rate or prepaid balance is applied to the final recorded aircraft time.</p></div><div class="billing-flow reveal reveal-delay"><div><span>1</span><strong>Reserve</strong><p>Example: 9:00 AM–2:00 PM</p></div><div><span>2</span><strong>Fly</strong><p>Actual aircraft time is recorded</p></div><div><span>3</span><strong>Reconcile</strong><p>Apply hours to package or invoice</p></div></div></div>
-    </section>
-
-    <section class="section policy-section">
-      <div class="container"><div class="section-heading centered reveal"><p class="eyebrow centered-eyebrow"><span></span> RESERVATION TERMS <span></span></p><h2>Clear expectations before you book.</h2></div><div class="policy-grid"><article><h3>Wet pricing</h3><p>Fuel is included in every published hourly rate.</p></article><article><h3>Three-month blocks</h3><p>All prepaid hour packages expire three months after purchase.</p></article><article><h3>Scheduling</h3><p>A one-hour daily minimum applies, and at least 45 minutes must remain between reservations.</p></article><article><h3>Special charges</h3><p>No-shows are subject to a $50 fee. Overnight rental is available with approval at an increased cost.</p></article></div></div>
-    </section>
-
-    <section class="section faq-section"><div class="container faq-grid"><div class="faq-intro reveal"><p class="eyebrow"><span></span> RENTAL QUESTIONS</p><h2>Important answers before checkout.</h2><p>Review the renter qualifications, documents, reservation terms, and operating expectations before applying.</p></div><div class="faq-list reveal reveal-delay">{rentalFaqs.map((faq, index) => <details open={index === 0}><summary>{faq.question}<span aria-hidden="true"></span></summary><div class="faq-answer"><p>{faq.answer}</p></div></details>)}</div></div></section>
-    <CallToAction />
   </main>
   <Footer />
 </BaseLayout>
+<script>
+  const base = import.meta.env.BASE_URL;
+  window.location.replace(`${base}account/#purchase-hours`);
+</script>

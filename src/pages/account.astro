@@ -6,12 +6,12 @@ import Icon from '../components/Icon.astro';
 import '../styles/global.css';
 const base = import.meta.env.BASE_URL;
 ---
-<BaseLayout title="Renter Account | Hutzell Aviation" description="Create a Hutzell Aviation renter account, review approval status, manage aircraft reservations, block-hour balances, flight records, and billing.">
+<BaseLayout title="Renter Portal | Hutzell Aviation" description="Manage Hutzell Aviation renter access, aircraft reservations, block-hour purchases, flight records, and billing.">
   <Header />
   <main class="account-main">
     <section class="account-login-section">
       <div class="container account-login-grid" data-auth-page>
-        <div class="account-intro reveal"><p class="eyebrow light"><span></span> RENTER PORTAL</p><h1>Your flying schedule and account in one place.</h1><p>Create an account, submit the renter application, reserve the Piper Cherokee, and keep up with flight activity and billing.</p><ul><li><Icon name="calendar" size={20}/> Reservations and post-flight reports</li><li><Icon name="dollar" size={20}/> Prepaid block-hour balance and charges</li><li><Icon name="wrench" size={20}/> Aircraft issue reporting</li></ul></div>
+        <div class="account-intro reveal"><p class="eyebrow light"><span></span> RENTER PORTAL</p><h1>Your flying schedule and account in one place.</h1><p>Sign in to manage renter access, schedule the Piper Cherokee, purchase block hours, and keep up with flight activity and billing.</p><ul><li><Icon name="calendar" size={20}/> Schedule flights and review reservations</li><li><Icon name="dollar" size={20}/> Purchase blocks and pay account charges</li><li><Icon name="wrench" size={20}/> Aircraft issue reporting</li></ul></div>
 
         <div class="login-card account-portal-card reveal reveal-delay" data-auth-card>
           <div class="login-logo"><img src={`${base}images/logo-full.png`} alt="Hutzell Aviation" width="1358" height="1224"/></div>
@@ -39,6 +39,14 @@ const base = import.meta.env.BASE_URL;
             <div class="dashboard-header"><div><span>Signed in as</span><strong data-dashboard-email></strong></div><button class="text-button" type="button" data-signout>Sign out</button></div>
             <div class="account-status-card"><span>Renter status</span><strong data-approval-status></strong><p data-status-guidance></p></div>
 
+            <section class="renter-primary-actions" data-approved-portal-actions hidden>
+              <div class="dashboard-section-title"><div><span class="dashboard-kicker">RENTER TOOLS</span><h3>What do you want to do?</h3></div></div>
+              <div class="renter-action-grid">
+                <a class="renter-action-card" href={`${base}availability/`}><span class="renter-action-icon"><Icon name="calendar" size={24}/></span><span><strong>Schedule a Flight</strong><small>View open aircraft time and request a reservation.</small></span><Icon name="arrow" size={20}/></a>
+                <a class="renter-action-card" href="#purchase-hours"><span class="renter-action-icon"><Icon name="dollar" size={24}/></span><span><strong>Purchase Hours</strong><small>Buy a 15-, 25-, or 50-hour block securely with Stripe.</small></span><Icon name="arrow" size={20}/></a>
+              </div>
+            </section>
+
             <div class="account-ops-grid">
               <article class="account-metric"><span>Available block hours</span><strong data-block-balance>—</strong><small data-block-expiry>No active prepaid block</small></article>
               <article class="account-metric"><span>Outstanding balance</span><strong data-outstanding-balance>—</strong><small>Recorded charges not yet marked paid</small></article>
@@ -46,7 +54,7 @@ const base = import.meta.env.BASE_URL;
 
             <div class="auth-message" data-stripe-message hidden></div>
 
-            <section class="stripe-purchase-panel" data-stripe-purchase-panel hidden>
+            <section class="stripe-purchase-panel" id="purchase-hours" data-stripe-purchase-panel hidden>
               <div class="dashboard-section-title"><div><span class="dashboard-kicker">SECURE CHECKOUT</span><h3>Purchase block hours</h3></div><span class="stripe-secure-note">Processed by Stripe</span></div>
               <div class="stripe-package-grid">
                 <article class="stripe-package-card"><span>15 hours</span><strong>$2,550</strong><small>$170/hr · expires in 3 months</small><button class="button" type="button" data-buy-package="15">Purchase 15 Hours</button></article>
@@ -56,11 +64,11 @@ const base = import.meta.env.BASE_URL;
               <p class="stripe-purchase-help">Only approved renter accounts can open checkout. Payment details are entered on Stripe's secure checkout page.</p>
             </section>
 
-            <div class="account-actions"><a class="button" href={`${base}availability/`}>View Availability</a><a class="button button-outline" href={`${base}apply/`} data-application-link>Renter Application</a><a class="button button-outline" href={`${base}report-squawk/`} data-squawk-action>Report Aircraft Issue</a><a class="button button-outline" href={`${base}admin/`} data-admin-action hidden>Open Admin</a></div>
+            <div class="account-actions"><a class="button button-outline" href={`${base}apply/`} data-application-link>Complete Renter Application</a><a class="button button-outline" href={`${base}report-squawk/`} data-squawk-action>Report Aircraft Issue</a><a class="button button-outline" href={`${base}admin/`} data-admin-action hidden>Open Admin</a></div>
 
             <section class="dashboard-reservations"><div class="dashboard-section-title"><h3>Your reservations</h3><button type="button" class="text-button" data-refresh-account>Refresh</button></div><div data-reservation-list><p>Loading reservations…</p></div></section>
 
-            <section class="dashboard-operations"><div class="dashboard-section-title"><h3>Block hours & billing</h3><a class="text-button" href={`${base}pricing/`}>View rates</a></div><div data-billing-list><p>Loading account activity…</p></div></section>
+            <section class="dashboard-operations"><div class="dashboard-section-title"><h3>Block hours & billing</h3><a class="text-button" href="#purchase-hours" data-purchase-hours-link hidden>Purchase hours</a></div><div data-billing-list><p>Loading account activity…</p></div></section>
 
             <section class="dashboard-operations"><div class="dashboard-section-title"><h3>Your reported squawks</h3><a class="text-button" href={`${base}report-squawk/`}>Report issue</a></div><div data-squawk-list><p>Loading reports…</p></div></section>
           </div>
@@ -86,6 +94,9 @@ const base = import.meta.env.BASE_URL;
   const squawkList = document.querySelector<HTMLElement>('[data-squawk-list]')!;
   const stripeMessage = document.querySelector<HTMLElement>('[data-stripe-message]')!;
   const stripePurchasePanel = document.querySelector<HTMLElement>('[data-stripe-purchase-panel]')!;
+  const approvedPortalActions = document.querySelector<HTMLElement>('[data-approved-portal-actions]')!;
+  const applicationLink = document.querySelector<HTMLElement>('[data-application-link]')!;
+  const purchaseHoursLink = document.querySelector<HTMLElement>('[data-purchase-hours-link]')!;
   let profile: Profile | null = null;
 
   function escapeHtml(value: unknown) {
@@ -254,12 +265,16 @@ const base = import.meta.env.BASE_URL;
     status.className = `status-value ${profile?.role === 'admin' ? 'approved' : profile?.approval_status}`;
     const guidance = dashboard.querySelector<HTMLElement>('[data-status-guidance]')!;
     if (profile?.role === 'admin') guidance.textContent = 'Administrator access is active for renter approvals, billing, post-flight closeouts, squawks, and maintenance.';
-    else if (profile?.approval_status === 'approved') guidance.textContent = 'Your account can request aircraft time, submit post-flight details, and view block-hour and billing activity.';
+    else if (profile?.approval_status === 'approved') guidance.textContent = 'Your renter access is active. Schedule a flight or purchase block hours directly from this portal.';
     else if (profile?.approval_status === 'pending') guidance.textContent = 'Your application is awaiting review. You may view availability, but booking remains locked.';
     else guidance.textContent = 'Complete the renter application to begin the approval process.';
+    const approved = profile?.role === 'admin' || profile?.approval_status === 'approved';
     dashboard.querySelector<HTMLElement>('[data-admin-action]')!.hidden = profile?.role !== 'admin';
-    dashboard.querySelector<HTMLElement>('[data-squawk-action]')!.hidden = profile?.role !== 'admin' && profile?.approval_status !== 'approved';
-    stripePurchasePanel.hidden = profile?.role !== 'admin' && profile?.approval_status !== 'approved';
+    dashboard.querySelector<HTMLElement>('[data-squawk-action]')!.hidden = !approved;
+    applicationLink.hidden = approved;
+    approvedPortalActions.hidden = !approved;
+    stripePurchasePanel.hidden = !approved;
+    purchaseHoursLink.hidden = !approved;
 
     const query = new URLSearchParams(window.location.search);
     const stripeResult = query.get('stripe');
@@ -267,6 +282,9 @@ const base = import.meta.env.BASE_URL;
     else if (stripeResult === 'cancelled') showStripeMessage('Stripe checkout was cancelled. No payment was recorded.', 'error');
 
     await loadAccount();
+    if (approved && window.location.hash === '#purchase-hours') {
+      window.setTimeout(() => stripePurchasePanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+    }
     if (stripeResult === 'success') window.setTimeout(loadBilling, 2500);
 
     const returnTo = query.get('returnTo');

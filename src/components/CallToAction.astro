@@ -6,13 +6,13 @@ interface Props {
 }
 const {
   title = 'Ready to build time on your schedule?',
-  text = 'Review the current calendar, then submit an application to become an approved Hutzell Aviation renter.',
+  text = 'Review current availability, then use renter access to manage approval, reservations, and flight time.',
 } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
 <section class="cta-section">
   <div class="container cta-shell reveal">
     <div><p class="eyebrow light"><span></span>NEXT STEPS</p><h2>{title}</h2><p>{text}</p></div>
-    <div class="cta-actions"><a class="button" href={`${base}availability/`}>View Availability <Icon name="calendar" size={19} /></a><a class="button button-ghost" href={`${base}apply/`}>Apply to Rent</a></div>
+    <div class="cta-actions"><a class="button" href={`${base}availability/`}>View Availability <Icon name="calendar" size={19} /></a><a class="button button-ghost" href={`${base}account/`} data-renter-action data-unapproved-label="Apply to Rent" data-approved-label="Renter Portal" data-unapproved-href={`${base}apply/`} data-approved-href={`${base}account/`}><span data-renter-action-label>Renter Access</span></a></div>
   </div>
 </section>

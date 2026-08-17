@@ -20,7 +20,6 @@ export const navItems = [
   { label: 'Home', href: '' },
   { label: 'About', href: 'about/' },
   { label: 'Aircraft', href: 'aircraft/' },
-  { label: 'Pricing', href: 'pricing/' },
   { label: 'Availability', href: 'availability/' },
 ] as const;
 
@@ -80,8 +79,8 @@ export const aircraftSpecs = [
 export const rentalSteps = [
   {
     number: '01',
-    title: 'Apply to rent',
-    text: 'Submit your pilot background and be ready to provide renter’s insurance, a valid medical or BasicMed, and photo ID.',
+    title: 'Get renter approval',
+    text: 'Provide your pilot background and be ready to provide renter’s insurance, a valid medical or BasicMed, and photo ID.',
   },
   {
     number: '02',

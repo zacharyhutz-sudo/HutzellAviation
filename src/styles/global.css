@@ -1308,3 +1308,19 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); outline: 
   .stripe-package-grid { grid-template-columns: 1fr; }
   .stripe-package-card > small { min-height: 0; }
 }
+
+/* Approved renter portal — primary schedule + purchase actions */
+.renter-primary-actions { padding: 20px; border: 1px solid var(--line); border-radius: 18px; background: #fff; }
+.renter-action-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.renter-action-card { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 13px; min-height: 92px; padding: 17px; border: 1px solid var(--line); border-radius: 14px; color: var(--navy); background: var(--cloud); transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
+.renter-action-card:hover { transform: translateY(-2px); border-color: #a9c4d2; box-shadow: 0 10px 24px rgba(8,43,69,.08); }
+.renter-action-card > span:nth-child(2) { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
+.renter-action-card strong { color: var(--navy); font-family: 'League Spartan',sans-serif; font-size: 1.08rem; }
+.renter-action-card small { color: var(--muted); font-size: .72rem; line-height: 1.4; }
+.renter-action-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 12px; color: var(--navy); background: #e9f1f5; }
+#purchase-hours { scroll-margin-top: 110px; }
+
+@media (max-width: 680px) {
+  .renter-action-grid { grid-template-columns: 1fr; }
+  .renter-action-card { min-height: 84px; }
+}

@@ -13,7 +13,7 @@ const base = import.meta.env.BASE_URL;
       <h3>Explore</h3>
       <nav aria-label="Footer navigation">
         {navItems.slice(1).map((item) => <a href={`${base}${item.href}`}>{item.label}</a>)}
-        <a href={`${base}apply/`}>Renter Application</a>
+        <a href={`${base}account/`} data-renter-action data-unapproved-label="Renter Application" data-approved-label="Renter Portal" data-unapproved-href={`${base}apply/`} data-approved-href={`${base}account/`}><span data-renter-action-label>Renter Access</span></a>
       </nav>
     </div>
     <div>
