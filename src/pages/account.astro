@@ -44,6 +44,18 @@ const base = import.meta.env.BASE_URL;
               <article class="account-metric"><span>Outstanding balance</span><strong data-outstanding-balance>—</strong><small>Recorded charges not yet marked paid</small></article>
             </div>
 
+            <div class="auth-message" data-stripe-message hidden></div>
+
+            <section class="stripe-purchase-panel" data-stripe-purchase-panel hidden>
+              <div class="dashboard-section-title"><div><span class="dashboard-kicker">SECURE CHECKOUT</span><h3>Purchase block hours</h3></div><span class="stripe-secure-note">Processed by Stripe</span></div>
+              <div class="stripe-package-grid">
+                <article class="stripe-package-card"><span>15 hours</span><strong>$2,550</strong><small>$170/hr · expires in 3 months</small><button class="button" type="button" data-buy-package="15">Purchase 15 Hours</button></article>
+                <article class="stripe-package-card featured"><span>25 hours</span><strong>$4,125</strong><small>$165/hr · expires in 3 months</small><button class="button" type="button" data-buy-package="25">Purchase 25 Hours</button></article>
+                <article class="stripe-package-card"><span>50 hours</span><strong>$7,500</strong><small>$150/hr · expires in 3 months</small><button class="button" type="button" data-buy-package="50">Purchase 50 Hours</button></article>
+              </div>
+              <p class="stripe-purchase-help">Only approved renter accounts can open checkout. Payment details are entered on Stripe's secure checkout page.</p>
+            </section>
+
             <div class="account-actions"><a class="button" href={`${base}availability/`}>View Availability</a><a class="button button-outline" href={`${base}apply/`} data-application-link>Renter Application</a><a class="button button-outline" href={`${base}report-squawk/`} data-squawk-action>Report Aircraft Issue</a><a class="button button-outline" href={`${base}admin/`} data-admin-action hidden>Open Admin</a></div>
 
             <section class="dashboard-reservations"><div class="dashboard-section-title"><h3>Your reservations</h3><button type="button" class="text-button" data-refresh-account>Refresh</button></div><div data-reservation-list><p>Loading reservations…</p></div></section>
@@ -72,6 +84,8 @@ const base = import.meta.env.BASE_URL;
   const reservationList = document.querySelector<HTMLElement>('[data-reservation-list]')!;
   const billingList = document.querySelector<HTMLElement>('[data-billing-list]')!;
   const squawkList = document.querySelector<HTMLElement>('[data-squawk-list]')!;
+  const stripeMessage = document.querySelector<HTMLElement>('[data-stripe-message]')!;
+  const stripePurchasePanel = document.querySelector<HTMLElement>('[data-stripe-purchase-panel]')!;
   let profile: Profile | null = null;
 
   function escapeHtml(value: unknown) {
@@ -87,6 +101,35 @@ const base = import.meta.env.BASE_URL;
     message.textContent = text;
     message.hidden = false;
   }
+
+  function showStripeMessage(text: string, kind: 'success' | 'error' = 'success') {
+    stripeMessage.className = `auth-message ${kind}`;
+    stripeMessage.textContent = text;
+    stripeMessage.hidden = false;
+  }
+
+  async function startStripeCheckout(payload: { kind: 'block_purchase'; packageHours: number } | { kind: 'account_payment'; paymentId: string }, button: HTMLButtonElement) {
+    if (!profile || (profile.role !== 'admin' && profile.approval_status !== 'approved')) {
+      showStripeMessage('Online payment is available only to approved renter accounts.', 'error');
+      return;
+    }
+    const originalText = button.textContent || 'Pay with Stripe';
+    button.disabled = true;
+    button.textContent = 'Opening Stripe…';
+    stripeMessage.hidden = true;
+    const { data, error } = await supabase.functions.invoke('create-checkout-session', { body: payload });
+    if (error || !data?.url) {
+      button.disabled = false;
+      button.textContent = originalText;
+      showStripeMessage(error?.message || data?.error || 'Unable to open Stripe checkout.', 'error');
+      return;
+    }
+    window.location.href = data.url;
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('[data-buy-package]').forEach((button) => {
+    button.addEventListener('click', () => startStripeCheckout({ kind: 'block_purchase', packageHours: Number(button.dataset.buyPackage) }, button));
+  });
 
   document.querySelectorAll<HTMLButtonElement>('[data-auth-tab]').forEach((tab) => {
     tab.addEventListener('click', () => {
@@ -175,9 +218,18 @@ const base = import.meta.env.BASE_URL;
     document.querySelector<HTMLElement>('[data-block-expiry]')!.textContent = nextExpiry ? `Next block expires ${formatEasternDate(nextExpiry.expires_at)}` : 'No active prepaid block';
     document.querySelector<HTMLElement>('[data-outstanding-balance]')!.textContent = money(pending);
 
-    const paymentRows = (payments || []).slice(0, 8).map((payment: any) => `<div class="billing-activity-row"><div><span>${escapeHtml(String(payment.kind).replace('_',' '))}</span><strong>${escapeHtml(payment.description || 'Account transaction')}</strong><small>${formatEasternDate(payment.created_at)}</small></div><div><strong>${money(payment.amount_cents)}</strong><span class="status-pill ${escapeHtml(payment.status)}">${escapeHtml(payment.status)}</span></div></div>`).join('');
+    const canPayOnline = profile.role === 'admin' || profile.approval_status === 'approved';
+    const paymentRows = (payments || []).slice(0, 8).map((payment: any) => {
+      const payButton = canPayOnline && payment.status === 'pending' && Number(payment.amount_cents) > 0
+        ? `<button class="mini-action stripe-pay-action" type="button" data-pay-payment="${escapeHtml(payment.id)}">Pay ${money(payment.amount_cents)}</button>`
+        : '';
+      return `<div class="billing-activity-row"><div><span>${escapeHtml(String(payment.kind).replace('_',' '))}</span><strong>${escapeHtml(payment.description || 'Account transaction')}</strong><small>${formatEasternDate(payment.created_at)}</small></div><div><strong>${money(payment.amount_cents)}</strong><span class="status-pill ${escapeHtml(payment.status)}">${escapeHtml(payment.status)}</span>${payButton}</div></div>`;
+    }).join('');
     const ledgerRows = (ledger || []).map((entry: any) => `<div class="hour-ledger-row"><span>${Number(entry.hours_delta) > 0 ? '+' : ''}${Number(entry.hours_delta).toFixed(1)} hr</span><div><strong>${escapeHtml(entry.note || String(entry.entry_type).replace('_',' '))}</strong><small>${formatEasternDate(entry.created_at)}</small></div></div>`).join('');
     billingList.innerHTML = `<div class="billing-account-grid"><div><h4>Recent charges & payments</h4>${paymentRows || '<div class="empty-dashboard"><strong>No billing activity yet.</strong></div>'}</div><div><h4>Hour activity</h4>${ledgerRows || '<div class="empty-dashboard"><strong>No block-hour activity yet.</strong></div>'}</div></div>`;
+    billingList.querySelectorAll<HTMLButtonElement>('[data-pay-payment]').forEach((button) => {
+      button.addEventListener('click', () => startStripeCheckout({ kind: 'account_payment', paymentId: String(button.dataset.payPayment) }, button));
+    });
   }
 
   async function loadSquawks() {
@@ -207,9 +259,17 @@ const base = import.meta.env.BASE_URL;
     else guidance.textContent = 'Complete the renter application to begin the approval process.';
     dashboard.querySelector<HTMLElement>('[data-admin-action]')!.hidden = profile?.role !== 'admin';
     dashboard.querySelector<HTMLElement>('[data-squawk-action]')!.hidden = profile?.role !== 'admin' && profile?.approval_status !== 'approved';
-    await loadAccount();
+    stripePurchasePanel.hidden = profile?.role !== 'admin' && profile?.approval_status !== 'approved';
 
-    const returnTo = new URLSearchParams(window.location.search).get('returnTo');
+    const query = new URLSearchParams(window.location.search);
+    const stripeResult = query.get('stripe');
+    if (stripeResult === 'success') showStripeMessage('Payment received by Stripe. Your account will update automatically after confirmation.', 'success');
+    else if (stripeResult === 'cancelled') showStripeMessage('Stripe checkout was cancelled. No payment was recorded.', 'error');
+
+    await loadAccount();
+    if (stripeResult === 'success') window.setTimeout(loadBilling, 2500);
+
+    const returnTo = query.get('returnTo');
     if (returnTo && (profile?.role === 'admin' || profile?.approval_status === 'approved')) {
       const target = new URL(returnTo, window.location.origin);
       if (target.origin === window.location.origin && target.pathname.startsWith(base)) window.location.href = target.href;

@@ -130,3 +130,9 @@ The included `.github/workflows/main.yml` builds and deploys the Astro site thro
 npm install
 npm run dev
 ```
+
+## Stripe Checkout
+
+Stripe Checkout support is now included for approved renter accounts. See `STRIPE_DEPLOY.md` for the database migration, Edge Function deployment, webhook setup, and testing sequence.
+
+The Stripe secret stays in Supabase Edge Function secrets. The static GitHub Pages bundle contains only Stripe Price IDs, never an API secret. Checkout Sessions are created server-side only after Supabase authenticates the renter and confirms the account is approved.

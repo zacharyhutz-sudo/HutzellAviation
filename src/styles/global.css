@@ -1287,3 +1287,24 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); outline: 
   .billing-activity-row > div:last-child { width: 100%; align-items: flex-start; flex-direction: row; justify-content: space-between; }
   .reservation-row-actions { flex-wrap: wrap; justify-content: flex-start; }
 }
+
+/* Stripe checkout — approved renter portal */
+.stripe-purchase-panel { padding: 20px; border: 1px solid var(--line); border-radius: 18px; background: #fff; }
+.stripe-purchase-panel .dashboard-section-title { margin-bottom: 14px; }
+.dashboard-kicker { display: block; margin-bottom: 2px; color: var(--blue); font-size: .62rem; font-weight: 900; letter-spacing: .12em; }
+.stripe-secure-note { color: var(--muted); font-size: .68rem; font-weight: 800; }
+.stripe-package-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+.stripe-package-card { display: flex; min-width: 0; flex-direction: column; gap: 5px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--cloud); }
+.stripe-package-card.featured { border-color: rgba(199,151,54,.65); background: #fff9ed; }
+.stripe-package-card > span { color: var(--blue); font-size: .68rem; font-weight: 900; text-transform: uppercase; }
+.stripe-package-card > strong { color: var(--navy); font-family: 'League Spartan',sans-serif; font-size: 1.55rem; line-height: 1; }
+.stripe-package-card > small { min-height: 31px; color: var(--muted); font-size: .68rem; }
+.stripe-package-card .button { width: 100%; min-height: 42px; margin-top: 5px; padding: 9px 10px; font-size: .72rem; }
+.stripe-purchase-help { margin: 12px 0 0; color: var(--muted); font-size: .7rem; }
+.stripe-pay-action { margin-top: 5px; border: 0; cursor: pointer; }
+.stripe-pay-action:disabled, .stripe-package-card .button:disabled { cursor: wait; opacity: .7; }
+
+@media (max-width: 820px) {
+  .stripe-package-grid { grid-template-columns: 1fr; }
+  .stripe-package-card > small { min-height: 0; }
+}

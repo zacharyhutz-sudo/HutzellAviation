@@ -29,3 +29,13 @@ This patch adds the renter-operations features discussed after the initial calen
 Before deploying the updated site, run `supabase/phase2.sql` once in the Supabase SQL Editor.
 
 Direct online card processing is **not** included in this patch because no merchant/payment-provider credentials are connected. The internal payment ledger is live and ready for a future Stripe or other checkout integration.
+
+## Stripe Checkout patch
+
+- Added approved-renter-only Stripe Checkout Sessions through Supabase Edge Functions.
+- Added direct purchase controls for 15-, 25-, and 50-hour blocks in the renter dashboard.
+- Added Stripe payment buttons for pending account charges.
+- Added signed Stripe webhook fulfillment for automatic payment status and block-hour ledger updates.
+- Added idempotent database fulfillment helpers in `supabase/stripe.sql`.
+- Added `STRIPE_DEPLOY.md` with deployment and webhook setup steps.
+- No Stripe secret or webhook secret is stored in the repository.
