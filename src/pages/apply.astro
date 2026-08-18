@@ -51,6 +51,10 @@ const base = import.meta.env.BASE_URL;
     if (field && value !== null && value !== undefined) field.value = String(value);
   }
 
+  function escapeHtml(value: unknown) {
+    return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#039;', '"':'&quot;' })[char]!);
+  }
+
   async function initialize() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -99,8 +103,11 @@ const base = import.meta.env.BASE_URL;
       setValue('flightReview', data.flight_review_date);
       setValue('medicalExpiration', data.medical_expiration);
       setValue('ratings', data.ratings);
-      statusBox.className = `application-current-status ${data.status}`;
-      statusBox.innerHTML = `<strong>Current status: ${String(data.status).replace('_', ' ')}</strong>${data.admin_notes ? `<span>${data.admin_notes}</span>` : '<span>You may update and resubmit the information below.</span>'}`;
+      const statusClass = ['pending','needs_information','approved','rejected','suspended'].includes(String(data.status)) ? String(data.status) : '';
+      statusBox.className = `application-current-status ${statusClass}`;
+      const safeStatus = escapeHtml(String(data.status).replace('_', ' '));
+      const safeAdminNotes = data.admin_notes ? `<span>${escapeHtml(data.admin_notes)}</span>` : '<span>You may update and resubmit the information below.</span>';
+      statusBox.innerHTML = `<strong>Current status: ${safeStatus}</strong>${safeAdminNotes}`;
       statusBox.hidden = false;
     }
   }

@@ -27,13 +27,13 @@ const activeFor = (href: string) => href === '' ? pathname === base || pathname 
       <a class="nav-account" href={`${base}account/`} data-account-link><Icon name="user" size={17} /> <span data-account-label>Account</span></a>
       <a
         class="button button-small"
-        href={`${base}account/`}
+        href={`${base}apply/`}
         data-renter-action
         data-unapproved-label="Apply to Rent"
         data-approved-label="Renter Portal"
         data-unapproved-href={`${base}apply/`}
         data-approved-href={`${base}account/`}
-      ><span data-renter-action-label>Renter Access</span></a>
+      ><span data-renter-action-label>Apply to Rent</span></a>
     </nav>
   </div>
 </header>

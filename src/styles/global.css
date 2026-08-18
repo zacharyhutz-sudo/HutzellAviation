@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;500;600;700;900&family=League+Spartan:wght@500;600;700;800&display=swap');
 
 :root {
+  --font-body: 'Lato', Arial, sans-serif;
+  --font-display: 'League Spartan', 'Arial Narrow', Arial, sans-serif;
   --navy: #082b45;
   --navy-deep: #051d2e;
   --blue: #2f6f94;
@@ -24,15 +26,17 @@
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 110px; }
-body { margin: 0; min-width: 320px; color: var(--text); background: var(--white); font-family: 'Lato', Arial, sans-serif; font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+body { margin: 0; min-width: 320px; color: var(--text); background: var(--white); font-family: var(--font-body); font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
 body.nav-open { overflow: hidden; }
-body, button, input, select, textarea, a { font-family: 'Lato', Arial, sans-serif; }
+body, button, input, select, textarea, option, optgroup, a { font-family: var(--font-body); }
+input::placeholder, textarea::placeholder { font-family: var(--font-body); }
+input::file-selector-button { font-family: var(--font-body); }
 img { display: block; max-width: 100%; height: auto; }
 svg { display: block; max-width: 100%; }
 button, a { -webkit-tap-highlight-color: transparent; }
 a { color: inherit; text-decoration: none; }
 p, h1, h2, h3, ul, ol { margin-top: 0; }
-h1, h2, h3, .brand-words { font-family: 'League Spartan', 'Arial Narrow', sans-serif; color: var(--navy); line-height: 1.04; letter-spacing: -0.025em; }
+h1, h2, h3, .brand-words { font-family: var(--font-display); color: var(--navy); line-height: 1.04; letter-spacing: -0.025em; }
 h1 { margin-bottom: 24px; font-size: clamp(3.25rem, 7vw, 6.3rem); font-weight: 700; }
 h2 { margin-bottom: 20px; font-size: clamp(2.35rem, 4.5vw, 4.15rem); font-weight: 700; }
 h3 { margin-bottom: 12px; font-size: 1.52rem; font-weight: 700; }
@@ -78,7 +82,7 @@ p { color: var(--muted); }
 .brand-mark-wrap img { width: 118px; max-width: none; height: 54px; object-fit: contain; }
 .brand-words { display: flex; flex-direction: column; color: var(--navy); line-height: .9; }
 .brand-words strong { font-size: 1.12rem; letter-spacing: .13em; }
-.brand-words span { margin-top: 7px; color: var(--blue); font-family: 'Lato', sans-serif; font-size: .64rem; font-weight: 800; letter-spacing: .38em; }
+.brand-words span { margin-top: 7px; color: var(--blue); font-family: var(--font-body); font-size: .64rem; font-weight: 800; letter-spacing: .38em; }
 .primary-nav { display: flex; align-items: center; gap: 23px; }
 .primary-nav > a:not(.button) { position: relative; padding-block: 28px; color: #3f5665; font-size: .9rem; font-weight: 800; }
 .primary-nav > a:not(.button)::after { position: absolute; right: 0; bottom: 19px; left: 0; height: 2px; content: ''; background: var(--gold); transform: scaleX(0); transition: transform 180ms ease; }
@@ -119,7 +123,7 @@ p { color: var(--muted); }
 .proof-grid { display: grid; grid-template-columns: repeat(4,1fr); }
 .proof-grid > div { display: flex; flex-direction: column; justify-content: center; min-height: 105px; padding: 20px 30px; border-right: 1px solid var(--line); }
 .proof-grid > div:first-child { border-left: 1px solid var(--line); }
-.proof-grid strong { color: var(--navy); font-family: 'League Spartan', sans-serif; font-size: 1.6rem; line-height: 1; }
+.proof-grid strong { color: var(--navy); font-family: var(--font-display); font-size: 1.6rem; line-height: 1; }
 .proof-grid span { color: var(--muted); font-size: .83rem; }
 
 /* Shared home sections */
@@ -170,7 +174,7 @@ p { color: var(--muted); }
 .portrait-photo::after { position: absolute; inset: 52% 0 0; background: linear-gradient(180deg, transparent, rgba(4,29,47,.9)); content: ''; pointer-events: none; }
 .portrait-photo img { display: block; width: 100%; height: 510px; object-fit: cover; object-position: center 25%; }
 .portrait-photo figcaption { position: absolute; z-index: 2; right: 26px; bottom: 25px; left: 26px; display: flex; flex-direction: column; color: #fff; }
-.portrait-photo figcaption span { font-family: 'League Spartan',sans-serif; font-size: 2rem; font-weight: 700; }
+.portrait-photo figcaption span { font-family: var(--font-display); font-size: 2rem; font-weight: 700; }
 .portrait-photo figcaption small { color: #d8e5eb; }
 .bio-credential { display: flex; align-items: center; gap: 13px; width: calc(100% - 38px); margin: -32px auto 0; padding: 18px 21px; border: 1px solid var(--line); border-radius: 14px; background: #fff; box-shadow: var(--shadow-soft); position: relative; }
 .bio-credential svg { color: var(--gold); }
@@ -250,7 +254,7 @@ p { color: var(--muted); }
 .billing-flow { display: grid; grid-template-columns: repeat(3,1fr); }
 .billing-flow > div { min-height: 180px; padding: 25px; border: 1px solid rgba(255,255,255,.16); }
 .billing-flow span { color: var(--gold); font-size: .8rem; font-weight: 900; }
-.billing-flow strong { display: block; margin: 32px 0 8px; color: #fff; font-family: 'League Spartan',sans-serif; font-size: 1.5rem; }
+.billing-flow strong { display: block; margin: 32px 0 8px; color: #fff; font-family: var(--font-display); font-size: 1.5rem; }
 .billing-flow p { color: #bcd0dc; font-size: .86rem; }
 .policy-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
 .policy-grid article { padding: 28px; border: 1px solid var(--line); border-radius: 16px; background: var(--cloud); }
@@ -258,7 +262,7 @@ p { color: var(--muted); }
 .faq-intro { position: sticky; top: 140px; align-self: start; }
 .faq-list details { border-top: 1px solid var(--line); }
 .faq-list details:last-child { border-bottom: 1px solid var(--line); }
-.faq-list summary { position: relative; padding: 22px 44px 22px 0; color: var(--navy); font-family: 'League Spartan',sans-serif; font-size: 1.22rem; font-weight: 700; cursor: pointer; list-style: none; }
+.faq-list summary { position: relative; padding: 22px 44px 22px 0; color: var(--navy); font-family: var(--font-display); font-size: 1.22rem; font-weight: 700; cursor: pointer; list-style: none; }
 .faq-list summary::-webkit-details-marker { display: none; }
 .faq-list summary span::before, .faq-list summary span::after { position: absolute; top: 31px; right: 4px; width: 15px; height: 2px; content: ''; background: var(--blue); }
 .faq-list summary span::after { transform: rotate(90deg); transition: transform 180ms ease; }
@@ -327,7 +331,7 @@ p { color: var(--muted); }
 .application-help p { margin-bottom: 0; color: #bdd0dc; font-size: .82rem; }
 .renter-form { padding: 36px; border: 1px solid var(--line); border-radius: 20px; background: #fff; box-shadow: var(--shadow-soft); }
 .renter-form fieldset { padding: 0; margin: 0 0 42px; border: 0; }
-.renter-form legend { width: 100%; padding-bottom: 12px; margin-bottom: 22px; border-bottom: 1px solid var(--line); color: var(--navy); font-family: 'League Spartan',sans-serif; font-size: 1.65rem; font-weight: 700; }
+.renter-form legend { width: 100%; padding-bottom: 12px; margin-bottom: 22px; border-bottom: 1px solid var(--line); color: var(--navy); font-family: var(--font-display); font-size: 1.65rem; font-weight: 700; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .form-grid label, .renter-form > label, .login-card label { display: flex; flex-direction: column; gap: 7px; color: var(--navy); font-size: .82rem; font-weight: 900; }
 .form-grid label.full { grid-column: 1 / -1; }
@@ -575,7 +579,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); outline: 
 .text-button { padding: 0; border: 0; color: var(--blue); background: transparent; font-weight: 900; cursor: pointer; }
 .text-button:hover { color: var(--navy); }
 .account-status-card { padding: 20px; border: 1px solid var(--line); border-radius: 13px; background: var(--cloud); }
-.account-status-card strong { display: block; margin: 5px 0; color: var(--navy); font-family: 'League Spartan',sans-serif; font-size: 1.55rem; text-transform: capitalize; }
+.account-status-card strong { display: block; margin: 5px 0; color: var(--navy); font-family: var(--font-display); font-size: 1.55rem; text-transform: capitalize; }
 .account-status-card strong.approved { color: var(--green); }
 .account-status-card strong.pending { color: var(--gold-dark); }
 .account-status-card strong.suspended, .account-status-card strong.rejected { color: var(--red); }
@@ -1210,12 +1214,12 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); outline: 
 .account-ops-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
 .account-metric { padding: 17px; border: 1px solid var(--line); border-radius: 12px; background: #fff; box-shadow: 0 8px 24px rgba(8,43,69,.05); }
 .account-metric > span { display: block; color: var(--blue); font-size: .66rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
-.account-metric > strong { display: block; margin: 3px 0; color: var(--navy); font-family: 'League Spartan',sans-serif; font-size: 1.65rem; }
+.account-metric > strong { display: block; margin: 3px 0; color: var(--navy); font-family: var(--font-display); font-size: 1.65rem; }
 .account-metric > small { display: block; color: var(--muted); font-size: .73rem; line-height: 1.35; }
 .dashboard-operations { padding-top: 2px; }
 .mini-action { padding: 5px 9px; border: 1px solid #b9d0dc; border-radius: 7px; color: var(--blue); background: #f7fbfd; font-size: .7rem; font-weight: 900; white-space: nowrap; }
 .billing-account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-.billing-account-grid h4 { margin: 0 0 8px; color: var(--navy); font-family: 'League Spartan',sans-serif; font-size: 1rem; }
+.billing-account-grid h4 { margin: 0 0 8px; color: var(--navy); font-family: var(--font-display); font-size: 1rem; }
 .billing-activity-row, .squawk-account-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); }
 .billing-activity-row > div, .squawk-account-row > div { display: flex; min-width: 0; flex-direction: column; }
 .billing-activity-row > div:last-child { align-items: flex-end; }
@@ -1249,14 +1253,14 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); outline: 
 .admin-summary-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; }
 .admin-summary-grid article { padding: 20px; border: 1px solid var(--line); border-radius: 15px; background: #fff; box-shadow: var(--shadow-soft); }
 .admin-summary-grid span { display: block; color: var(--blue); font-size: .65rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
-.admin-summary-grid strong { display: block; margin: 5px 0 3px; color: var(--navy); font-family: 'League Spartan',sans-serif; font-size: 1.75rem; }
+.admin-summary-grid strong { display: block; margin: 5px 0 3px; color: var(--navy); font-family: var(--font-display); font-size: 1.75rem; }
 .admin-summary-grid small { display: block; color: var(--muted); font-size: .72rem; line-height: 1.4; }
 .admin-panel-copy { margin: -9px 0 18px; font-size: .83rem; }
 .operations-admin-grid { grid-template-columns: 1fr 1fr; }
 .operations-admin-grid h3 { margin-bottom: 14px; font-size: 1.25rem; }
 .admin-subsection { padding-top: 26px; margin-top: 26px; border-top: 1px solid var(--line); }
 .admin-hint { color: var(--muted); font-size: .72rem; text-align: right; }
-.balance-number { flex: 0 0 auto; color: var(--navy); font-family: 'League Spartan',sans-serif; }
+.balance-number { flex: 0 0 auto; color: var(--navy); font-family: var(--font-display); }
 .inline-closeout { display: flex; gap: 7px; margin-top: 9px; }
 .inline-closeout input { width: 115px; height: 36px; font-size: .78rem; }
 .inline-closeout button, .primary-mini { padding: 6px 10px; border: 1px solid var(--gold); border-radius: 7px; color: var(--navy); background: var(--gold); font-size: .72rem; font-weight: 900; cursor: pointer; }
@@ -1297,7 +1301,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); outline: 
 .stripe-package-card { display: flex; min-width: 0; flex-direction: column; gap: 5px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--cloud); }
 .stripe-package-card.featured { border-color: rgba(199,151,54,.65); background: #fff9ed; }
 .stripe-package-card > span { color: var(--blue); font-size: .68rem; font-weight: 900; text-transform: uppercase; }
-.stripe-package-card > strong { color: var(--navy); font-family: 'League Spartan',sans-serif; font-size: 1.55rem; line-height: 1; }
+.stripe-package-card > strong { color: var(--navy); font-family: var(--font-display); font-size: 1.55rem; line-height: 1; }
 .stripe-package-card > small { min-height: 31px; color: var(--muted); font-size: .68rem; }
 .stripe-package-card .button { width: 100%; min-height: 42px; margin-top: 5px; padding: 9px 10px; font-size: .72rem; }
 .stripe-purchase-help { margin: 12px 0 0; color: var(--muted); font-size: .7rem; }
@@ -1315,7 +1319,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); outline: 
 .renter-action-card { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 13px; min-height: 92px; padding: 17px; border: 1px solid var(--line); border-radius: 14px; color: var(--navy); background: var(--cloud); transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
 .renter-action-card:hover { transform: translateY(-2px); border-color: #a9c4d2; box-shadow: 0 10px 24px rgba(8,43,69,.08); }
 .renter-action-card > span:nth-child(2) { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
-.renter-action-card strong { color: var(--navy); font-family: 'League Spartan',sans-serif; font-size: 1.08rem; }
+.renter-action-card strong { color: var(--navy); font-family: var(--font-display); font-size: 1.08rem; }
 .renter-action-card small { color: var(--muted); font-size: .72rem; line-height: 1.4; }
 .renter-action-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 12px; color: var(--navy); background: #e9f1f5; }
 #purchase-hours { scroll-margin-top: 110px; }
@@ -1323,4 +1327,55 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); outline: 
 @media (max-width: 680px) {
   .renter-action-grid { grid-template-columns: 1fr; }
   .renter-action-card { min-height: 84px; }
+}
+
+
+/* Responsive audit fixes — August 18, 2026 */
+@media (min-width: 901px) and (max-width: 1180px) {
+  /* Keep the availability card from colliding with the photo caption when the
+     two-column hero becomes narrow but has not yet reached the mobile layout. */
+  .hero-status-card {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    min-width: 0;
+    margin-top: 12px;
+  }
+}
+
+/* Prevent long user-entered values, email addresses, references, or admin copy
+   from forcing cards/forms wider than their grid column. */
+.form-grid > *,
+.time-pair > *,
+.dashboard-header > *,
+.dashboard-section-title > *,
+.reservation-row > *,
+.admin-row > *,
+.billing-activity-row > *,
+.squawk-account-row > *,
+.operations-record-heading > *,
+.renter-action-card > * {
+  min-width: 0;
+}
+
+.form-grid label,
+.renter-form label,
+.login-card label,
+.operations-form label,
+.admin-row-main,
+.reservation-row,
+.dashboard-header,
+.billing-activity-row,
+.squawk-account-row {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 680px) {
+  /* Detail-tile zoom is useful on desktop but crops too aggressively once the
+     gallery becomes a single narrow column. */
+  .gallery-photo.aircraft-detail-crop img,
+  .gallery-photo.cockpit-detail-crop img {
+    transform: none;
+  }
 }
