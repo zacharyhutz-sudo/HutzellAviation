@@ -7,7 +7,7 @@ import Icon from '../components/Icon.astro';
 import { pricingPlans, rentalSteps, site } from '../data/site';
 import '../styles/global.css';
 const base = import.meta.env.BASE_URL;
-const aircraftExterior = 'https://upload.wikimedia.org/wikipedia/commons/8/8b/Piper_PA-28_Cherokee_-_G-BCPG_-_2_October_2025.jpg';
+const aircraftExterior = `${base}images/n8491f-home-hero.jpeg`;
 const aircraftLanding = 'https://upload.wikimedia.org/wikipedia/commons/2/24/Piper_PA-28_Cherokee_Landing_03.JPG';
 ---
 <BaseLayout>
@@ -24,8 +24,8 @@ const aircraftLanding = 'https://upload.wikimedia.org/wikipedia/commons/2/24/Pip
         </div>
         <div class="hero-visual reveal reveal-delay">
           <figure class="hero-photo-frame">
-            <img src={aircraftExterior} alt="Representative Piper PA-28 Cherokee parked on an airfield" width="4259" height="2842" fetchpriority="high" decoding="async" />
-            <figcaption>Representative Piper Cherokee imagery</figcaption>
+            <img src={aircraftExterior} alt="Hutzell Aviation Piper PA-28-140 N8491F parked at the hangar" width="1536" height="1152" fetchpriority="high" decoding="async" />
+            <figcaption>1974 Piper PA-28-140 · N8491F</figcaption>
           </figure>
           <div class="hero-status-card"><span class="status-dot"></span><div><strong>Availability calendar</strong><span>Preview open rental windows online</span></div></div>
         </div>

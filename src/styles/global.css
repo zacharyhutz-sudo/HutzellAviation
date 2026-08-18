@@ -112,7 +112,7 @@ p { color: var(--muted); }
 .hero-visual { position: relative; min-width: 0; }
 .hero-photo-frame { position: relative; overflow: hidden; margin: 0; border: 1px solid var(--line); border-radius: 26px; background: var(--cloud); box-shadow: var(--shadow); }
 .hero-photo-frame::after { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(4,29,47,.32)); content: ''; pointer-events: none; }
-.hero-photo-frame img { display: block; width: 100%; aspect-ratio: 1.22 / 1; object-fit: cover; object-position: center 52%; }
+.hero-photo-frame img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; object-position: center; }
 .hero-photo-frame figcaption { position: absolute; z-index: 2; left: 18px; bottom: 18px; padding: 7px 10px; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; color: #fff; background: rgba(8,43,69,.76); backdrop-filter: blur(8px); font-size: .69rem; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
 .hero-status-card { position: absolute; right: 3%; bottom: 7%; display: flex; align-items: center; gap: 12px; min-width: 260px; padding: 16px 19px; border: 1px solid rgba(8,43,69,.08); border-radius: 14px; background: rgba(255,255,255,.96); box-shadow: var(--shadow-soft); }
 .status-dot { width: 12px; height: 12px; border: 3px solid #bde6d2; border-radius: 50%; background: var(--green); }
