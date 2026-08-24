@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HutzellFlash | Hangar 10</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    background: #0e1420;
+    font-family: "Courier New", ui-monospace, monospace;
+    overflow: hidden;
+    touch-action: none;
+  }
+  body { display: flex; align-items: center; justify-content: center; }
+  #wrap {
+    position: relative;
+    width: min(100vw, 177.78vh);   /* 16:9 */
+    height: min(100vh, 56.25vw);
+  }
+  canvas {
+    width: 100%; height: 100%; display: block;
+    image-rendering: pixelated;   /* chunky nearest-neighbor upscale */
+  }
+  #rotatePrompt {
+    position: fixed; inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    background: #0e1420;
+    z-index: 10;
+    color: #fff;
+    text-align: center;
+    padding: 24px;
+  }
+  #rotatePrompt.show { display: flex; }
+  #rotatePrompt .phone {
+    width: 52px; height: 92px;
+    border: 4px solid #9fd6ff;
+    border-radius: 0;
+    margin-bottom: 28px;
+    animation: turnPhone 1.8s ease-in-out infinite;
+  }
+  @keyframes turnPhone {
+    0%, 25% { transform: rotate(0deg); }
+    60%, 100% { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="game"></canvas></div>
+<div id="rotatePrompt">
+  <div class="phone"></div>
+  <div style="font-size:20px; font-weight:bold; letter-spacing:2px; text-transform:uppercase;">ROTATE YOUR DEVICE</div>
+  <div style="font-size:14px; color:#9fd6ff; margin-top:10px;">HutzellFlash flies best in landscape</div>
+</div>
+<script>
+"use strict";
+
+// ---------- Canvas ----------
+const canvas = document.getElementById("game");
+const VW = 960, VH = 540;                 // internal resolution
+const PIXEL = 3;                          // 320x180 true-pixel art grid, upscaled nearest-neighbor
+canvas.width = VW; canvas.height = VH;
+const main = canvas.getContext("2d");
+main.imageSmoothingEnabled = false;
+// low-res offscreen buffer: everything is drawn here, then blitted up chunky
+const pcan = document.createElement("canvas");
+pcan.width = VW / PIXEL; pcan.height = VH / PIXEL;
+const ctx = pcan.getContext("2d");
+ctx.imageSmoothingEnabled = false;
+
+// ---------- State ----------
+const GROUND = VH - 56;
+let state = "title";                      // title | countdown | play | crash | over
+let plane, obstacles, coins, particles, clouds, hazards, ring, popups;
+let score, coinCount, speed, t, flightTime, shakeT, coinFlash, crashTimer, crashFreeze, newBest;
+let combo, comboTimer, dangerStreak, dangerTimer, countdownT, ringWarningT;
+let spawnTimer = 1.2, coinTimer = 0.8, ringTimer = 24;
+let patternQueue, lastPattern, patternStage, spawnGuideY, lastLevel, levelBannerT;
+
+let highScores = [];
+let best = 0;
+let parentGate = false;
+
+function notifyParent(type, payload = {}) {
+  try {
+    window.parent.postMessage({ type, ...payload }, window.location.origin);
+  } catch (e) { /* parent integration is optional when game is opened directly */ }
+}
+
+window.addEventListener("message", (event) => {
+  if (event.origin !== window.location.origin) return;
+  const data = event.data || {};
+  if (data.type === "hutzellflash:leaderboard") {
+    highScores = Array.isArray(data.scores)
+      ? data.scores.map(Number).filter(Number.isFinite).sort((a, b) => b - a).slice(0, 10)
+      : [];
+    best = highScores[0] || 0;
+  }
+  if (data.type === "hutzellflash:release") parentGate = false;
+});
+
+// ---------- Arcade progression ----------
+// Stages are based on flight time, not score. Rewards can make the score explode
+// without allowing a lucky ring to skip half the run.
+const STAGE_TIMES = [0, 35, 75, 120, 165, 210, 255, 300, 345, 390];
+const LEVEL_NAMES = ["SKY TRAINEE", "LOW CLOUD", "MID AIR", "STORM FRONTS", "HURRICANE BAY", "UPPER STRATOS", "JET STREAM", "POLAR FRONT", "STORM EYE", "CROSSWINDS"];
+const HAZARD_UNLOCK = 5;                  // wind arrives later, after the player settles in
+function levelForProgress(seconds) { let n = 1; for (let i = 0; i < STAGE_TIMES.length; i++) if (seconds >= STAGE_TIMES[i]) n = i + 1; return n; }
+function runProgress() { return Math.min(1, flightTime / STAGE_TIMES[STAGE_TIMES.length - 1]); }
+function speedForProgress() {
+  const p = runProgress();
+  return Math.min(540, 150 + 325 * p + 48 * (1 - Math.exp(-flightTime / 95)));
+}
+function hazardCountForLevel(lv) {
+  if (lv < HAZARD_UNLOCK) return 0;
+  if (lv < 7) return 1;
+  if (lv < 9) return 2;
+  return 3;
+}
+
+// ---------- Stage-specific spawn formations ----------
+// Each stage has its own small pattern pool. The player gradually learns the visual
+// language of each stage instead of seeing every hazard from the opening seconds.
+const FLIGHT_LANES = [102, 174, 246, 318, 390];
+const STAGE_PATTERNS = [
+  [
+    [{kind:"cloud",lane:0,guide:3},{kind:"balloon",lane:1,guide:4},{kind:"cloud",lane:0,guide:3}],
+    [{kind:"balloon",lane:4,guide:1},{kind:"cloud",lane:3,guide:0},{kind:"balloon",lane:4,guide:1}],
+    [{kind:"cloud",lane:1,guide:4},{kind:"balloon",lane:3,guide:0},{kind:"cloud",lane:1,guide:4}]
+  ],
+  [
+    [{kind:"cloud",lane:0,guide:4},{kind:"cloud",lane:1,guide:4},{kind:"balloon",lane:2,guide:0}],
+    [{kind:"cloud",lane:4,guide:0},{kind:"balloon",lane:3,guide:0},{kind:"cloud",lane:2,guide:4}],
+    [{kind:"balloon",lane:1,guide:4},{kind:"cloud",lane:2,guide:0},{kind:"balloon",lane:3,guide:0},{kind:"cloud",lane:1,guide:4}]
+  ],
+  [
+    [{kind:"bird",lane:0,guide:3},{kind:"bird",lane:1,guide:4},{kind:"balloon",lane:3,guide:0}],
+    [{kind:"cloud",lane:4,guide:0},{kind:"bird",lane:2,guide:4},{kind:"bird",lane:1,guide:4}],
+    [{kind:"bird",lane:4,guide:1},{kind:"cloud",lane:2,guide:0},{kind:"bird",lane:0,guide:3}]
+  ],
+  [
+    [{kind:"cloud",lane:0,guide:4},{kind:"cloud",lane:2,guide:4},{kind:"balloon",lane:4,guide:1}],
+    [{kind:"bird",lane:1,guide:4},{kind:"cloud",lane:3,guide:0},{kind:"bird",lane:2,guide:4}],
+    [{kind:"cloud",lane:4,guide:0},{kind:"balloon",lane:2,guide:0},{kind:"cloud",lane:1,guide:4},{kind:"bird",lane:3,guide:0}]
+  ],
+  [
+    [{kind:"balloon",lane:0,guide:4},{kind:"bird",lane:2,guide:4},{kind:"cloud",lane:4,guide:1},{kind:"bird",lane:3,guide:0}],
+    [{kind:"cloud",lane:1,guide:4},{kind:"bird",lane:3,guide:0},{kind:"cloud",lane:1,guide:4},{kind:"balloon",lane:3,guide:0}],
+    [{kind:"bird",lane:4,guide:0},{kind:"balloon",lane:2,guide:0},{kind:"bird",lane:0,guide:4},{kind:"cloud",lane:3,guide:0}]
+  ],
+  [
+    [{kind:"cloud",lane:2,guide:0},{kind:"bird",lane:2,guide:4},{kind:"balloon",lane:2,guide:0},{kind:"bird",lane:2,guide:4}],
+    [{kind:"bird",lane:0,guide:3},{kind:"balloon",lane:4,guide:1},{kind:"cloud",lane:1,guide:4},{kind:"bird",lane:3,guide:0}],
+    [{kind:"cloud",lane:4,guide:0},{kind:"bird",lane:1,guide:4},{kind:"balloon",lane:3,guide:0},{kind:"cloud",lane:0,guide:4}]
+  ],
+  [
+    [{kind:"bird",lane:0,guide:4},{kind:"bird",lane:2,guide:4},{kind:"bird",lane:4,guide:1}],
+    [{kind:"bird",lane:4,guide:0},{kind:"bird",lane:3,guide:0},{kind:"cloud",lane:1,guide:4},{kind:"bird",lane:0,guide:3}],
+    [{kind:"cloud",lane:0,guide:4},{kind:"bird",lane:3,guide:0},{kind:"bird",lane:1,guide:4},{kind:"balloon",lane:4,guide:0}]
+  ],
+  [
+    [{kind:"cloud",lane:0,guide:4},{kind:"bird",lane:1,guide:4},{kind:"cloud",lane:3,guide:0},{kind:"bird",lane:4,guide:1}],
+    [{kind:"balloon",lane:4,guide:0},{kind:"cloud",lane:2,guide:0},{kind:"bird",lane:1,guide:4},{kind:"cloud",lane:3,guide:0}],
+    [{kind:"bird",lane:0,guide:3},{kind:"cloud",lane:2,guide:4},{kind:"balloon",lane:4,guide:1},{kind:"bird",lane:2,guide:0}]
+  ],
+  [
+    [{kind:"cloud",lane:0,guide:3},{kind:"cloud",lane:1,guide:4},{kind:"bird",lane:3,guide:0},{kind:"cloud",lane:4,guide:1}],
+    [{kind:"bird",lane:4,guide:0},{kind:"cloud",lane:3,guide:0},{kind:"balloon",lane:1,guide:4},{kind:"bird",lane:0,guide:3}],
+    [{kind:"cloud",lane:4,guide:0},{kind:"bird",lane:2,guide:4},{kind:"cloud",lane:0,guide:3},{kind:"balloon",lane:2,guide:0}]
+  ],
+  [
+    [{kind:"bird",lane:0,guide:3},{kind:"cloud",lane:2,guide:4},{kind:"bird",lane:4,guide:1},{kind:"balloon",lane:2,guide:0}],
+    [{kind:"cloud",lane:4,guide:0},{kind:"bird",lane:1,guide:4},{kind:"balloon",lane:3,guide:0},{kind:"cloud",lane:0,guide:4},{kind:"bird",lane:2,guide:0}],
+    [{kind:"balloon",lane:0,guide:4},{kind:"bird",lane:2,guide:4},{kind:"cloud",lane:4,guide:1},{kind:"bird",lane:3,guide:0},{kind:"cloud",lane:1,guide:4}]
+  ]
+];
+
+function laneY(lane, jitter=0) {
+  const i = Math.max(0, Math.min(FLIGHT_LANES.length - 1, lane));
+  return FLIGHT_LANES[i] + (jitter ? rnd(-jitter, jitter) : 0);
+}
+function nextPatternEvent(lv) {
+  const stageIndex = Math.max(0, Math.min(STAGE_PATTERNS.length - 1, lv - 1));
+  const pool = STAGE_PATTERNS[stageIndex];
+  if (!patternQueue.length || patternStage !== stageIndex) {
+    if (patternStage !== stageIndex) lastPattern = -1;
+    patternStage = stageIndex;
+    let pick = Math.floor(rnd(0, pool.length));
+    if (pool.length > 1 && pick === lastPattern) pick = (pick + 1) % pool.length;
+    lastPattern = pick;
+    patternQueue = pool[pick].map(e => ({...e}));
+  }
+  return patternQueue.shift();
+}
+function clearSpawnY(x, preferred) {
+  const choices = [preferred, ...FLIGHT_LANES];
+  let bestY = preferred, bestClearance = -Infinity;
+  for (const rawY of choices) {
+    const y = Math.max(130, Math.min(GROUND - 140, rawY));
+    let clearance = 999;
+    for (const o of obstacles) {
+      if (Math.abs(o.x - x) > 260) continue;
+      const pad = o.kind === "cloud" ? o.h * 0.62 : o.h * 0.75;
+      clearance = Math.min(clearance, Math.abs(o.y - y) - pad);
+    }
+    if (clearance > bestClearance) { bestClearance = clearance; bestY = y; }
+  }
+  return bestY;
+}
+
+function reset() {
+  plane = { x: 150, y: VH / 2, vy: 0, tilt: 0, w: 74, h: 30 };
+  obstacles = []; coins = []; hazards = []; particles = []; popups = [];
+  clouds = [];
+  ring = null;                            // active "clear the ring" objective
+  for (let i = 0; i < 5; i++) clouds.push(makeCloud(rnd(-100, VW)));
+  score = 0; coinCount = 0; speed = 150; t = 0; flightTime = 0; shakeT = 0; coinFlash = 0; crashTimer = 0; crashFreeze = 0; newBest = false;
+  combo = 1; comboTimer = 0; dangerStreak = 0; dangerTimer = 0; countdownT = 3.75; ringWarningT = 0;
+  spawnTimer = 1.35; coinTimer = 1.0; ringTimer = rnd(22, 30);
+  patternQueue = []; lastPattern = -1; patternStage = -1; spawnGuideY = VH / 2; lastLevel = 1; levelBannerT = 0;
+}
+
+function makeCloud(x) {
+  const s = rnd(0.5, 1.4);
+  return { x: x, y: rnd(40, GROUND - 120), s: s, v: rnd(8, 26) * s };
+}
+
+// ---------- Tiny audio (no assets needed) ----------
+let actx = null;
+function beep(freq, dur, type, vol) {
+  try {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === "suspended") actx.resume();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type || "sine"; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol || 0.12, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime + dur);
+  } catch (e) { /* audio is optional */ }
+}
+
+// ---------- Helpers ----------
+const rnd = (a, b) => a + Math.random() * (b - a);
+
+// ---------- Input ----------
+const KEY_SPEED = 440;                    // same maximum climb/dive speed as before
+const CONTROL_RESPONSE = 10.5;            // quick acceleration without cursor-like snapping
+const CONTROL_RELEASE = 8.0;              // settles rapidly when the player releases input
+const keys = {};
+let pointerY = null, pointerDown = false;
+window.addEventListener("keydown", e => {
+  if (["ArrowUp","ArrowDown"," ","w","s","W","S"].includes(e.key)) e.preventDefault();
+  keys[e.key.toLowerCase()] = true;
+  if ((state === "title" || state === "over") && (e.key === " " || e.key === "Enter")) start();
+});
+window.addEventListener("keyup", e => { keys[e.key.toLowerCase()] = false; });
+
+function canvasY(clientY) {
+  const r = canvas.getBoundingClientRect();
+  return (clientY - r.top) / r.height * VH;
+}
+canvas.addEventListener("pointerdown", e => {
+  pointerDown = true;
+  pointerY = canvasY(e.clientY);
+  if (state === "title" || state === "over") start();
+});
+canvas.addEventListener("pointermove", e => {
+  if (pointerDown) pointerY = canvasY(e.clientY);
+});
+window.addEventListener("pointerup", () => { pointerDown = false; });
+
+function start() {
+  if (state === "play" || state === "countdown" || parentGate) return;
+  reset();
+  plane.x = 64;
+  state = "countdown";
+  parentGate = true;
+  notifyParent("hutzellflash:run-start");
+  if (window.parent === window) parentGate = false;
+  beep(420, 0.08, "square", 0.04);
+}
+
+// ---------- Spawning ----------
+function spawnObstacle() {
+  const event = nextPatternEvent(levelForProgress(flightTime));
+  const y = laneY(event.lane, event.kind === "cloud" ? 10 : 14);
+  spawnGuideY = laneY(event.guide, 6);
+  if (event.kind === "cloud") {
+    obstacles.push({ kind: "cloud", x: VW + 60, y, w: rnd(82, 122), h: rnd(56, 100) });
+  } else if (event.kind === "balloon") {
+    obstacles.push({ kind: "balloon", x: VW + 40, y, w: 34, h: 46, bob: rnd(0, 6.28), str: rnd(20, 54) });
+  } else {
+    obstacles.push({ kind: "bird", x: VW + 40, y, w: 46, h: 26, vy: rnd(-40, 40), flap: 0 });
+  }
+}
+
+function spawnCoin() {
+  const cluster = Math.random() < 0.4 ? 3 : 1;
+  // Most coin groups reinforce the readable opening in the current formation,
+  // while a minority remain free-floating so runs still feel varied.
+  const guided = Math.random() < 0.72;
+  const base = guided ? spawnGuideY + rnd(-14, 14) : rnd(90, GROUND - 80);
+  const y = Math.max(90, Math.min(GROUND - 80, base));
+  for (let i = 0; i < cluster; i++) {
+    coins.push({ x: VW + 40 + i * 44, y: y + (cluster > 1 ? i * 4 : 0), r: 13, spin: rnd(0, 6.28) });
+  }
+}
+
+// objective ring: still periodic, but biased toward the clearest authored lane
+function spawnRing() {
+  if (ring) return;
+  const preferred = spawnGuideY || rnd(130, GROUND - 140);
+  ring = { x: VW + 120, y: clearSpawnY(VW + 120, preferred), r: 64, spin: 0 };
+  ringWarningT = 2.25;
+  beep(760, 0.09, "triangle", 0.035);
+}
+
+// wind gust hazard: pushes the plane off course
+function spawnHazard() {
+  const fromLeft = Math.random() < 0.5;
+  hazards.push({
+    x: fromLeft ? -60 : VW + 60,
+    y: rnd(80, GROUND - 90),
+    w: 120, h: 90,
+    dir: fromLeft ? 1 : -1,
+    push: Math.random() < 0.5 ? -1 : 1,   // -1 = blows up, +1 = blows down
+    spin: rnd(0, 6.28)
+  });
+}
+
+function burst(x, y, color, n, energy = 1) {
+  for (let i = 0; i < n; i++) {
+    const a = rnd(0, Math.PI * 2), sp = rnd(60, 260) * energy;
+    particles.push({ x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rnd(0.3, 0.7), t: 0, color: color, r: rnd(2, 5) });
+  }
+}
+
+function popup(text, x, y, color, life = 0.62) {
+  popups.push({ text, x, y, color, life, t: 0 });
+}
+
+
+function resetCombo(show = false) {
+  if (combo > 1 && show && state === "play") popup("COMBO LOST", plane.x + 20, plane.y - 36, "#ffb28a", 0.48);
+  combo = 1;
+  comboTimer = 0;
+}
+
+function awardPickup(basePoints, x, y, label) {
+  const mult = combo;
+  const points = basePoints * mult;
+  score += points;
+  combo = Math.min(5, combo + 1);
+  comboTimer = 4.2;
+  popup("+" + points + (mult > 1 ? " X" + mult : ""), x, y, "#fff0a7", 0.66);
+  if (combo > 2) popup("COMBO X" + combo, x, y - 25, "#8bdcff", 0.58);
+  return points;
+}
+
+function awardNearMiss(o) {
+  dangerStreak = dangerTimer > 0 ? Math.min(3, dangerStreak + 1) : 1;
+  dangerTimer = 3.0;
+  const points = 100 * dangerStreak;
+  score += points;
+  popup("NEAR MISS +" + points, plane.x + 55, plane.y - 34, "#8df2a2", 0.72);
+  if (dangerStreak > 1) popup("DANGER X" + dangerStreak, plane.x + 55, plane.y - 58, "#ffd866", 0.62);
+  beep(700 + dangerStreak * 110, 0.07, "square", 0.035);
+}
+
+// ---------- Update ----------
+function update(dt) {
+  t += dt;
+
+  // A crash gets a tiny hit-stop before debris moves. It makes impact feel crisp
+  // without changing the collision rules or run difficulty.
+  if (state === "crash" && crashFreeze > 0) {
+    crashFreeze = Math.max(0, crashFreeze - dt);
+    return;
+  }
+
+  // clouds always drift
+  for (const c of clouds) {
+    c.x -= c.v * dt * (state === "play" ? 1.6 : 1);
+    if (c.x < -160) Object.assign(c, makeCloud(VW + rnd(40, 200)));
+  }
+
+  // particles and score popups continue through the short crash animation
+  for (const p of particles) { p.t += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 200 * dt; }
+  particles = particles.filter(p => p.t < p.life);
+  for (const p of popups) { p.t += dt; p.y -= 28 * dt; }
+  popups = popups.filter(p => p.t < p.life);
+
+  shakeT = Math.max(0, shakeT - dt * (state === "crash" ? 4.5 : 3));
+  coinFlash = Math.max(0, coinFlash - dt * 4);
+  levelBannerT = Math.max(0, levelBannerT - dt);
+  ringWarningT = Math.max(0, ringWarningT - dt);
+  dangerTimer = Math.max(0, dangerTimer - dt);
+  if (dangerTimer <= 0) dangerStreak = 0;
+
+  if (state === "countdown") {
+    countdownT -= dt;
+    plane.x += (150 - plane.x) * Math.min(1, dt * 3.4);
+    plane.tilt *= Math.max(0, 1 - dt * 8);
+    if (countdownT <= -0.55) {
+      plane.x = 150;
+      state = "play";
+      beep(980, 0.12, "square", 0.065);
+      beep(1320, 0.18, "triangle", 0.05);
+    }
+    return;
+  }
+
+  if (state === "crash") {
+    crashTimer -= dt;
+    if (crashTimer <= 0) state = "over";
+    return;
+  }
+  if (state !== "play") return;
+
+  // Progression is time/distance based. Score is now free to behave like an arcade score.
+  flightTime += dt;
+  const lv = levelForProgress(flightTime);
+  speed = speedForProgress();
+  score += speed * dt * 0.045;             // survival score, independent from stage timing
+  if (comboTimer > 0) {
+    comboTimer -= dt;
+    if (comboTimer <= 0) resetCombo(false);
+  }
+  const currentLevel = levelForProgress(flightTime);
+  if (currentLevel !== lastLevel) {
+    lastLevel = currentLevel;
+    patternQueue = [];                     // stage-specific formation pool begins immediately
+    levelBannerT = 2.15;
+    beep(660 + currentLevel * 38, 0.11, "square", 0.045);
+    beep(880 + currentLevel * 42, 0.16, "triangle", 0.04);
+  }
+
+  // Flight polish: input still means only UP / DOWN, but the plane now eases into
+  // its target vertical speed instead of teleporting directly at KEY_SPEED.
+  const thrust = (keys["arrowup"] || keys["w"] ? -1 : 0) + (keys["arrowdown"] || keys["s"] ? 1 : 0);
+  let targetVy = thrust * KEY_SPEED;
+  let response = thrust ? CONTROL_RESPONSE : CONTROL_RELEASE;
+  if (pointerDown && pointerY != null) {
+    const delta = pointerY - plane.y;
+    targetVy = Math.max(-KEY_SPEED, Math.min(KEY_SPEED, delta * 7.5));
+    response = CONTROL_RESPONSE + 2;
+  }
+  plane.vy += (targetVy - plane.vy) * Math.min(1, dt * response);
+  plane.y += plane.vy * dt;
+
+  const minY = 50, maxY = GROUND - 16;
+  if (plane.y <= minY) { plane.y = minY; if (plane.vy < 0) plane.vy *= 0.22; }
+  if (plane.y >= maxY) { plane.y = maxY; if (plane.vy > 0) plane.vy *= 0.22; }
+
+  // Banking follows actual motion, so both keyboard and touch share the same feel.
+  const targetTilt = Math.max(-0.62, Math.min(0.62, plane.vy / KEY_SPEED * 0.62));
+  plane.tilt += (targetTilt - plane.tilt) * Math.min(1, dt * 11);
+
+  // spawn timers
+  spawnTimer -= dt;
+  if (spawnTimer <= 0) {
+    spawnObstacle();
+    const density = 1 - 0.36 * Math.min(1, flightTime / 300); // ramps across ~5 minutes, not 90 seconds
+    spawnTimer = rnd(0.9, 1.5) * density;
+  }
+  coinTimer -= dt;
+  if (coinTimer <= 0) { spawnCoin(); coinTimer = rnd(1.55, 2.75); }
+  // Golden rings are now rare arcade events rather than routine score injections.
+  ringTimer -= dt;
+  if (ringTimer <= 0 && !ring) { spawnRing(); ringTimer = rnd(25, 40); }
+
+  // move hazards (wind gusts)
+  for (const h of hazards) { h.x += h.dir * speed * 0.6 * dt; h.spin += dt * 6; }
+  hazards = hazards.filter(h => h.x > -200 && h.x < VW + 200);
+  // keep the right number of hazards for the current level
+  const wantHaz = hazardCountForLevel(lv);
+  if (hazards.length < wantHaz && Math.random() < dt * 0.42) spawnHazard();
+
+  // move ring
+  if (ring) { ring.x -= speed * dt; ring.spin += dt * 3; if (ring.x < -160) ring = null; }
+
+  // move obstacles
+  for (const o of obstacles) {
+    o.x -= speed * dt;
+    if (o.kind === "balloon") { o.bob += dt * 3; o.y += Math.sin(o.bob) * 26 * dt; }
+    if (o.kind === "bird") {
+      o.flap += dt * 14;
+      o.y += o.vy * dt + Math.sin(t * 2 + o.x * 0.01) * 18 * dt;
+      o.y = Math.max(70, Math.min(GROUND - 60, o.y));
+    }
+  }
+  obstacles = obstacles.filter(o => o.x > -160);
+  for (const c of coins) { c.x -= speed * dt; c.spin += dt * 6; }
+  if (coins.some(c => c.x <= -40)) resetCombo(true);
+  coins = coins.filter(c => c.x > -40);
+
+  // wind gust push (grows stronger with level)
+  const gust = 70 + lv * 14;
+  for (const h of hazards) {
+    const hw = h.w * 0.5, hh = h.h * 0.55;
+    if (Math.abs(h.x - plane.x) < hw + plane.w * 0.3 && Math.abs(h.y - plane.y) < hh + plane.h * 0.4) {
+      plane.y += h.push * gust * dt;             // blows up or down off course
+      plane.tilt += h.dir * 0.35;
+    }
+  }
+  plane.y = Math.max(50, Math.min(GROUND - 16, plane.y));
+
+  // ring objective check
+  if (ring) {
+    const dx = ring.x - plane.x, dy = ring.y - plane.y;
+    if (dx * dx + dy * dy < ring.r * ring.r) {
+      awardPickup(500, ring.x, ring.y - 44, "RING");
+      combo = Math.min(5, combo + 1);       // rings push the combo harder than ordinary coins
+      comboTimer = 5.0;
+      coinFlash = 1; shakeT = Math.max(shakeT, 0.13);
+      burst(ring.x, ring.y, "#ffd94d", 20, 1.05);
+      burst(ring.x, ring.y, "#fff3a4", 8, 0.72);
+      popup("RING CLEAR", ring.x, ring.y - 70, "#ffd866", 0.74);
+      beep(1040, 0.10, "square", 0.075);
+      beep(1560, 0.18, "sine", 0.055);
+      ring = null;
+    }
+  }
+
+  // collisions (plane is a forgiving box)
+  const px = plane.x, py = plane.y, pw = plane.w * 0.36, ph = plane.h * 0.42;
+  for (const o of obstacles) {
+    const ow = o.kind === "bird" ? o.w * 0.55 : o.w * 0.42;
+    const oh = o.kind === "cloud" ? o.h * 0.45 : o.h * 0.5;
+    if (Math.abs(o.x - px) < (ow + pw) && Math.abs(o.y - py) < (oh + ph)) {
+      gameOver(o);
+      return;
+    }
+  }
+  // Award a near miss only after collision safety has been resolved for this frame.
+  for (const o of obstacles) {
+    if (o.passed || o.x >= px) continue;
+    o.passed = true;
+    const ow = o.kind === "bird" ? o.w * 0.55 : o.w * 0.42;
+    const oh = o.kind === "cloud" ? o.h * 0.45 : o.h * 0.5;
+    const edgeGap = Math.abs(o.y - py) - (oh + ph);
+    if (edgeGap >= 0 && edgeGap < 34) awardNearMiss(o);
+  }
+
+  for (let i = coins.length - 1; i >= 0; i--) {
+    const c = coins[i];
+    const dx = c.x - px, dy = c.y - py;
+    if (dx * dx + dy * dy < 42 * 42) {
+      coins.splice(i, 1);
+      coinCount++;
+      awardPickup(25, c.x, c.y - 24, "COIN");
+      coinFlash = 1; shakeT = Math.max(shakeT, 0.035);
+      burst(c.x, c.y, "#ffd94d", 10, 0.78);
+      burst(c.x, c.y, "#fff3a4", 4, 0.5);
+      beep(920, 0.07, "square", 0.06);
+      beep(1380, 0.11, "sine", 0.045);
+    }
+  }
+
+  // ground scrape
+  if (plane.y > GROUND - 16) { gameOver(null); }
+
+}
+
+function gameOver(hit) {
+  if (state !== "play") return;
+  state = "crash";
+  crashFreeze = 0.085;
+  crashTimer = 0.42;
+  shakeT = 1;
+  burst(plane.x, plane.y, "#e8edf4", 30, 1.05);
+  burst(plane.x, plane.y, "#ff7b4d", 20, 1.0);
+  burst(plane.x, plane.y, "#ffd36a", 10, 0.7);
+  if (hit) burst(hit.x, hit.y, hit.kind === "cloud" ? "#ffffff" : "#ffb04d", 14, 0.8);
+  beep(220, 0.18, "sawtooth", 0.09);
+  beep(110, 0.34, "triangle", 0.11);
+  const total = Math.floor(score);
+  newBest = total > best;
+  notifyParent("hutzellflash:game-over", {
+    score: total,
+    runSeconds: Math.max(1, Math.floor(flightTime)),
+    stage: levelForProgress(flightTime),
+    coins: coinCount
+  });
+}
+
+// ---------- Rendering ----------
+// All drawing is handled by graphics.js; gameplay state above drives the arcade presentation.
+</script>
+<script src="graphics.js"></script>
+<script>
+"use strict";
+
+// ---------- Mobile orientation prompt ----------
+const rotatePrompt = document.getElementById("rotatePrompt");
+const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+function isPortrait() { return window.innerHeight > window.innerWidth; }
+function checkOrientation() {
+  rotatePrompt.classList.toggle("show", isTouch && isPortrait());
+}
+window.addEventListener("resize", checkOrientation);
+window.addEventListener("orientationchange", checkOrientation);
+checkOrientation();
+
+// ---------- Main loop ----------
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+reset();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

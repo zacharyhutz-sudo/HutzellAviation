@@ -1,0 +1,345 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/global.css';
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout
+  title="Hangar 10 | Hutzell Aviation"
+  description="An unlisted Hutzell Aviation arcade hangar."
+  noindex={true}
+>
+  <main class="hangar-page">
+    <div class="hangar-shell">
+      <div class="hangar-topbar">
+        <a href={base} aria-label="Return to Hutzell Aviation">← HUTZELL AVIATION</a>
+        <span>UNLISTED // TIE-DOWN 10</span>
+      </div>
+
+      <header class="hangar-heading">
+        <p>YOU FOUND HANGAR 10</p>
+        <h1>HUTZELLFLASH</h1>
+        <span>Fly clean. Build combos. Put your initials on the board.</span>
+      </header>
+
+      <div class="arcade-grid">
+        <section class="game-column" aria-label="HutzellFlash arcade game">
+          <div class="game-frame-shell">
+            <iframe
+              data-game-frame
+              src={`${base}hutzellflash/`}
+              title="HutzellFlash arcade game"
+              allow="autoplay"
+              loading="eager"
+            ></iframe>
+          </div>
+          <div class="run-status" data-run-status data-tone="neutral">TOP 10 scores can claim a 3-character pilot name.</div>
+        </section>
+
+        <aside class="leaderboard-card" aria-labelledby="leaderboard-title">
+          <div class="leaderboard-heading">
+            <div>
+              <p>GLOBAL BOARD</p>
+              <h2 id="leaderboard-title">TOP PILOTS</h2>
+            </div>
+            <span data-board-state>LOADING</span>
+          </div>
+          <ol class="leaderboard-list" data-leaderboard-list aria-live="polite"></ol>
+          <p class="leaderboard-note">Only the ten highest scores are displayed. A new score must beat the current #10 score to enter a full board.</p>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <dialog class="score-dialog" data-score-dialog>
+    <form class="score-form" data-score-form method="dialog">
+      <p class="score-kicker">TOP 10 QUALIFIER</p>
+      <h2>ENTER PILOT NAME</h2>
+      <p>You scored <strong data-entry-score>0</strong>. Claim your spot with exactly 3 characters.</p>
+      <label for="pilot-initials">PILOT NAME</label>
+      <input id="pilot-initials" name="initials" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="3" minlength="3" pattern="[A-Za-z0-9]{3}" placeholder="ACE" required />
+      <p class="entry-status" data-entry-status aria-live="polite"></p>
+      <div class="score-actions">
+        <button type="submit" data-submit-score>POST SCORE</button>
+        <button type="button" class="secondary" data-skip-score>SKIP</button>
+      </div>
+    </form>
+  </dialog>
+</BaseLayout>
+
+<script>
+  import { supabase } from '../lib/supabase';
+
+  const gameFrame = document.querySelector('[data-game-frame]');
+  const listEl = document.querySelector('[data-leaderboard-list]');
+  const boardState = document.querySelector('[data-board-state]');
+  const runStatus = document.querySelector('[data-run-status]');
+  const dialog = document.querySelector('[data-score-dialog]');
+  const form = document.querySelector('[data-score-form]');
+  const initialsInput = document.querySelector('#pilot-initials');
+  const entryScore = document.querySelector('[data-entry-score]');
+  const entryStatus = document.querySelector('[data-entry-status]');
+  const submitButton = document.querySelector('[data-submit-score]');
+  const skipButton = document.querySelector('[data-skip-score]');
+  const formatter = new Intl.NumberFormat('en-US');
+
+  let leaderboard = [];
+  let leaderboardReady = false;
+  let runStartPromise = null;
+  let pendingRunId = null;
+  let pendingScore = 0;
+  let pendingRunSeconds = 0;
+
+  function showRunStatus(message, tone = 'neutral') {
+    runStatus.textContent = message;
+    runStatus.dataset.tone = tone;
+  }
+
+  function renderLeaderboard() {
+    listEl.replaceChildren();
+    for (let index = 0; index < 10; index += 1) {
+      const row = leaderboard[index];
+      const item = document.createElement('li');
+      const rank = document.createElement('span');
+      const name = document.createElement('strong');
+      const score = document.createElement('span');
+      rank.textContent = String(index + 1).padStart(2, '0');
+      name.textContent = row ? row.initials : '---';
+      score.textContent = row ? formatter.format(row.score) : '------';
+      item.append(rank, name, score);
+      listEl.append(item);
+    }
+  }
+
+  function postLeaderboardToGame() {
+    if (!gameFrame?.contentWindow) return;
+    gameFrame.contentWindow.postMessage({
+      type: 'hutzellflash:leaderboard',
+      scores: leaderboard.map((row) => row.score),
+    }, window.location.origin);
+  }
+
+  function releaseGame() {
+    gameFrame?.contentWindow?.postMessage({ type: 'hutzellflash:release' }, window.location.origin);
+  }
+
+  async function loadLeaderboard() {
+    boardState.textContent = 'SYNCING';
+    const { data, error } = await supabase.rpc('get_hutzellflash_leaderboard');
+    if (error) {
+      leaderboardReady = false;
+      leaderboard = [];
+      renderLeaderboard();
+      boardState.textContent = 'OFFLINE';
+      showRunStatus('Leaderboard is offline. Run the HutzellFlash Supabase SQL, then reload this page.', 'warning');
+      return false;
+    }
+    leaderboard = (data || []).map((row) => ({
+      rank: Number(row.leaderboard_rank),
+      initials: String(row.initials || '---').toUpperCase(),
+      score: Number(row.score) || 0,
+    }));
+    leaderboardReady = true;
+    renderLeaderboard();
+    postLeaderboardToGame();
+    boardState.textContent = leaderboard.length < 10 ? `${leaderboard.length}/10` : 'LIVE';
+    return true;
+  }
+
+  async function startTrackedRun() {
+    const { data, error } = await supabase.rpc('start_hutzellflash_run');
+    if (error) {
+      showRunStatus('Run tracking is unavailable. The game still works, but scores cannot be posted yet.', 'warning');
+      return null;
+    }
+    return data;
+  }
+
+  function qualifiesForTopTen(score) {
+    if (!leaderboardReady) return false;
+    if (leaderboard.length < 10) return true;
+    return score > leaderboard[9].score;
+  }
+
+  function openScoreDialog(score, runId, runSeconds) {
+    pendingScore = score;
+    pendingRunId = runId;
+    pendingRunSeconds = runSeconds;
+    entryScore.textContent = formatter.format(score);
+    entryStatus.textContent = '';
+    initialsInput.value = '';
+    submitButton.disabled = false;
+    skipButton.textContent = 'SKIP';
+    dialog.showModal();
+    window.setTimeout(() => initialsInput.focus(), 40);
+  }
+
+  async function handleGameOver(payload) {
+    const score = Math.max(0, Math.floor(Number(payload.score) || 0));
+    const runSeconds = Math.max(1, Math.floor(Number(payload.runSeconds) || 1));
+    const runId = await Promise.resolve(runStartPromise).catch(() => null);
+
+    if (!leaderboardReady) {
+      showRunStatus(`SCORE ${formatter.format(score)} // leaderboard unavailable`, 'warning');
+      releaseGame();
+      return;
+    }
+
+    if (!qualifiesForTopTen(score)) {
+      const cutoff = leaderboard[9]?.score || 0;
+      showRunStatus(`SCORE ${formatter.format(score)} // TOP 10 CUTOFF ${formatter.format(cutoff)}`, 'neutral');
+      releaseGame();
+      return;
+    }
+
+    if (!runId) {
+      showRunStatus(`SCORE ${formatter.format(score)} qualifies, but this run was not tracked. Reload after installing the SQL.`, 'warning');
+      releaseGame();
+      return;
+    }
+
+    showRunStatus(`SCORE ${formatter.format(score)} // TOP 10 QUALIFIER`, 'success');
+    openScoreDialog(score, runId, runSeconds);
+  }
+
+  window.addEventListener('message', async (event) => {
+    if (event.origin !== window.location.origin || event.source !== gameFrame?.contentWindow) return;
+    const payload = event.data || {};
+    if (payload.type === 'hutzellflash:run-start') {
+      showRunStatus('RUN ACTIVE // score tracking armed', 'success');
+      runStartPromise = startTrackedRun();
+    }
+    if (payload.type === 'hutzellflash:game-over') {
+      await handleGameOver(payload);
+    }
+  });
+
+  gameFrame.addEventListener('load', postLeaderboardToGame);
+
+  initialsInput.addEventListener('input', () => {
+    initialsInput.value = initialsInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 3);
+  });
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const initials = initialsInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 3);
+    if (!/^[A-Z0-9]{3}$/.test(initials)) {
+      entryStatus.textContent = 'Enter exactly 3 letters or numbers.';
+      return;
+    }
+    if (!pendingRunId) {
+      entryStatus.textContent = 'This run is missing its server token. Reload and try again.';
+      return;
+    }
+
+    submitButton.disabled = true;
+    entryStatus.textContent = 'Checking the live board...';
+    const { data, error } = await supabase.rpc('submit_hutzellflash_score', {
+      p_run_id: pendingRunId,
+      p_initials: initials,
+      p_score: pendingScore,
+      p_run_seconds: pendingRunSeconds,
+    });
+
+    if (error) {
+      entryStatus.textContent = error.message || 'Score could not be posted.';
+      submitButton.disabled = false;
+      return;
+    }
+
+    const result = Array.isArray(data) ? data[0] : data;
+    if (!result?.accepted) {
+      entryStatus.textContent = result?.message || 'The board changed and this score no longer qualifies.';
+      submitButton.disabled = true;
+      skipButton.textContent = 'CLOSE';
+      await loadLeaderboard();
+      return;
+    }
+
+    const rank = Number(result.leaderboard_rank) || 0;
+    dialog.close();
+    await loadLeaderboard();
+    showRunStatus(`${initials} POSTED ${formatter.format(pendingScore)} // RANK #${rank}`, 'success');
+    pendingRunId = null;
+    releaseGame();
+  });
+
+  skipButton.addEventListener('click', () => {
+    dialog.close();
+    pendingRunId = null;
+    showRunStatus(`SCORE ${formatter.format(pendingScore)} // not posted`, 'neutral');
+    releaseGame();
+  });
+
+  dialog.addEventListener('cancel', (event) => {
+    event.preventDefault();
+  });
+
+  renderLeaderboard();
+  loadLeaderboard();
+</script>
+
+<style>
+  .hangar-page {
+    min-height: 100vh;
+    padding: 26px 0 54px;
+    color: #eef7fb;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(42, 105, 137, .28), transparent 35%),
+      linear-gradient(180deg, #071725 0%, #091f30 55%, #06131e 100%);
+    font-family: "Courier New", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .hangar-shell { width: min(1420px, calc(100% - 36px)); margin: 0 auto; }
+  .hangar-topbar { display: flex; justify-content: space-between; gap: 20px; padding-bottom: 22px; border-bottom: 1px solid rgba(139, 220, 255, .18); font-size: .76rem; font-weight: 900; letter-spacing: .15em; }
+  .hangar-topbar a, .hangar-topbar span { color: #8bdcff; text-decoration: none; }
+  .hangar-heading { padding: 38px 0 28px; }
+  .hangar-heading p { margin: 0 0 8px; color: #ffd866; font-size: .78rem; font-weight: 900; letter-spacing: .2em; }
+  .hangar-heading h1 { margin: 0; color: #fff; font-family: "Courier New", ui-monospace, monospace; font-size: clamp(2.45rem, 6vw, 5.1rem); line-height: .9; letter-spacing: -.06em; }
+  .hangar-heading span { display: block; margin-top: 15px; color: #aac3d0; font-size: .92rem; }
+  .arcade-grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(300px, .65fr); gap: 24px; align-items: start; }
+  .game-column { min-width: 0; }
+  .game-frame-shell { overflow: hidden; aspect-ratio: 16 / 9; border: 1px solid rgba(139, 220, 255, .28); box-shadow: 0 26px 75px rgba(0,0,0,.38); background: #0e1420; }
+  .game-frame-shell iframe { display: block; width: 100%; height: 100%; border: 0; }
+  .run-status { min-height: 45px; margin-top: 12px; padding: 12px 15px; border: 1px solid rgba(255,255,255,.09); background: rgba(255,255,255,.035); color: #aac3d0; font-size: .76rem; font-weight: 900; letter-spacing: .055em; line-height: 1.45; }
+  .run-status[data-tone="success"] { color: #8df2a2; border-color: rgba(141,242,162,.25); }
+  .run-status[data-tone="warning"] { color: #ffd866; border-color: rgba(255,216,102,.27); }
+  .leaderboard-card { border: 1px solid rgba(139, 220, 255, .24); background: rgba(13, 34, 49, .88); box-shadow: 0 26px 75px rgba(0,0,0,.24); }
+  .leaderboard-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px; border-bottom: 1px solid rgba(139, 220, 255, .14); }
+  .leaderboard-heading p { margin: 0 0 5px; color: #ffd866; font-size: .66rem; font-weight: 900; letter-spacing: .18em; }
+  .leaderboard-heading h2 { margin: 0; color: #fff; font-family: inherit; font-size: 1.35rem; letter-spacing: .035em; }
+  .leaderboard-heading > span { padding: 5px 7px; border: 1px solid rgba(139,220,255,.2); color: #8bdcff; font-size: .62rem; font-weight: 900; letter-spacing: .12em; }
+  .leaderboard-list { margin: 0; padding: 8px 0; list-style: none; counter-reset: none; }
+  .leaderboard-list li { display: grid; grid-template-columns: 38px 1fr auto; gap: 10px; align-items: center; min-height: 43px; padding: 0 18px; border-bottom: 1px solid rgba(255,255,255,.055); color: #dcecff; font-size: .85rem; font-variant-numeric: tabular-nums; }
+  .leaderboard-list li:last-child { border-bottom: 0; }
+  .leaderboard-list li:nth-child(-n+3) strong { color: #ffd866; }
+  .leaderboard-list li > span:first-child { color: #587889; font-size: .7rem; }
+  .leaderboard-list strong { color: #fff; font-size: .95rem; letter-spacing: .16em; }
+  .leaderboard-list li > span:last-child { color: #8bdcff; font-weight: 900; }
+  .leaderboard-note { margin: 0; padding: 16px 20px 20px; border-top: 1px solid rgba(139,220,255,.12); color: #7896a6; font-size: .68rem; line-height: 1.6; }
+  .score-dialog { width: min(470px, calc(100% - 28px)); padding: 0; border: 1px solid rgba(139,220,255,.42); border-radius: 0; background: #0b2131; color: #eef7fb; box-shadow: 0 30px 100px rgba(0,0,0,.65); font-family: "Courier New", ui-monospace, monospace; }
+  .score-dialog::backdrop { background: rgba(2, 9, 15, .82); backdrop-filter: blur(4px); }
+  .score-form { padding: 28px; }
+  .score-kicker { margin: 0 0 7px; color: #8df2a2; font-size: .7rem; font-weight: 900; letter-spacing: .18em; }
+  .score-form h2 { margin: 0; color: #fff; font-family: inherit; font-size: 1.7rem; }
+  .score-form > p:not(.score-kicker):not(.entry-status) { color: #aac3d0; line-height: 1.55; }
+  .score-form label { display: block; margin: 24px 0 8px; color: #ffd866; font-size: .68rem; font-weight: 900; letter-spacing: .14em; }
+  .score-form input { width: 100%; height: 76px; padding: 0 18px; border: 1px solid #416d83; border-radius: 0; outline: none; background: #061521; color: #fff; font: 900 2.5rem/1 "Courier New", monospace; letter-spacing: .45em; text-align: center; text-transform: uppercase; }
+  .score-form input:focus { border-color: #8bdcff; box-shadow: 0 0 0 2px rgba(139,220,255,.12); }
+  .entry-status { min-height: 20px; margin: 10px 0 0; color: #ffd866; font-size: .72rem; line-height: 1.45; }
+  .score-actions { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 18px; }
+  .score-actions button { min-height: 48px; padding: 0 18px; border: 1px solid #8bdcff; border-radius: 0; background: #8bdcff; color: #061521; font: 900 .76rem/1 "Courier New", monospace; letter-spacing: .1em; cursor: pointer; }
+  .score-actions button.secondary { border-color: rgba(255,255,255,.16); background: transparent; color: #aac3d0; }
+  .score-actions button:disabled { opacity: .5; cursor: not-allowed; }
+  @media (max-width: 900px) {
+    .arcade-grid { grid-template-columns: 1fr; }
+    .leaderboard-card { max-width: 680px; width: 100%; margin: 0 auto; }
+  }
+  @media (max-width: 580px) {
+    .hangar-page { padding-top: 18px; }
+    .hangar-shell { width: min(100% - 20px, 1420px); }
+    .hangar-topbar { align-items: flex-start; flex-direction: column; gap: 8px; }
+    .hangar-heading { padding: 27px 0 20px; }
+    .hangar-heading span { font-size: .8rem; line-height: 1.5; }
+    .run-status { font-size: .67rem; }
+    .score-form { padding: 22px; }
+  }
+</style>
