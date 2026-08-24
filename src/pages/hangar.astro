@@ -147,6 +147,9 @@ const base = import.meta.env.BASE_URL;
   let pendingRunId = null;
   let pendingScore = 0;
   let pendingRunSeconds = 0;
+  let startRequested = false;
+  let startAttemptTimer = null;
+  let startFailureTimer = null;
 
   function renderLeaderboard(target) {
     if (!target) return;
@@ -248,35 +251,100 @@ const base = import.meta.env.BASE_URL;
     checkOrientation();
   }
 
-  function invokeGameStart() {
-    if (!gameFrame?.contentWindow) return false;
+  function clearStartTimers() {
+    if (startAttemptTimer) window.clearTimeout(startAttemptTimer);
+    if (startFailureTimer) window.clearTimeout(startFailureTimer);
+    startAttemptTimer = null;
+    startFailureTimer = null;
+  }
+
+  function dispatchStartGesture() {
+    if (!gameFrame?.contentWindow || !gameFrame.contentDocument) return false;
+    const frameWindow = gameFrame.contentWindow;
+    const frameDocument = gameFrame.contentDocument;
+    const canvas = frameDocument.getElementById('game');
+    let attempted = false;
+
+    // Primary path: call the existing game's public start function directly.
     try {
-      const frameWindow = gameFrame.contentWindow;
       if (typeof frameWindow.start === 'function') {
         frameWindow.focus();
         frameWindow.start();
-        return true;
+        attempted = true;
       }
-      frameWindow.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-      frameWindow.focus();
-      return true;
-    } catch (error) {
-      return false;
+    } catch (error) { /* try the fallbacks below */ }
+
+    // Safari can expose classic-script globals inconsistently inside an iframe.
+    // Evaluating in the child realm reaches the same existing start() function
+    // without changing the game files.
+    if (!attempted) {
+      try {
+        frameWindow.eval('typeof start === "function" && start()');
+        attempted = true;
+      } catch (error) { /* try a synthetic pointer gesture */ }
     }
+
+    // Final fallback mirrors the game's own mobile canvas input path. The game
+    // listens for pointerdown on its canvas and does not require a trusted event.
+    if (!attempted && canvas) {
+      try {
+        const rect = canvas.getBoundingClientRect();
+        const eventInit = {
+          bubbles: true,
+          cancelable: true,
+          clientX: rect.left + rect.width / 2,
+          clientY: rect.top + rect.height / 2,
+          pointerId: 1,
+          pointerType: 'touch',
+          isPrimary: true,
+        };
+        if (typeof frameWindow.PointerEvent === 'function') {
+          canvas.dispatchEvent(new frameWindow.PointerEvent('pointerdown', eventInit));
+          frameWindow.dispatchEvent(new frameWindow.PointerEvent('pointerup', eventInit));
+        } else {
+          canvas.dispatchEvent(new frameWindow.MouseEvent('mousedown', eventInit));
+          canvas.dispatchEvent(new frameWindow.MouseEvent('mouseup', eventInit));
+        }
+        frameWindow.focus();
+        attempted = true;
+      } catch (error) { /* the acknowledgement timeout handles failure */ }
+    }
+
+    return attempted;
+  }
+
+  function attemptGameStart() {
+    if (!startRequested) return;
+    dispatchStartGesture();
+    // Keep the lobby covering the iframe until the game itself confirms that
+    // a run actually started. This prevents the game's title/high-score screen
+    // from flashing full-screen on mobile when a start gesture is missed.
+    startAttemptTimer = window.setTimeout(() => {
+      if (startRequested) dispatchStartGesture();
+    }, 180);
   }
 
   function beginFlight() {
-    if (!gameReady) return;
+    if (!gameReady || startRequested) return;
     pendingRunId = null;
     pendingScore = 0;
     pendingRunSeconds = 0;
-    setView('play');
-    requestAnimationFrame(() => {
-      if (!invokeGameStart()) {
-        setView('lobby');
-        lobbyStatus.textContent = 'Flight controls could not initialize. Reload the page and try again.';
-      }
-    });
+    clearStartTimers();
+    startRequested = true;
+    startButton.disabled = true;
+    flyAgainButton.disabled = true;
+    if (currentView === 'lobby') lobbyStatus.textContent = 'Starting flight...';
+
+    requestAnimationFrame(attemptGameStart);
+    startFailureTimer = window.setTimeout(() => {
+      if (!startRequested) return;
+      startRequested = false;
+      clearStartTimers();
+      startButton.disabled = false;
+      flyAgainButton.disabled = false;
+      if (currentView !== 'lobby') setView('lobby');
+      lobbyStatus.textContent = 'Flight controls did not respond. Tap START FLIGHT again.';
+    }, 1600);
   }
 
   function showResult({ score, title, kicker, message }) {
@@ -361,25 +429,24 @@ const base = import.meta.env.BASE_URL;
     if (event.origin !== window.location.origin || event.source !== gameFrame?.contentWindow) return;
     const payload = event.data || {};
     if (payload.type === 'hutzellflash:run-start') {
+      clearStartTimers();
+      startRequested = false;
+      startButton.disabled = false;
+      flyAgainButton.disabled = false;
       runStartPromise = startTrackedRun();
+      setView('play');
+      gameFrame?.contentWindow?.focus();
     }
     if (payload.type === 'hutzellflash:game-over') {
       await handleGameOver(payload);
     }
   });
 
-  function markGameReady() {
+  gameFrame.addEventListener('load', () => {
     gameReady = true;
     postLeaderboardToGame();
     updateStartAvailability();
-  }
-
-  gameFrame.addEventListener('load', markGameReady);
-  try {
-    if (gameFrame.contentDocument?.readyState === 'complete') markGameReady();
-  } catch (error) {
-    // Same-origin in production; the load listener remains the fallback.
-  }
+  });
 
   startButton.addEventListener('click', beginFlight);
   flyAgainButton.addEventListener('click', beginFlight);
@@ -471,6 +538,7 @@ const base = import.meta.env.BASE_URL;
     background: #0e1420;
   }
 
+  :global(html) { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   :global(body) { touch-action: manipulation; }
   :global(*) { box-sizing: border-box; }
 
@@ -495,6 +563,8 @@ const base = import.meta.env.BASE_URL;
     height: 100%;
     border: 0;
     background: #0e1420;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
   }
 
   .screen,
