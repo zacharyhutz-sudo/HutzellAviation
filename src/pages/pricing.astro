@@ -2,27 +2,12 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import Icon from '../components/Icon.astro';
+import { pricingPlans } from '../data/site';
 import '../styles/global.css';
 const base = import.meta.env.BASE_URL;
 ---
-<BaseLayout title="Renter Portal | Hutzell Aviation" description="Approved Hutzell Aviation renters can purchase block hours and manage rental activity from the renter portal.">
+<BaseLayout title="Rental Rates | Hutzell Aviation" description="Compare pay-as-you-go and prepaid wet rates for Hutzell Aviation aircraft rental.">
   <Header />
-  <main>
-    <section class="section checkout-section">
-      <div class="container">
-        <div class="checkout-form-card payment-roadmap">
-          <Icon name="dollar" size={34}/>
-          <h1>Rental purchases have moved to the renter portal.</h1>
-          <p>Approved renters can purchase 15-, 25-, or 50-hour blocks and manage their account from one place.</p>
-          <div class="account-actions"><a class="button" href={`${base}account/#purchase-hours`}>Open Renter Portal</a></div>
-        </div>
-      </div>
-    </section>
-  </main>
+  <main class="rates-page container" id="main-content"><p class="eyebrow">HOURS THAT FIT YOUR FLYING</p><h1>Simple rates. Fuel included.</h1><p class="rental-lead">Pay after each flight or save with a prepaid block.</p><div class="rental-rate-grid">{pricingPlans.map(plan => <article><span>{plan.name}</span><h2>{plan.rate}</h2><strong>{plan.total}</strong><p>{plan.description}</p><a class="button button-outline" href={`${base}account/${plan.name !== 'Pay As You Go' ? '#purchase-hours' : '#payments'}`}>{plan.name === 'Pay As You Go' ? 'Open Payments' : 'Purchase Hours'}</a></article>)}</div><section class="portal-panel"><h2>Before you purchase</h2><p>Prepaid blocks expire three months after purchase. Approved renter access is required for online purchases and reservation requests. Purchasing hours does not confirm a reservation.</p><p>Finalized flight time is applied to eligible prepaid hours, with remaining time charged at the pay-as-you-go rate. Review aircraft requirements and rental terms before requesting a flight.</p><div class="hero-actions"><a class="text-link" href={`${base}aircraft/#requirements`}>Requirements and rental terms →</a><a class="text-link" href={`${base}availability/`}>View the schedule →</a></div></section></main>
   <Footer />
 </BaseLayout>
-<script>
-  const base = import.meta.env.BASE_URL;
-  window.location.replace(`${base}account/#purchase-hours`);
-</script>

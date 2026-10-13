@@ -19,7 +19,7 @@ export const supabase = browserFactory.createClient(supabaseUrl, supabaseKey || 
   },
 });
 
-export const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://zacharyhutz-sudo.github.io/HutzellAviation/';
+export const siteUrl = import.meta.env.PUBLIC_SITE_URL || ''; 
 export const aircraftId = '00000000-0000-0000-0000-000000000001';
 export const aviationTimeZone = 'America/New_York';
 

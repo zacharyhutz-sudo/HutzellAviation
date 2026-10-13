@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import PortalNav from '../components/PortalNav.astro';
 import PageHero from '../components/PageHero.astro';
 import Icon from '../components/Icon.astro';
 import '../styles/global.css';
@@ -10,6 +11,7 @@ const base = import.meta.env.BASE_URL;
 <BaseLayout title="Renter Application | Hutzell Aviation" description="Apply for approved renter access to the Hutzell Aviation Piper Cherokee.">
   <Header />
   <main>
+    <div class="container operations-nav"><PortalNav /></div>
     <PageHero eyebrow="RENTER APPLICATION" title="Apply for aircraft access." description="Create a renter account, provide your pilot background, and prepare the required insurance, medical, ID, logbook review, and aircraft check flight." />
 
     <section class="section application-section">

@@ -1,0 +1,9 @@
+---
+const base = import.meta.env.BASE_URL;
+const { active = '' } = Astro.props;
+---
+<nav class="portal-nav" aria-label="Renter workspace" data-portal-nav hidden>
+  <a href={`${base}availability/`} aria-current={active === 'schedule' ? 'page' : undefined}>Schedule</a>
+  <a href={`${base}account/#flights`} data-portal-section="flights">My Flights</a>
+  <a href={`${base}account/#payments`} data-portal-section="payments">Hours &amp; Payments</a>
+</nav>

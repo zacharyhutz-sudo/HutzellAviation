@@ -17,10 +17,9 @@ export const site = {
 };
 
 export const navItems = [
-  { label: 'Home', href: '' },
-  { label: 'About', href: 'about/' },
+  { label: 'Schedule', href: 'availability/' },
+  { label: 'Rates', href: 'pricing/' },
   { label: 'Aircraft', href: 'aircraft/' },
-  { label: 'Availability', href: 'availability/' },
 ] as const;
 
 export const pricingPlans = [

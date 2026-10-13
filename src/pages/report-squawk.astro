@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import PortalNav from '../components/PortalNav.astro';
 import PageHero from '../components/PageHero.astro';
 import Icon from '../components/Icon.astro';
 import '../styles/global.css';
@@ -10,6 +11,7 @@ const base = import.meta.env.BASE_URL;
 <BaseLayout title="Report Aircraft Issue | Hutzell Aviation" description="Report an aircraft squawk to Hutzell Aviation for maintenance review.">
   <Header />
   <main>
+    <div class="container operations-nav"><PortalNav /></div>
     <PageHero eyebrow="AIRCRAFT SQUAWK" title="Report something Tyler should inspect." description="Use this form for aircraft discrepancies, equipment issues, or anything that should be reviewed before the next flight." />
     <section class="section operations-form-section">
       <div class="container operations-form-wrap">

@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import PortalNav from '../components/PortalNav.astro';
 import PageHero from '../components/PageHero.astro';
 import Icon from '../components/Icon.astro';
 import '../styles/global.css';
@@ -10,6 +11,7 @@ const base = import.meta.env.BASE_URL;
 <BaseLayout title="Post-Flight Report | Hutzell Aviation" description="Submit recorded aircraft time and post-flight details for a Hutzell Aviation reservation.">
   <Header />
   <main>
+    <div class="container operations-nav"><PortalNav /></div>
     <PageHero eyebrow="POST-FLIGHT" title="Close out your flight." description="Record aircraft time and return details after a confirmed reservation. Tyler will review the report before final billing and block-hour reconciliation." />
     <section class="section operations-form-section">
       <div class="container operations-form-wrap">
@@ -124,7 +126,7 @@ const base = import.meta.env.BASE_URL;
     if (error) showMessage(error.message);
     else {
       showMessage('Post-flight report submitted. Tyler will review the final aircraft time and reconcile your block balance or pay-as-you-go charge.', 'success');
-      window.setTimeout(() => window.location.href = `${base}account/`, 1600);
+      window.setTimeout(() => window.location.href = `${base}account/#flights`, 1600);
     }
   });
 

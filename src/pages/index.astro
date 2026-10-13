@@ -2,97 +2,22 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import CallToAction from '../components/CallToAction.astro';
 import Icon from '../components/Icon.astro';
-import { pricingPlans, rentalSteps, site } from '../data/site';
+import { pricingPlans } from '../data/site';
 import '../styles/global.css';
 const base = import.meta.env.BASE_URL;
-const aircraftExterior = `${base}images/n8491f-home-hero.jpeg`;
-const aircraftLanding = 'https://upload.wikimedia.org/wikipedia/commons/2/24/Piper_PA-28_Cherokee_Landing_03.JPG';
 ---
 <BaseLayout>
   <Header />
-  <main id="top">
-    <section class="home-hero">
-      <div class="container home-hero-grid">
-        <div class="hero-copy reveal">
-          <p class="eyebrow"><span></span> AIRCRAFT RENTAL • KWDR • WINDER, GEORGIA</p>
-          <h1>Build time.<br /><em>Fly on your schedule.</em></h1>
-          <p class="hero-lead">A 1974 Piper PA-28-140 being prepared for wet rental by approved pilots, commercial-pilot candidates, and local time builders.</p>
-          <div class="hero-actions"><a class="button" href={`${base}availability/`}>View Availability <Icon name="calendar" size={19} /></a><a class="button button-outline" href={`${base}apply/`} data-renter-action data-unapproved-label="Apply to Rent" data-approved-label="Renter Portal" data-unapproved-href={`${base}apply/`} data-approved-href={`${base}account/`}><span data-renter-action-label>Apply to Rent</span></a></div>
-          <div class="hero-trust"><span><Icon name="shield" size={20} /> Approved renters</span><span><Icon name="location" size={20} /> KWDR · Winder</span><span><Icon name="clock" size={20} /> Flexible blocks</span></div>
-        </div>
-        <div class="hero-visual reveal reveal-delay">
-          <figure class="hero-photo-frame">
-            <img src={aircraftExterior} alt="Hutzell Aviation Piper PA-28-140 N8491F parked at the hangar" width="1536" height="1152" fetchpriority="high" decoding="async" />
-            <figcaption>1974 Piper PA-28-140 · N8491F</figcaption>
-          </figure>
-          <div class="hero-status-card"><span class="status-dot"></span><div><strong>Availability calendar</strong><span>Preview open rental windows online</span></div></div>
-        </div>
-      </div>
+  <main id="main-content" class="rental-home">
+    <div class="container returning-renter" data-returning-renter hidden><div><strong>Welcome back.</strong><span>Your flights, hours, and payments are in your renter portal.</span></div><a class="button button-small" href={`${base}account/`}>Open Renter Portal →</a></div>
+    <section class="rental-hero container">
+      <div><p class="eyebrow">AIRCRAFT RENTAL · KWDR · WINDER, GA</p><h1>Your time.<br />Your next flight.</h1><p class="rental-lead">Check the schedule, request your flight, and manage your hours in one place.</p><div class="hero-actions"><a class="button" href={`${base}availability/`}>Schedule a Flight <Icon name="calendar" size={20}/></a><a class="button button-outline" href={`${base}account/#payments`}>Hours &amp; Payments</a></div><p class="rental-qualification">For approved renters. Every reservation requires Tyler’s confirmation.</p><a class="text-link" href={`${base}apply/`} data-renter-action data-unapproved-label="New renter? Start your application" data-approved-label="View My Flights" data-unapproved-href={`${base}apply/`} data-approved-href={`${base}account/#flights`}><span data-renter-action-label>New renter? Start your application</span> →</a></div>
+      <figure class="rental-aircraft"><img src={`${base}images/n8491f-home-hero.jpeg`} alt="Hutzell Aviation Piper Cherokee N8491F at the hangar" width="1536" height="1152" fetchpriority="high"/><figcaption><span><strong>Piper PA-28-140</strong>N8491F · 1974 Cherokee</span><a href={`${base}aircraft/`}>Meet the aircraft →</a></figcaption></figure>
     </section>
-
-    <section class="proof-strip" aria-label="Hutzell Aviation rental benefits">
-      <div class="container proof-grid"><div><strong>PA-28-140</strong><span>1974 Piper Cherokee</span></div><div><strong>Online</strong><span>Availability calendar</span></div><div><strong>4</strong><span>Flexible pricing options</span></div><div><strong>KWDR</strong><span>Barrow County Airport</span></div></div>
-    </section>
-
-    <section class="section intro-section">
-      <div class="container split-intro">
-        <div class="section-heading reveal"><p class="eyebrow"><span></span> A RENTAL COMPANY BUILT FOR PILOTS</p><h2>More access to the airplane. Less friction around the schedule.</h2></div>
-        <div class="intro-copy reveal reveal-delay"><p class="lead">Hutzell Aviation is preparing a 1974 Piper PA-28-140 at KWDR in Winder, Georgia for qualified pilots who need dependable aircraft access.</p><p>Renters can review availability, request approved time blocks, and choose pay-as-you-go or discounted 15-, 25-, and 50-hour wet-rate packages.</p><a class="text-link" href={`${base}about/`}>Why Tyler started Hutzell Aviation <Icon name="arrow" size={18} /></a></div>
-      </div>
-    </section>
-
-    <section class="section feature-section">
-      <div class="container">
-        <div class="section-heading centered reveal"><p class="eyebrow centered-eyebrow"><span></span> DESIGNED AROUND RENTAL <span></span></p><h2>A clear path from application to flight.</h2><p>The rental process keeps availability, approval, reservations, and account activity easy to understand.</p></div>
-        <div class="feature-grid">
-          <article class="feature-card reveal"><span class="feature-icon"><Icon name="calendar" size={28} /></span><h3>See open time</h3><p>Review the public calendar without exposing another renter’s personal details.</p><a href={`${base}availability/`}>Open calendar <Icon name="arrow" size={17} /></a></article>
-          <article class="feature-card reveal reveal-1"><span class="feature-icon"><Icon name="document" size={28} /></span><h3>Renter access</h3><p>Submit pilot information once for Tyler’s review, then manage approved rental access from your account.</p><a href={`${base}apply/`} data-renter-action data-unapproved-label="Start application" data-approved-label="Open renter portal" data-unapproved-href={`${base}apply/`} data-approved-href={`${base}account/`}><span data-renter-action-label>Start application</span> <Icon name="arrow" size={17} /></a></article>
-          <article class="feature-card reveal reveal-2"><span class="feature-icon"><Icon name="dollar" size={28} /></span><h3>Purchase hours</h3><p>Fly for $180 per hour or save with a 15-, 25-, or 50-hour wet-rate block. Approved renters purchase blocks securely in the renter portal.</p><a href={`${base}account/#purchase-hours`}>Renter portal <Icon name="arrow" size={17} /></a></article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section process-section">
-      <div class="container">
-        <div class="section-heading reveal"><p class="eyebrow light"><span></span> HOW IT WORKS</p><h2>Four steps to the flight line.</h2></div>
-        <ol class="rental-steps">{rentalSteps.map((step) => <li class="reveal"><span>{step.number}</span><h3>{step.title}</h3><p>{step.text}</p></li>)}</ol>
-      </div>
-    </section>
-
-    <section class="section aircraft-preview-section">
-      <div class="container aircraft-preview-grid">
-        <div class="aircraft-preview-art reveal">
-          <figure class="aircraft-photo-card">
-            <span class="card-label">THE AIRCRAFT</span>
-            <img src={aircraftLanding} alt="Representative Piper PA-28 Cherokee landing" width="1600" height="1200" loading="lazy" decoding="async" />
-            <figcaption><span>Piper Cherokee</span><span>Representative photo</span></figcaption>
-          </figure>
-        </div>
-        <div class="aircraft-preview-copy reveal reveal-delay"><p class="eyebrow"><span></span> 1974 PIPER PA-28-140</p><h2>A well-equipped platform for time building and personal flying.</h2><p class="lead">N8491F combines a 160 HP Lycoming engine, 950-pound useful load, 50-gallon fuel capacity, and a modernized Garmin-equipped panel.</p><ul class="check-list"><li><Icon name="check" size={18} /> Dual Garmin G5s and GTN 650Xi</li><li><Icon name="check" size={18} /> 115-knot cruise speed</li><li><Icon name="check" size={18} /> Based at KWDR, tie-down #10</li></ul><a class="button button-outline" href={`${base}aircraft/`}>Explore the Aircraft <Icon name="arrow" size={19} /></a></div>
-      </div>
-    </section>
-
-    <section class="section pricing-preview-section">
-      <div class="container">
-        <div class="section-heading centered reveal"><p class="eyebrow centered-eyebrow"><span></span> RENTAL OPTIONS <span></span></p><h2>Choose the commitment that fits your flying.</h2><p>All published rates are wet. Prepaid hour packages expire three months after purchase.</p></div>
-        <div class="mini-pricing-grid">{pricingPlans.map((plan) => <article class:list={['mini-price-card','reveal',{featured: plan.badge === 'Most Popular'}]}>{plan.badge && <span class="plan-badge">{plan.badge}</span>}<h3>{plan.name}</h3><strong>{plan.hours}</strong><p>{plan.rate}</p></article>)}</div>
-        <div class="center-action"><a class="button button-outline" href={`${base}account/#purchase-hours`}>Purchase Hours in Renter Portal <Icon name="arrow" size={19} /></a></div>
-      </div>
-    </section>
-
-    <section class="section about-preview-section">
-      <div class="container about-preview-grid">
-        <article class="tyler-card reveal">
-          <img class="tyler-card-photo" src={`${base}images/tyler-hutzell.png`} alt="Tyler Hutzell, founder of Hutzell Aviation" width="400" height="400" loading="lazy" decoding="async" />
-          <div class="tyler-card-body"><span>FOUNDER</span><h3>{site.owner}</h3><p>ATP Flight School graduate, CFII, and owner of Hutzell Aviation LLC.</p></div>
-        </article>
-        <div class="about-preview-copy reveal reveal-delay"><p class="eyebrow"><span></span> ABOUT HUTZELL AVIATION</p><h2>Created by a pilot who understands the need for accessible flight time.</h2><p class="lead">Tyler’s aviation background helps shape a renter experience built around clear expectations, practical access, and responsible aircraft use.</p><a class="text-link" href={`${base}about/`}>Meet Tyler and read the company story <Icon name="arrow" size={18} /></a></div>
-      </div>
-    </section>
-
-    <CallToAction />
+    <section class="rental-rates container" aria-labelledby="home-rates"><div class="portal-section-heading"><div><p class="eyebrow">FLIGHT HOURS</p><h2 id="home-rates">Fly at your pace.</h2><p>Wet rates include fuel. Prepaid blocks expire in three months.</p></div><a class="text-link" href={`${base}pricing/`}>View rates and terms →</a></div><div class="rental-rate-grid">{pricingPlans.map(plan => <article><span>{plan.name}</span><h3>{plan.rate}</h3><p>{plan.total}</p></article>)}</div></section>
+    <section class="rental-start container"><div><p class="eyebrow">NEW TO HUTZELL AVIATION?</p><h2>A straightforward start.</h2><p>Our 1974 Piper Cherokee is being prepared for rental at Barrow County Airport. Review the requirements, submit your application, and complete your aircraft checkout with Tyler.</p><a class="text-link" href={`${base}aircraft/#requirements`}>Renter requirements →</a></div><ol><li><span>01</span><div><h3>Create your account</h3><p>Submit pilot details and your renter application.</p></div></li><li><span>02</span><div><h3>Get approved</h3><p>Complete document review and the required check flight.</p></div></li><li><span>03</span><div><h3>Choose your next flight</h3><p>Request a time window and manage billing in your portal.</p></div></li></ol></section>
+    <section class="rental-about container"><div><h2>Local aircraft. Personal support.</h2><p>Learn about Tyler, Hutzell Aviation, and flying from KWDR.</p></div><a class="button button-outline" href={`${base}about/`}>About Hutzell Aviation</a></section>
   </main>
   <Footer />
 </BaseLayout>

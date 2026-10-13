@@ -22,23 +22,15 @@ const activeFor = (href: string) => href === '' ? pathname === base || pathname 
     </button>
 
     <nav class="primary-nav" id="primary-nav" aria-label="Primary navigation" data-nav>
-      {navItems.map((item) => <a class:list={[{ active: activeFor(item.href) }]} href={`${base}${item.href}`}>{item.label}</a>)}
+      {navItems.map((item) => <a class:list={[{ active: activeFor(item.href) }]} aria-current={activeFor(item.href) ? 'page' : undefined} href={`${base}${item.href}`}>{item.label}</a>)}
+      <details class="nav-more"><summary>More</summary><div><a href={`${base}about/`}>About Hutzell Aviation</a><a href={`${base}aircraft/#requirements`}>Renter requirements</a><a href={`${base}apply/`}>Renter application</a><a href={`mailto:tylerhutzell4@gmail.com`}>Contact Tyler</a></div></details>
       <a class="nav-admin" href={`${base}admin/`} data-admin-link hidden>Admin</a>
-      <a class="nav-account" href={`${base}account/`} data-account-link><Icon name="user" size={17} /> <span data-account-label>Account</span></a>
-      <a
-        class="button button-small"
-        href={`${base}apply/`}
-        data-renter-action
-        data-unapproved-label="Apply to Rent"
-        data-approved-label="Renter Portal"
-        data-unapproved-href={`${base}apply/`}
-        data-approved-href={`${base}account/`}
-      ><span data-renter-action-label>Apply to Rent</span></a>
+      <a class="button button-small" href={`${base}account/`} data-account-link><Icon name="user" size={17} /><span data-account-label>Sign In</span></a>
     </nav>
   </div>
 </header>
 <script>
-  import { getCurrentProfile, supabase, type Profile } from '../lib/supabase';
+  import { onSession, isApproved } from '../lib/session';
 
   const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
   const nav = document.querySelector<HTMLElement>('[data-nav]');
@@ -51,6 +43,7 @@ const activeFor = (href: string) => href === '' ? pathname === base || pathname 
     toggle.setAttribute('aria-expanded', String(open));
     nav.classList.toggle('is-open', open);
     document.body.classList.toggle('nav-open', open);
+    if (!open) nav.querySelectorAll('details').forEach((item) => item.open = false);
     if (navLabel) navLabel.textContent = open ? 'Close navigation' : 'Open navigation';
     if (open && focusFirst) {
       window.setTimeout(() => nav.querySelector<HTMLElement>('a:not([hidden])')?.focus(), 50);
@@ -78,43 +71,26 @@ const activeFor = (href: string) => href === '' ? pathname === base || pathname 
     });
   }
 
-  const accountLabel = document.querySelector('[data-account-label]');
-  const accountLink = document.querySelector<HTMLElement>('[data-account-link]');
-  const adminLink = document.querySelector<HTMLElement>('[data-admin-link]');
+  const more = document.querySelector<HTMLDetailsElement>('.nav-more');
+  document.addEventListener('click', (event) => { if (more && !more.contains(event.target as Node)) more.open = false; });
+  document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && more?.open) { more.open = false; more.querySelector('summary')?.focus(); } });
 
-  function updateRenterActions(profile: Profile | null) {
-    const approved = profile?.role === 'admin' || profile?.approval_status === 'approved';
+  const accountLabel = document.querySelector('[data-account-label]');
+  const adminLink = document.querySelector<HTMLElement>('[data-admin-link]');
+  onSession(({ loading, userId, profile }) => {
+    if (loading) return;
+    if (accountLabel) accountLabel.textContent = userId ? 'Renter Portal' : 'Sign In';
+    if (adminLink) adminLink.hidden = profile?.role !== 'admin';
+    document.querySelectorAll<HTMLElement>('[data-portal-nav]').forEach((nav) => nav.hidden = !userId);
+    document.body.classList.toggle('has-portal-nav', Boolean(userId && document.querySelector('[data-portal-nav]')));
+    document.querySelectorAll<HTMLElement>('[data-returning-renter]').forEach((el) => el.hidden = !userId);
     document.querySelectorAll<HTMLAnchorElement>('[data-renter-action]').forEach((link) => {
+      const approved = isApproved(profile);
       const label = approved ? link.dataset.approvedLabel : link.dataset.unapprovedLabel;
       const href = approved ? link.dataset.approvedHref : link.dataset.unapprovedHref;
       const labelEl = link.querySelector<HTMLElement>('[data-renter-action-label]');
       if (label && labelEl) labelEl.textContent = label;
       if (href) link.href = href;
     });
-  }
-
-  async function updateHeaderAccount() {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        if (accountLabel) accountLabel.textContent = 'Account';
-        if (accountLink) accountLink.hidden = false;
-        if (adminLink) adminLink.hidden = true;
-        updateRenterActions(null);
-        return;
-      }
-      const profile = await getCurrentProfile();
-      const approved = profile?.role === 'admin' || profile?.approval_status === 'approved';
-      if (accountLabel) accountLabel.textContent = 'Dashboard';
-      if (accountLink) accountLink.hidden = approved;
-      if (adminLink) adminLink.hidden = profile?.role !== 'admin';
-      updateRenterActions(profile);
-    } catch {
-      if (accountLink) accountLink.hidden = false;
-      if (adminLink) adminLink.hidden = true;
-      updateRenterActions(null);
-    }
-  }
-  updateHeaderAccount();
-  supabase.auth.onAuthStateChange(() => { window.setTimeout(updateHeaderAccount, 0); });
+  });
 </script>

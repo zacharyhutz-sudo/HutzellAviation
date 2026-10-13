@@ -10,9 +10,10 @@ const base = import.meta.env.BASE_URL;
       <p>{site.serviceArea}.</p>
     </div>
     <div>
-      <h3>Explore</h3>
+      <h3>Fly with us</h3>
       <nav aria-label="Footer navigation">
-        {navItems.slice(1).map((item) => <a href={`${base}${item.href}`}>{item.label}</a>)}
+        <a href={`${base}about/`}>About</a>
+        {navItems.map((item) => <a href={`${base}${item.href}`}>{item.label}</a>)}
         <a href={`${base}apply/`} data-renter-action data-unapproved-label="Renter Application" data-approved-label="Renter Portal" data-unapproved-href={`${base}apply/`} data-approved-href={`${base}account/`}><span data-renter-action-label>Renter Application</span></a>
       </nav>
     </div>

@@ -2,300 +2,308 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import PortalNav from '../components/PortalNav.astro';
 import Icon from '../components/Icon.astro';
 import '../styles/global.css';
 const base = import.meta.env.BASE_URL;
 ---
-<BaseLayout title="Renter Portal | Hutzell Aviation" description="Manage Hutzell Aviation renter access, aircraft reservations, block-hour purchases, flight records, and billing.">
+<BaseLayout title="Renter Portal | Hutzell Aviation" description="Schedule your next flight, manage reservations, purchase flight hours, and pay outstanding charges." noindex>
   <Header />
-  <main class="account-main">
-    <section class="account-login-section">
-      <div class="container account-login-grid" data-auth-page>
-        <div class="account-intro reveal"><p class="eyebrow light"><span></span> RENTER PORTAL</p><h1>Your flying schedule and account in one place.</h1><p>Sign in to manage renter access, schedule the Piper Cherokee, purchase block hours, and keep up with flight activity and billing.</p><ul><li><Icon name="calendar" size={20}/> Schedule flights and review reservations</li><li><Icon name="dollar" size={20}/> Purchase blocks and pay account charges</li><li><Icon name="wrench" size={20}/> Aircraft issue reporting</li></ul></div>
-
-        <div class="login-card account-portal-card reveal reveal-delay" data-auth-card>
+  <main class="renter-page" id="main-content">
+    <div class="container session-notice" data-session-loading role="status">Opening your renter workspace…</div>
+    <div class="container session-notice" data-session-error hidden role="alert"><h1>We couldn’t load your account.</h1><p>Check your connection and try again.</p><button class="button" type="button" data-session-retry>Try again</button><button class="text-button" type="button" data-signout>Sign out</button></div>
+    <script is:inline>
+      window.setTimeout(() => {
+        const loading = document.querySelector('[data-session-loading]');
+        if (loading && !loading.hidden) {
+          loading.textContent = 'Your account is taking longer than expected to load. Check your connection, then ';
+          const retry = document.createElement('a'); retry.href = window.location.href; retry.textContent = 'reload this page'; retry.className = 'text-link'; loading.append(retry);
+        }
+      }, 12000);
+    </script>
+    <noscript><div class="container session-notice">Enable JavaScript to sign in and manage your flights.</div></noscript>
+    <section class="renter-auth" data-auth-page hidden>
+      <div class="container renter-auth-grid">
+        <div class="renter-auth-intro"><p class="eyebrow">YOUR NEXT FLIGHT STARTS HERE</p><h1>More flying.<br />Less planning.</h1><p>Sign in to schedule N8491F, buy flight hours, and manage payments in one place.</p><a class="text-link" href={`${base}availability/`}>Browse the schedule <Icon name="arrow" size={18}/></a><p class="auth-help">New to Hutzell Aviation? Create an account, submit your pilot details, and complete renter approval.</p></div>
+        <div class="login-card renter-auth-card">
           <div class="login-logo"><img src={`${base}images/logo-full.png`} alt="Hutzell Aviation" width="1358" height="1224"/></div>
-          <div data-auth-forms>
-            <div class="auth-tabs" role="tablist"><button type="button" class="active" data-auth-tab="signin">Sign In</button><button type="button" data-auth-tab="register">Create Account</button></div>
-            <form data-signin-form>
-              <h2>Renter sign in</h2>
-              <label>Email address<input type="email" name="email" autocomplete="email" required/></label>
-              <label>Password<input type="password" name="password" autocomplete="current-password" minlength="8" required/></label>
-              <button class="button" type="submit">Sign In</button>
-            </form>
-            <form data-register-form hidden>
-              <h2>Create your account</h2>
-              <label>Full name<input name="fullName" autocomplete="name" required/></label>
-              <label>Phone number<input name="phone" type="tel" autocomplete="tel" required/></label>
-              <label>Email address<input type="email" name="email" autocomplete="email" required/></label>
-              <label>Password<input type="password" name="password" autocomplete="new-password" minlength="8" required/></label>
-              <button class="button" type="submit">Create Account</button>
-              <small>Supabase may send an email-confirmation link before the first sign-in.</small>
-            </form>
-            <div class="auth-message" data-auth-message hidden></div>
+          <div class="auth-tabs" role="tablist" aria-label="Account access">
+            <button id="signin-tab" type="button" role="tab" class="active" aria-selected="true" aria-controls="signin-panel" data-auth-tab="signin">Sign In</button>
+            <button id="register-tab" type="button" role="tab" aria-selected="false" aria-controls="register-panel" tabindex="-1" data-auth-tab="register">Create Account</button>
           </div>
-
-          <div class="account-dashboard" data-account-dashboard hidden>
-            <div class="dashboard-header"><div><span>Signed in as</span><strong data-dashboard-email></strong></div><button class="text-button" type="button" data-signout>Sign out</button></div>
-            <div class="account-status-card"><span>Renter status</span><strong data-approval-status></strong><p data-status-guidance></p></div>
-
-            <section class="renter-primary-actions" data-approved-portal-actions hidden>
-              <div class="dashboard-section-title"><div><span class="dashboard-kicker">RENTER TOOLS</span><h3>What do you want to do?</h3></div></div>
-              <div class="renter-action-grid">
-                <a class="renter-action-card" href={`${base}availability/`}><span class="renter-action-icon"><Icon name="calendar" size={24}/></span><span><strong>Schedule a Flight</strong><small>View open aircraft time and request a reservation.</small></span><Icon name="arrow" size={20}/></a>
-                <a class="renter-action-card" href="#purchase-hours"><span class="renter-action-icon"><Icon name="dollar" size={24}/></span><span><strong>Purchase Hours</strong><small>Buy a 15-, 25-, or 50-hour block securely with Stripe.</small></span><Icon name="arrow" size={20}/></a>
-              </div>
-            </section>
-
-            <div class="account-ops-grid">
-              <article class="account-metric"><span>Available block hours</span><strong data-block-balance>—</strong><small data-block-expiry>No active prepaid block</small></article>
-              <article class="account-metric"><span>Outstanding balance</span><strong data-outstanding-balance>—</strong><small>Recorded charges not yet marked paid</small></article>
-            </div>
-
-            <div class="auth-message" data-stripe-message hidden></div>
-
-            <section class="stripe-purchase-panel" id="purchase-hours" data-stripe-purchase-panel hidden>
-              <div class="dashboard-section-title"><div><span class="dashboard-kicker">SECURE CHECKOUT</span><h3>Purchase block hours</h3></div><span class="stripe-secure-note">Processed by Stripe</span></div>
-              <div class="stripe-package-grid">
-                <article class="stripe-package-card"><span>15 hours</span><strong>$2,550</strong><small>$170/hr · expires in 3 months</small><button class="button" type="button" data-buy-package="15">Purchase 15 Hours</button></article>
-                <article class="stripe-package-card featured"><span>25 hours</span><strong>$4,125</strong><small>$165/hr · expires in 3 months</small><button class="button" type="button" data-buy-package="25">Purchase 25 Hours</button></article>
-                <article class="stripe-package-card"><span>50 hours</span><strong>$7,500</strong><small>$150/hr · expires in 3 months</small><button class="button" type="button" data-buy-package="50">Purchase 50 Hours</button></article>
-              </div>
-              <p class="stripe-purchase-help">Only approved renter accounts can open checkout. Payment details are entered on Stripe's secure checkout page.</p>
-            </section>
-
-            <div class="account-actions"><a class="button button-outline" href={`${base}apply/`} data-application-link>Complete Renter Application</a><a class="button button-outline" href={`${base}report-squawk/`} data-squawk-action>Report Aircraft Issue</a><a class="button button-outline" href={`${base}admin/`} data-admin-action hidden>Open Admin</a></div>
-
-            <section class="dashboard-reservations"><div class="dashboard-section-title"><h3>Your reservations</h3><button type="button" class="text-button" data-refresh-account>Refresh</button></div><div data-reservation-list><p>Loading reservations…</p></div></section>
-
-            <section class="dashboard-operations"><div class="dashboard-section-title"><h3>Block hours & billing</h3><a class="text-button" href="#purchase-hours" data-purchase-hours-link hidden>Purchase hours</a></div><div data-billing-list><p>Loading account activity…</p></div></section>
-
-            <section class="dashboard-operations"><div class="dashboard-section-title"><h3>Your reported squawks</h3><a class="text-button" href={`${base}report-squawk/`}>Report issue</a></div><div data-squawk-list><p>Loading reports…</p></div></section>
+          <div id="signin-panel" role="tabpanel" aria-labelledby="signin-tab">
+            <form data-signin-form><h2>Welcome back</h2><label>Email address<input type="email" name="email" autocomplete="email" required/></label><label>Password<input type="password" name="password" autocomplete="current-password" required/></label><button class="button" type="submit">Sign In</button></form>
           </div>
+          <div id="register-panel" role="tabpanel" aria-labelledby="register-tab" hidden>
+            <form data-register-form><h2>Create your account</h2><label>Full name<input name="fullName" autocomplete="name" required/></label><label>Phone number<input name="phone" type="tel" autocomplete="tel" required/></label><label>Email address<input type="email" name="email" autocomplete="email" required/></label><label>Password<input type="password" name="password" autocomplete="new-password" minlength="8" required/></label><small>Use at least 8 characters.</small><button class="button" type="submit">Create Account</button><small>Check your email for a confirmation link before signing in.</small></form>
+          </div>
+          <div class="auth-message" data-auth-message role="status" aria-live="polite" hidden></div>
         </div>
       </div>
+    </section>
+    <section class="portal-workspace container" data-account-dashboard hidden>
+      <div class="portal-heading"><div><p class="eyebrow">RENTER PORTAL · KWDR</p><h1 data-greeting>Your next flight awaits.</h1><p data-dashboard-email></p></div><div class="portal-profile"><button class="text-button" type="button" data-refresh-account>Refresh account</button><button class="text-button" type="button" data-signout>Sign out</button><a href={`${base}admin/`} class="text-link" data-admin-action hidden>Admin</a></div></div>
+      <PortalNav />
+      <div class="portal-status" data-status-card><strong data-approval-status></strong><p data-status-guidance></p><a class="button button-small" href={`${base}apply/`} data-application-link hidden>Complete Renter Application</a></div>
+      <div class="portal-overview">
+        <article class="next-flight-card"><p class="eyebrow">NEXT FLIGHT</p><div data-next-flight role="status">Loading your schedule…</div><a class="button" href={`${base}availability/`}>Schedule a Flight <Icon name="arrow" size={18}/></a></article>
+        <article class="portal-metric"><span>Available flight hours</span><strong data-block-balance>—</strong><p data-block-expiry>Loading prepaid hours…</p><a class="text-link" href="#purchase-hours" data-purchase-hours-link hidden>Purchase hours →</a></article>
+        <article class="portal-metric"><span>Outstanding balance</span><strong data-outstanding-balance>—</strong><p>Finalized charges awaiting payment</p><a class="text-link" href="#payments">Review and pay →</a></article>
+      </div>
+      <section class="portal-panel" id="flights" tabindex="-1"><div class="portal-section-heading"><div><p class="eyebrow">MY FLIGHTS</p><h2>Your flight schedule</h2></div><span class="portal-caption">All times Eastern</span></div><div data-reservation-list aria-live="polite">Loading reservations…</div></section>
+      <section class="portal-panel" id="payments" tabindex="-1"><div class="portal-section-heading"><div><p class="eyebrow">HOURS &amp; PAYMENTS</p><h2>Ready for more flight time?</h2></div><button type="button" class="text-button" data-refresh-billing>Refresh payments</button></div>
+        <div class="auth-message" data-stripe-message role="status" aria-live="polite" hidden></div>
+        <div data-billing-list aria-live="polite">Loading account activity…</div>
+        <section class="stripe-purchase-panel" id="purchase-hours" data-stripe-purchase-panel tabindex="-1" hidden><div class="portal-section-heading"><div><h3>Purchase flight hours</h3><p>All rates include fuel. Blocks expire three months after purchase.</p></div><span class="stripe-secure-note">Secure Stripe checkout</span></div><div class="stripe-package-grid">
+          <article class="stripe-package-card"><span>15 hours</span><strong>$2,550</strong><small>$170 per hour</small><button class="button" type="button" data-buy-package="15">Buy 15 Hours</button></article>
+          <article class="stripe-package-card featured"><span>25 hours</span><strong>$4,125</strong><small>$165 per hour</small><button class="button" type="button" data-buy-package="25">Buy 25 Hours</button></article>
+          <article class="stripe-package-card"><span>50 hours</span><strong>$7,500</strong><small>$150 per hour</small><button class="button" type="button" data-buy-package="50">Buy 50 Hours</button></article>
+        </div><p class="portal-caption">Prefer to pay as you go? Fly for $180 per hour. Charges appear after your flight is finalized.</p></section>
+      </section>
+      <section class="portal-panel portal-support"><div><h2>Aircraft support</h2><p>Report an aircraft issue or review updates on a previous report.</p></div><a class="button button-outline" href={`${base}report-squawk/`} data-squawk-action hidden>Report Aircraft Issue</a><details><summary>Your reported issues</summary><div data-squawk-list>Loading reports…</div></details><a href="tel:+14044010041" class="text-link">Contact Tyler · (404) 401-0041</a></section>
     </section>
   </main>
   <Footer />
 </BaseLayout>
-
 <script>
-  import { getCurrentProfile, resolveSiteUrl, supabase, type Profile } from '../lib/supabase';
+  import { resolveSiteUrl, supabase, type Profile } from '../lib/supabase';
+  import { onSession, refreshSession, isApproved } from '../lib/session';
   import { formatEasternDate, formatEasternTime } from '../lib/calendar';
+  import { clearBookingDraft } from '../lib/booking-draft';
 
   const base = import.meta.env.BASE_URL;
-  const formsWrap = document.querySelector<HTMLElement>('[data-auth-forms]')!;
-  const dashboard = document.querySelector<HTMLElement>('[data-account-dashboard]')!;
-  const signInForm = document.querySelector<HTMLFormElement>('[data-signin-form]')!;
-  const registerForm = document.querySelector<HTMLFormElement>('[data-register-form]')!;
-  const message = document.querySelector<HTMLElement>('[data-auth-message]')!;
-  const reservationList = document.querySelector<HTMLElement>('[data-reservation-list]')!;
-  const billingList = document.querySelector<HTMLElement>('[data-billing-list]')!;
-  const squawkList = document.querySelector<HTMLElement>('[data-squawk-list]')!;
-  const stripeMessage = document.querySelector<HTMLElement>('[data-stripe-message]')!;
-  const stripePurchasePanel = document.querySelector<HTMLElement>('[data-stripe-purchase-panel]')!;
-  const approvedPortalActions = document.querySelector<HTMLElement>('[data-approved-portal-actions]')!;
-  const applicationLink = document.querySelector<HTMLElement>('[data-application-link]')!;
-  const purchaseHoursLink = document.querySelector<HTMLElement>('[data-purchase-hours-link]')!;
+  const el = <T extends HTMLElement = HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
+  const message = el('[data-auth-message]');
+  const reservationList = el('[data-reservation-list]');
+  const billingList = el('[data-billing-list]');
+  const squawkList = el('[data-squawk-list]');
+  const stripeMessage = el('[data-stripe-message]');
+  const query = new URLSearchParams(window.location.search);
+  const checkoutSession = query.get('session_id') || '';
   let profile: Profile | null = null;
-
-  function escapeHtml(value: unknown) {
-    return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#039;', '"':'&quot;' })[char]!);
+  let userGeneration = 0;
+  let checkoutBusy = false;
+  let paymentConfirmed = false;
+  let paymentRetries = 0;
+  let paymentTimer = 0;
+  let billingRequest = 0;
+  let reservationRequest = 0;
+  let renderedIdentity = '';
+  const money = (cents: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((cents || 0) / 100);
+  const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#039;', '"':'&quot;' })[char]!);
+  const showMessage = (text: string, success = false) => { message.className = `auth-message ${success ? 'success' : 'error'}`; message.textContent = text; message.hidden = false; };
+  function showStripeMessage(text: string, error = false) { stripeMessage.className = `auth-message ${error ? 'error' : 'success'}`; stripeMessage.textContent = text; stripeMessage.hidden = false; }
+  function highlightSection() {
+    const section = ['#payments', '#purchase-hours'].includes(location.hash) ? 'payments' : 'flights';
+    document.querySelectorAll<HTMLElement>('[data-portal-section]').forEach((link) => {
+      if (link.dataset.portalSection === section) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
   }
-
-  function money(cents: number) {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((cents || 0) / 100);
+  function revealHash() {
+    highlightSection();
+    const ids = ['#flights', '#payments', '#purchase-hours'];
+    if (ids.includes(location.hash)) requestAnimationFrame(() => {
+      const target = el(location.hash === '#purchase-hours' && !isApproved(profile) ? '#payments' : location.hash);
+      target.scrollIntoView({ block: 'start' });
+    });
   }
+  window.addEventListener('hashchange', highlightSection);
 
-  function showMessage(text: string, kind: 'success' | 'error' = 'error') {
-    message.className = `auth-message ${kind}`;
-    message.textContent = text;
-    message.hidden = false;
+  const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-auth-tab]'));
+  function selectTab(tab: HTMLButtonElement) {
+    tabs.forEach((item) => { const active = item === tab; item.classList.toggle('active', active); item.setAttribute('aria-selected', String(active)); item.tabIndex = active ? 0 : -1; el(`#${item.dataset.authTab}-panel`).hidden = !active; });
+    message.hidden = true;
   }
-
-  function showStripeMessage(text: string, kind: 'success' | 'error' = 'success') {
-    stripeMessage.className = `auth-message ${kind}`;
-    stripeMessage.textContent = text;
-    stripeMessage.hidden = false;
+  tabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => selectTab(tab));
+    tab.addEventListener('keydown', (event) => {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+      selectTab(tabs[next]); tabs[next].focus();
+    });
+  });
+  for (const kind of ['signin', 'register']) {
+    const form = el<HTMLFormElement>(`[data-${kind}-form]`);
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault(); message.hidden = true;
+      const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+      const label = button.textContent;
+      button.disabled = true; button.textContent = kind === 'signin' ? 'Signing in…' : 'Creating account…';
+      try {
+        const data = new FormData(form);
+        const credentials = { email: String(data.get('email')).trim(), password: String(data.get('password')) };
+        const result = kind === 'signin' ? await supabase.auth.signInWithPassword(credentials) : await supabase.auth.signUp({ ...credentials, options: { data: { full_name: String(data.get('fullName')).trim(), phone: String(data.get('phone')).trim() }, emailRedirectTo: `${resolveSiteUrl(base)}account/` } });
+        if (result.error) throw result.error;
+        if (kind === 'register' && !result.data.session) showMessage('Account created. Check your email for a confirmation link, then return to sign in.', true);
+        await refreshSession();
+      } catch (error: any) { showMessage(error?.message || 'Unable to connect. Please try again.'); }
+      finally { button.disabled = false; button.textContent = label; }
+    });
   }
 
   async function startStripeCheckout(payload: { kind: 'block_purchase'; packageHours: number } | { kind: 'account_payment'; paymentId: string }, button: HTMLButtonElement) {
-    if (!profile || (profile.role !== 'admin' && profile.approval_status !== 'approved')) {
-      showStripeMessage('Online payment is available only to approved renter accounts.', 'error');
-      return;
-    }
-    const originalText = button.textContent || 'Pay with Stripe';
-    button.disabled = true;
-    button.textContent = 'Opening Stripe…';
-    stripeMessage.hidden = true;
-    const { data, error } = await supabase.functions.invoke('create-checkout-session', { body: payload });
-    if (error || !data?.url) {
-      button.disabled = false;
-      button.textContent = originalText;
-      showStripeMessage(error?.message || data?.error || 'Unable to open Stripe checkout.', 'error');
-      return;
-    }
-    window.location.href = data.url;
+    if (checkoutBusy) return;
+    if (!isApproved(profile)) { showStripeMessage('Online payments require approved renter access. Contact Tyler if you need help with a balance.', true); return; }
+    checkoutBusy = true;
+    const label = button.textContent;
+    button.disabled = true; button.textContent = 'Opening checkout…';
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout-session', { body: payload });
+      if (error || !data?.url) throw error || new Error(data?.error || 'Unable to open checkout.');
+      window.location.assign(data.url);
+    } catch (error: any) { showStripeMessage(error?.message || 'Unable to open checkout. Please try again.', true); stripeMessage.scrollIntoView({ block: 'center' }); }
+    finally { checkoutBusy = false; button.disabled = false; button.textContent = label; }
   }
-
-  document.querySelectorAll<HTMLButtonElement>('[data-buy-package]').forEach((button) => {
-    button.addEventListener('click', () => startStripeCheckout({ kind: 'block_purchase', packageHours: Number(button.dataset.buyPackage) }, button));
-  });
-
-  document.querySelectorAll<HTMLButtonElement>('[data-auth-tab]').forEach((tab) => {
-    tab.addEventListener('click', () => {
-      const target = tab.dataset.authTab;
-      document.querySelectorAll('[data-auth-tab]').forEach((item) => item.classList.toggle('active', item === tab));
-      signInForm.hidden = target !== 'signin';
-      registerForm.hidden = target !== 'register';
-      message.hidden = true;
-    });
-  });
-
-  signInForm.addEventListener('submit', async (event) => {
-    event.preventDefault(); message.hidden = true;
-    const button = signInForm.querySelector<HTMLButtonElement>('button[type="submit"]')!;
-    const data = new FormData(signInForm);
-    button.disabled = true; button.textContent = 'Signing in…';
-    const { error } = await supabase.auth.signInWithPassword({ email: String(data.get('email')), password: String(data.get('password')) });
-    button.disabled = false; button.textContent = 'Sign In';
-    if (error) showMessage(error.message);
-  });
-
-  registerForm.addEventListener('submit', async (event) => {
-    event.preventDefault(); message.hidden = true;
-    const button = registerForm.querySelector<HTMLButtonElement>('button[type="submit"]')!;
-    const data = new FormData(registerForm);
-    button.disabled = true; button.textContent = 'Creating…';
-    const { data: result, error } = await supabase.auth.signUp({
-      email: String(data.get('email')),
-      password: String(data.get('password')),
-      options: { data: { full_name: String(data.get('fullName')), phone: String(data.get('phone')) }, emailRedirectTo: `${resolveSiteUrl(base)}account/` },
-    });
-    button.disabled = false; button.textContent = 'Create Account';
-    if (error) showMessage(error.message);
-    else if (!result.session) showMessage('Account created. Check your email for the confirmation link, then return here to sign in.', 'success');
-    else showMessage('Account created successfully.', 'success');
-  });
+  document.querySelectorAll<HTMLButtonElement>('[data-buy-package]').forEach((button) => button.addEventListener('click', () => startStripeCheckout({ kind: 'block_purchase', packageHours: Number(button.dataset.buyPackage) }, button)));
 
   async function loadReservations() {
     if (!profile) return;
-    reservationList.innerHTML = '<p>Loading reservations…</p>';
-    const [{ data, error }, { data: logs }] = await Promise.all([
-      supabase.from('reservations').select('id,starts_at,ends_at,status,estimated_flight_hours,actual_aircraft_hours,renter_notes,admin_notes').eq('renter_id', profile.id).order('starts_at', { ascending: false }),
-      supabase.from('flight_logs').select('reservation_id,status,actual_aircraft_hours,block_hours_applied,payg_hours,admin_notes').eq('renter_id', profile.id),
-    ]);
-    if (error) { reservationList.innerHTML = `<p class="inline-error">${escapeHtml(error.message)}</p>`; return; }
-    if (!data?.length) { reservationList.innerHTML = `<div class="empty-dashboard"><strong>No reservations yet.</strong><p>Open the live calendar to request your first aircraft window.</p></div>`; return; }
-    const logMap = new Map((logs || []).map((log: any) => [log.reservation_id, log]));
-    reservationList.innerHTML = data.map((reservation: any) => {
-      const canCancel = ['pending','confirmed'].includes(reservation.status) && new Date(reservation.starts_at) > new Date();
-      const canPostFlight = reservation.status === 'confirmed' && new Date(reservation.starts_at) <= new Date();
-      const canSquawk = ['confirmed','completed'].includes(reservation.status);
-      const log: any = logMap.get(reservation.id);
-      const detail = log?.status === 'approved'
-        ? `${log.actual_aircraft_hours} hr final · ${log.block_hours_applied || 0} block / ${log.payg_hours || 0} pay-as-you-go`
-        : log ? `Post-flight report: ${String(log.status).replace('_',' ')}`
-        : reservation.estimated_flight_hours ? `Estimated flight time: ${reservation.estimated_flight_hours} hr` : 'No estimated flight time entered';
-      return `<article class="reservation-row"><div><span>${formatEasternDate(reservation.starts_at)}</span><strong>${formatEasternTime(reservation.starts_at)}–${formatEasternTime(reservation.ends_at)}</strong><small>${escapeHtml(detail)}</small></div><div class="reservation-row-actions"><span class="status-pill ${escapeHtml(reservation.status)}">${escapeHtml(reservation.status.replace('_',' '))}</span>${canPostFlight && log?.status !== 'approved' ? `<a class="mini-action" href="${base}postflight/?reservation=${encodeURIComponent(reservation.id)}">Post-flight</a>` : ''}${canSquawk ? `<a class="mini-action" href="${base}report-squawk/?reservation=${encodeURIComponent(reservation.id)}">Report issue</a>` : ''}${canCancel ? `<button type="button" data-cancel-reservation="${reservation.id}">Cancel</button>` : ''}</div></article>`;
-    }).join('');
-    reservationList.querySelectorAll<HTMLButtonElement>('[data-cancel-reservation]').forEach((button) => button.addEventListener('click', async () => {
-      if (!confirm('Cancel this reservation request?')) return;
-      button.disabled = true;
-      const { error: cancelError } = await supabase.rpc('cancel_my_reservation', { p_reservation_id: button.dataset.cancelReservation });
-      if (cancelError) alert(cancelError.message);
-      await loadReservations();
-    }));
+    const generation = userGeneration, request = ++reservationRequest, id = profile.id;
+    try {
+      const [{ data, error }, { data: logs, error: logError }] = await Promise.all([
+        supabase.from('reservations').select('id,starts_at,ends_at,status,estimated_flight_hours,actual_aircraft_hours').eq('renter_id', id).order('starts_at', { ascending: false }),
+        supabase.from('flight_logs').select('reservation_id,status,actual_aircraft_hours,block_hours_applied,payg_hours').eq('renter_id', id),
+      ]);
+      if (generation !== userGeneration || request !== reservationRequest) return;
+      if (error) throw error;
+      const all = data || [], now = Date.now();
+      const upcoming = all.filter((r: any) => ['pending', 'confirmed'].includes(r.status) && new Date(r.ends_at).getTime() > now).sort((a: any,b: any) => +new Date(a.starts_at) - +new Date(b.starts_at));
+      const history = all.filter((r: any) => !upcoming.includes(r));
+      const logMap = new Map((logs || []).map((log: any) => [log.reservation_id, log]));
+      const next = upcoming[0];
+      el('[data-next-flight]').innerHTML = next ? `<h2>${formatEasternDate(next.starts_at)}</h2><p>${formatEasternTime(next.starts_at)}–${formatEasternTime(next.ends_at)} Eastern</p><span class="status-pill ${escapeHtml(next.status)}">${next.status === 'pending' ? 'Awaiting approval' : 'Confirmed'}</span>` : '<h2>Your schedule is clear.</h2><p>Choose an available window for your next flight.</p>';
+      function row(r: any) {
+        const log: any = logMap.get(r.id);
+        const canCancel = ['pending','confirmed'].includes(r.status) && +new Date(r.starts_at) > now;
+        const canPost = !logError && r.status === 'confirmed' && +new Date(r.starts_at) <= now && log?.status !== 'approved';
+        const detail = logError ? 'Flight report status unavailable. Refresh to try again.' : log?.status === 'approved' ? `${log.actual_aircraft_hours} hr finalized · ${log.block_hours_applied || 0} prepaid / ${log.payg_hours || 0} pay as you go` : log ? `Flight report: ${String(log.status).replaceAll('_',' ')}` : r.estimated_flight_hours ? `${r.estimated_flight_hours} estimated flight hours` : 'Flight time recorded after flying';
+        return `<article class="reservation-row"><div><span>${formatEasternDate(r.starts_at)}</span><strong>${formatEasternTime(r.starts_at)}–${formatEasternTime(r.ends_at)}</strong><small>${escapeHtml(detail)}</small></div><div class="reservation-row-actions"><span class="status-pill ${escapeHtml(r.status)}">${escapeHtml(r.status.replaceAll('_',' '))}</span>${canPost ? `<a class="mini-action" href="${base}postflight/?reservation=${encodeURIComponent(r.id)}">Post-flight report</a>` : ''}${canCancel ? `<button type="button" data-cancel-reservation="${escapeHtml(r.id)}">Cancel</button>` : ''}</div></article>`;
+      }
+      const needsReport = history.filter((r: any) => r.status === 'confirmed' && (logMap.get(r.id) as any)?.status !== 'approved');
+      const past = history.filter((r: any) => !needsReport.includes(r));
+      reservationList.innerHTML = (upcoming.map(row).join('') || '<p>No upcoming reservations.</p>') + (needsReport.length ? `<h3 class="portal-subheading">Flight reports to complete</h3>${needsReport.map(row).join('')}` : '') + (past.length ? `<details class="portal-history"><summary>Flight history (${past.length})</summary>${past.map(row).join('')}</details>` : '');
+      reservationList.querySelectorAll<HTMLButtonElement>('[data-cancel-reservation]').forEach((button) => button.addEventListener('click', async () => {
+        if (!confirm('Cancel this reservation?')) return;
+        button.disabled = true;
+        try { const { error } = await supabase.rpc('cancel_my_reservation', { p_reservation_id: button.dataset.cancelReservation }); if (error) throw error; await loadReservations(); }
+        catch { alert('Unable to cancel this reservation. Please refresh and try again.'); button.disabled = false; }
+      }));
+    } catch {
+      if (generation !== userGeneration || request !== reservationRequest) return;
+      reservationList.innerHTML = '<p class="inline-error">Unable to load flights. Use Refresh account to try again.</p>';
+      el('[data-next-flight]').textContent = 'Your flight schedule is temporarily unavailable.';
+    }
   }
 
+  // Fetch pages explicitly so older unpaid charges cannot disappear behind the API row limit.
+  async function allPayments(renterId: string) {
+    const rows: any[] = [];
+    for (let from = 0; ; from += 500) {
+      const { data, error } = await supabase.from('payments').select('id,kind,status,amount_cents,description,method,paid_at,created_at,reference').eq('renter_id', renterId).order('created_at', { ascending: false }).order('id').range(from, from + 499);
+      if (error) throw error;
+      rows.push(...(data || []));
+      if (!data || data.length < 500) return rows;
+    }
+  }
   async function loadBilling() {
     if (!profile) return;
-    const now = new Date();
-    const [{ data: blocks, error: blockError }, { data: payments, error: paymentError }, { data: ledger }] = await Promise.all([
-      supabase.from('block_hour_purchases').select('id,package_hours,remaining_hours,purchased_at,expires_at,status').eq('renter_id', profile.id).order('purchased_at', { ascending: false }),
-      supabase.from('payments').select('id,kind,status,amount_cents,description,method,paid_at,created_at').eq('renter_id', profile.id).order('created_at', { ascending: false }),
-      supabase.from('hour_ledger').select('id,entry_type,hours_delta,note,created_at').eq('renter_id', profile.id).order('created_at', { ascending: false }).limit(6),
-    ]);
-    if (blockError || paymentError) {
-      const error = blockError || paymentError;
-      billingList.innerHTML = `<p class="inline-error">${escapeHtml(error?.message || 'Unable to load billing.')}</p>`;
-      return;
+    const generation = userGeneration, request = ++billingRequest, id = profile.id;
+    try {
+      const [{ data: blocks, error }, payments, { data: ledger, error: ledgerError }] = await Promise.all([
+        supabase.from('block_hour_purchases').select('id,package_hours,remaining_hours,purchased_at,expires_at,status').eq('renter_id', id).order('expires_at'),
+        allPayments(id),
+        supabase.from('hour_ledger').select('id,entry_type,hours_delta,note,created_at').eq('renter_id', id).order('created_at', { ascending: false }).limit(10),
+      ]);
+      if (generation !== userGeneration || request !== billingRequest) return;
+      if (error) throw error;
+      const active = (blocks || []).filter((b: any) => b.status !== 'void' && Number(b.remaining_hours) > 0 && +new Date(b.expires_at) > Date.now());
+      el('[data-block-balance]').textContent = `${active.reduce((sum: number,b: any) => sum + Number(b.remaining_hours), 0).toFixed(1)} hr`;
+      el('[data-block-expiry]').textContent = active.length ? `Next expiration: ${formatEasternDate(active[0].expires_at)}` : 'No active prepaid block';
+      const unpaid = payments.filter((p: any) => p.status === 'pending');
+      el('[data-outstanding-balance]').textContent = money(unpaid.reduce((sum: number,p: any) => sum + Number(p.amount_cents), 0));
+      const row = (payment: any) => `<div class="billing-activity-row"><div><strong>${escapeHtml(payment.description || 'Account transaction')}</strong><small>${formatEasternDate(payment.created_at)}</small></div><div><strong>${money(payment.amount_cents)}</strong><span class="status-pill ${escapeHtml(payment.status)}">${escapeHtml(payment.status)}</span>${isApproved(profile) && payment.status === 'pending' && payment.amount_cents > 0 ? `<button type="button" class="mini-action stripe-pay-action" data-pay-payment="${escapeHtml(payment.id)}">Pay ${money(payment.amount_cents)}</button>` : ''}</div></div>`;
+      const history = payments.filter((p: any) => p.status !== 'pending');
+      billingList.innerHTML = `<h3>Outstanding charges</h3>${unpaid.map(row).join('') || '<div class="empty-dashboard"><strong>You’re all caught up.</strong><p>No outstanding charges.</p></div>'}${unpaid.length && !isApproved(profile) ? '<p>Contact Tyler to arrange payment while online renter access is unavailable.</p>' : ''}<details class="portal-history"><summary>Payment history (${history.length})</summary><div data-payment-history></div><button class="text-button" type="button" data-more-payments hidden>Show more payments</button></details><details class="portal-history"><summary>Prepaid hours and recent activity</summary>${active.map((b: any) => `<p><strong>${Number(b.remaining_hours).toFixed(1)} of ${Number(b.package_hours)} hours remaining</strong> · expires ${formatEasternDate(b.expires_at)}</p>`).join('') || '<p>No active block.</p>'}${ledgerError ? '<p>Hour activity is temporarily unavailable.</p>' : (ledger || []).map((e: any) => `<div class="hour-ledger-row"><span>${Number(e.hours_delta).toFixed(1)} hr</span><div><strong>${escapeHtml(e.note || e.entry_type)}</strong><small>${formatEasternDate(e.created_at)}</small></div></div>`).join('')}</details>`;
+      let shown = 0;
+      const more = el<HTMLButtonElement>('[data-more-payments]');
+      function showMore() { shown += 10; el('[data-payment-history]').innerHTML = history.slice(0, shown).map(row).join('') || '<p>No payment history yet.</p>'; more.hidden = shown >= history.length; }
+      more.addEventListener('click', showMore); showMore();
+      billingList.querySelectorAll<HTMLButtonElement>('[data-pay-payment]').forEach((button) => button.addEventListener('click', () => startStripeCheckout({ kind: 'account_payment', paymentId: button.dataset.payPayment! }, button)));
+      if (query.get('stripe') === 'success' && checkoutSession && payments.some((p: any) => p.reference === checkoutSession && p.status === 'paid')) {
+        paymentConfirmed = true; clearTimeout(paymentTimer); showStripeMessage('Payment confirmed. Your hours and balance are up to date.');
+      }
+    } catch {
+      if (generation !== userGeneration || request !== billingRequest) return;
+      billingList.innerHTML = '<p class="inline-error">Unable to load billing. Refresh payments to try again.</p>';
+      el('[data-block-balance]').textContent = '—'; el('[data-outstanding-balance]').textContent = '—'; el('[data-block-expiry]').textContent = 'Hours temporarily unavailable';
     }
-    const activeBlocks = (blocks || []).filter((block: any) => block.status !== 'void' && Number(block.remaining_hours) > 0 && new Date(block.expires_at) > now);
-    const balance = activeBlocks.reduce((sum: number, block: any) => sum + Number(block.remaining_hours), 0);
-    const pending = (payments || []).filter((payment: any) => payment.status === 'pending').reduce((sum: number, payment: any) => sum + Number(payment.amount_cents), 0);
-    const nextExpiry = activeBlocks.slice().sort((a: any,b: any) => +new Date(a.expires_at) - +new Date(b.expires_at))[0];
-    document.querySelector<HTMLElement>('[data-block-balance]')!.textContent = `${balance.toFixed(1)} hr`;
-    document.querySelector<HTMLElement>('[data-block-expiry]')!.textContent = nextExpiry ? `Next block expires ${formatEasternDate(nextExpiry.expires_at)}` : 'No active prepaid block';
-    document.querySelector<HTMLElement>('[data-outstanding-balance]')!.textContent = money(pending);
-
-    const canPayOnline = profile.role === 'admin' || profile.approval_status === 'approved';
-    const paymentRows = (payments || []).slice(0, 8).map((payment: any) => {
-      const payButton = canPayOnline && payment.status === 'pending' && Number(payment.amount_cents) > 0
-        ? `<button class="mini-action stripe-pay-action" type="button" data-pay-payment="${escapeHtml(payment.id)}">Pay ${money(payment.amount_cents)}</button>`
-        : '';
-      return `<div class="billing-activity-row"><div><span>${escapeHtml(String(payment.kind).replace('_',' '))}</span><strong>${escapeHtml(payment.description || 'Account transaction')}</strong><small>${formatEasternDate(payment.created_at)}</small></div><div><strong>${money(payment.amount_cents)}</strong><span class="status-pill ${escapeHtml(payment.status)}">${escapeHtml(payment.status)}</span>${payButton}</div></div>`;
-    }).join('');
-    const ledgerRows = (ledger || []).map((entry: any) => `<div class="hour-ledger-row"><span>${Number(entry.hours_delta) > 0 ? '+' : ''}${Number(entry.hours_delta).toFixed(1)} hr</span><div><strong>${escapeHtml(entry.note || String(entry.entry_type).replace('_',' '))}</strong><small>${formatEasternDate(entry.created_at)}</small></div></div>`).join('');
-    billingList.innerHTML = `<div class="billing-account-grid"><div><h4>Recent charges & payments</h4>${paymentRows || '<div class="empty-dashboard"><strong>No billing activity yet.</strong></div>'}</div><div><h4>Hour activity</h4>${ledgerRows || '<div class="empty-dashboard"><strong>No block-hour activity yet.</strong></div>'}</div></div>`;
-    billingList.querySelectorAll<HTMLButtonElement>('[data-pay-payment]').forEach((button) => {
-      button.addEventListener('click', () => startStripeCheckout({ kind: 'account_payment', paymentId: String(button.dataset.payPayment) }, button));
-    });
   }
-
+  async function pollPayment() {
+    if (!profile || paymentConfirmed || query.get('stripe') !== 'success' || !checkoutSession) return;
+    if (paymentRetries >= 5) { showStripeMessage('Payment confirmation is still pending. Use Refresh payments in a moment. Contact Tyler before attempting the same payment again.'); return; }
+    const generation = userGeneration;
+    paymentTimer = window.setTimeout(async () => { if (generation !== userGeneration) return; paymentRetries++; await loadBilling(); if (generation === userGeneration) void pollPayment(); }, 3000);
+  }
   async function loadSquawks() {
     if (!profile) return;
-    const { data, error } = await supabase.from('aircraft_squawks').select('id,title,priority,status,admin_notes,created_at').eq('reported_by', profile.id).order('created_at', { ascending: false }).limit(6);
-    if (error) { squawkList.innerHTML = `<p class="inline-error">${escapeHtml(error.message)}</p>`; return; }
-    if (!data?.length) { squawkList.innerHTML = '<div class="empty-dashboard"><strong>No aircraft issues reported.</strong></div>'; return; }
-    squawkList.innerHTML = data.map((item: any) => `<div class="squawk-account-row"><div><span>${formatEasternDate(item.created_at)} · ${escapeHtml(item.priority)}</span><strong>${escapeHtml(item.title)}</strong>${item.admin_notes ? `<small>${escapeHtml(item.admin_notes)}</small>` : ''}</div><span class="status-pill ${escapeHtml(item.status)}">${escapeHtml(String(item.status).replace('_',' '))}</span></div>`).join('');
+    const generation = userGeneration;
+    try {
+      const { data, error } = await supabase.from('aircraft_squawks').select('id,title,priority,status,admin_notes,created_at').eq('reported_by', profile.id).order('created_at', { ascending: false }).limit(6);
+      if (generation !== userGeneration) return;
+      if (error) throw error;
+      squawkList.innerHTML = (data || []).map((item: any) => `<div class="squawk-account-row"><div><strong>${escapeHtml(item.title)}</strong><small>${formatEasternDate(item.created_at)}${item.admin_notes ? ` · ${escapeHtml(item.admin_notes)}` : ''}</small></div><span class="status-pill">${escapeHtml(String(item.status).replaceAll('_',' '))}</span></div>`).join('') || '<p>No aircraft issues reported.</p>';
+    } catch { if (generation === userGeneration) squawkList.innerHTML = '<p>Issue reports are temporarily unavailable. Refresh account to try again.</p>'; }
   }
-
   async function loadAccount() { await Promise.all([loadReservations(), loadBilling(), loadSquawks()]); }
-
-  async function renderSession() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { profile = null; formsWrap.hidden = false; dashboard.hidden = true; return; }
-    try { profile = await getCurrentProfile(); }
-    catch (error) { showMessage(error instanceof Error ? error.message : 'Unable to load the account profile. Run the Supabase setup SQL.'); return; }
-    formsWrap.hidden = true; dashboard.hidden = false;
-    dashboard.querySelector<HTMLElement>('[data-dashboard-email]')!.textContent = profile?.email || session.user.email || '';
-    const status = dashboard.querySelector<HTMLElement>('[data-approval-status]')!;
-    status.textContent = profile?.role === 'admin' ? 'Administrator' : (profile?.approval_status || 'incomplete').replace('_', ' ');
-    status.className = `status-value ${profile?.role === 'admin' ? 'approved' : profile?.approval_status}`;
-    const guidance = dashboard.querySelector<HTMLElement>('[data-status-guidance]')!;
-    if (profile?.role === 'admin') guidance.textContent = 'Administrator access is active for renter approvals, billing, post-flight closeouts, squawks, and maintenance.';
-    else if (profile?.approval_status === 'approved') guidance.textContent = 'Your renter access is active. Schedule a flight or purchase block hours directly from this portal.';
-    else if (profile?.approval_status === 'pending') guidance.textContent = 'Your application is awaiting review. You may view availability, but booking remains locked.';
-    else guidance.textContent = 'Complete the renter application to begin the approval process.';
-    const approved = profile?.role === 'admin' || profile?.approval_status === 'approved';
-    dashboard.querySelector<HTMLElement>('[data-admin-action]')!.hidden = profile?.role !== 'admin';
-    dashboard.querySelector<HTMLElement>('[data-squawk-action]')!.hidden = !approved;
-    applicationLink.hidden = approved;
-    approvedPortalActions.hidden = !approved;
-    stripePurchasePanel.hidden = !approved;
-    purchaseHoursLink.hidden = !approved;
-
-    const query = new URLSearchParams(window.location.search);
-    const stripeResult = query.get('stripe');
-    if (stripeResult === 'success') showStripeMessage('Payment received by Stripe. Your account will update automatically after confirmation.', 'success');
-    else if (stripeResult === 'cancelled') showStripeMessage('Stripe checkout was cancelled. No payment was recorded.', 'error');
-
-    await loadAccount();
-    if (approved && window.location.hash === '#purchase-hours') {
-      window.setTimeout(() => stripePurchasePanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
-    }
-    if (stripeResult === 'success') window.setTimeout(loadBilling, 2500);
-
+  el('[data-refresh-account]').addEventListener('click', async () => { await refreshSession(); await loadAccount(); });
+  el('[data-refresh-billing]').addEventListener('click', () => void loadBilling());
+  el('[data-session-retry]').addEventListener('click', () => void refreshSession());
+  document.querySelectorAll<HTMLButtonElement>('[data-signout]').forEach((button) => button.addEventListener('click', async () => {
+    button.disabled = true;
+    try { const { error } = await supabase.auth.signOut(); if (error) throw error; clearBookingDraft(); window.location.assign(`${base}account/`); }
+    catch { button.disabled = false; alert('Unable to sign out. Please try again.'); }
+  }));
+  onSession(async (state) => {
+    el('[data-session-loading]').hidden = !state.loading;
+    el('[data-session-error]').hidden = !state.error;
+    el('[data-auth-page]').hidden = state.loading || state.error || Boolean(state.userId);
+    el('[data-account-dashboard]').hidden = state.loading || state.error || !state.userId;
+    if (state.loading) return;
+    const identity = `${state.userId}:${state.profile?.approval_status}:${state.profile?.role}:${state.error}`;
+    if (identity === renderedIdentity) return;
+    renderedIdentity = identity; userGeneration++; profile = state.profile; clearTimeout(paymentTimer);
+    paymentRetries = 0; paymentConfirmed = false; stripeMessage.hidden = true;
+    reservationList.textContent = 'Loading reservations…'; billingList.textContent = 'Loading account activity…'; squawkList.textContent = 'Loading reports…';
+    el('[data-next-flight]').textContent = 'Loading your schedule…';
+    el('[data-block-balance]').textContent = '—'; el('[data-outstanding-balance]').textContent = '—';
+    el('[data-block-expiry]').textContent = 'Loading prepaid hours…';
+    if (!profile) return;
+    const approved = isApproved(profile);
+    el('[data-dashboard-email]').textContent = profile.email;
+    el('[data-greeting]').textContent = profile.full_name ? `Welcome back, ${profile.full_name.split(' ')[0]}.` : 'Your next flight awaits.';
+    const status = profile.role === 'admin' ? 'Administrator' : profile.approval_status;
+    el('[data-approval-status]').textContent = approved ? 'Renter access active' : `Renter access: ${status}`;
+    el('[data-status-card]').classList.toggle('is-approved', approved);
+    const guidance: Record<string,string> = { incomplete: 'Complete your application to request renter approval.', pending: 'Your application is awaiting review. You can browse the schedule while Tyler reviews your details.', approved: 'Reservations require Tyler’s confirmation. Request your next flight whenever you’re ready.', suspended: 'Your renter access is suspended. Contact Tyler to discuss the next steps.', rejected: 'Your application was not approved. Contact Tyler if you have questions.', Administrator: 'Renter tools are ready. Manage approvals and operations through Admin.' };
+    el('[data-status-guidance]').textContent = guidance[status] || '';
+    el('[data-application-link]').hidden = profile.approval_status !== 'incomplete' || profile.role === 'admin';
+    el('[data-admin-action]').hidden = profile.role !== 'admin';
+    el('[data-squawk-action]').hidden = !approved;
+    el('[data-stripe-purchase-panel]').hidden = !approved;
+    el('[data-purchase-hours-link]').hidden = !approved;
     const returnTo = query.get('returnTo');
-    if (returnTo && (profile?.role === 'admin' || profile?.approval_status === 'approved')) {
-      const target = new URL(returnTo, window.location.origin);
-      if (target.origin === window.location.origin && target.pathname.startsWith(base)) window.location.href = target.href;
+    if (returnTo) {
+      try { const target = new URL(returnTo, window.location.origin); if (target.origin === location.origin && target.pathname.startsWith(base) && target.pathname !== location.pathname && (approved || target.pathname === `${base}apply/`)) { location.replace(target.href); return; } } catch { /* Ignore malformed return URLs. */ }
     }
-  }
-
-  document.querySelector('[data-signout]')!.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.href = `${base}account/`; });
-  document.querySelector('[data-refresh-account]')!.addEventListener('click', loadAccount);
-  supabase.auth.onAuthStateChange(() => window.setTimeout(renderSession, 0));
-  await renderSession();
+    if (query.get('stripe') === 'success') showStripeMessage('Checking payment confirmation. Your balance updates after payment is recorded.');
+    if (query.get('stripe') === 'cancelled') showStripeMessage('Checkout closed. Review your account activity before starting another payment.');
+    const generation = userGeneration;
+    await loadAccount();
+    if (generation !== userGeneration) return;
+    if (query.has('stripe') && !location.hash) { history.replaceState(null, '', `${location.pathname}${location.search}#payments`); }
+    revealHash();
+    void pollPayment();
+  });
 </script>
