@@ -8,9 +8,7 @@ import Icon from '../components/Icon.astro';
 import { site } from '../data/site';
 import '../styles/global.css';
 const base = import.meta.env.BASE_URL;
-const aircraftExterior = 'https://upload.wikimedia.org/wikipedia/commons/8/8b/Piper_PA-28_Cherokee_-_G-BCPG_-_2_October_2025.jpg';
-const aircraftCockpit = 'https://upload.wikimedia.org/wikipedia/commons/2/29/Cockpit_of_Piper_PA-28-151_%28G-BOYH%29_at_Bristol_Airport%2C_England_15May2016_arp.jpg';
-const aircraftLanding = 'https://upload.wikimedia.org/wikipedia/commons/2/24/Piper_PA-28_Cherokee_Landing_03.JPG';
+const photo = (name: string) => `${base}images/${name}`;
 ---
 <BaseLayout title="About Tyler | Hutzell Aviation" description="Learn about Tyler Hutzell, his flight training, certificates, ratings, and the purpose behind Hutzell Aviation aircraft rental at KWDR in Winder, Georgia.">
   <Header />
@@ -20,7 +18,7 @@ const aircraftLanding = 'https://upload.wikimedia.org/wikipedia/commons/2/24/Pip
     <section class="section">
       <div class="container biography-grid">
         <div class="bio-visual reveal">
-          <figure class="portrait-photo"><img src={`${base}images/tyler-hutzell.jpg`} alt="Tyler Hutzell, founder of Hutzell Aviation" width="853" height="1280" decoding="async" /><figcaption><span>Tyler Hutzell</span><small>Founder, Hutzell Aviation LLC</small></figcaption></figure>
+          <figure class="portrait-photo"><img src={photo("tyler-hutzell-portrait.jpg")} alt="Tyler Hutzell, founder of Hutzell Aviation, standing in front of N8491F" width="1024" height="1536" decoding="async" /><figcaption><span>Tyler Hutzell</span><small>Founder, Hutzell Aviation LLC</small></figcaption></figure>
           <div class="bio-credential"><Icon name="plane" size={25} /><div><strong>ATP Flight School graduate</strong><span>Completed February 2026 at KLZU</span></div></div>
         </div>
         <div class="bio-copy reveal reveal-delay">
@@ -43,13 +41,13 @@ const aircraftLanding = 'https://upload.wikimedia.org/wikipedia/commons/2/24/Pip
 
     <section class="section gallery-section">
       <div class="container">
-        <div class="section-heading reveal"><p class="eyebrow"><span></span> PHOTO GALLERY</p><h2>A first look at Tyler and the aircraft platform.</h2><p>Tyler’s portrait is current. The Piper Cherokee images are representative filler photography and should be replaced with photos of the actual rental aircraft before the final launch.</p></div>
+        <div class="section-heading reveal"><p class="eyebrow"><span></span> PHOTO GALLERY</p><h2>Meet Tyler and the aircraft.</h2><p>Take a look at Tyler Hutzell and the actual Piper Cherokee N8491F on the ramp.</p></div>
         <div class="gallery-grid">
-          <figure class="gallery-photo wide"><img src={aircraftExterior} alt="Representative Piper PA-28 Cherokee parked on an airfield" width="4259" height="2842" loading="lazy" decoding="async" /><figcaption>Representative Piper Cherokee exterior</figcaption></figure>
-          <figure class="gallery-photo"><img src={aircraftCockpit} alt="Representative Piper PA-28 cockpit and instrument panel" width="3852" height="2564" loading="lazy" decoding="async" /><figcaption>Representative PA-28 panel</figcaption></figure>
-          <figure class="gallery-photo portrait-tile"><img src={`${base}images/tyler-hutzell.jpg`} alt="Tyler Hutzell" width="853" height="1280" loading="lazy" decoding="async" /><figcaption>Tyler Hutzell</figcaption></figure>
-          <figure class="gallery-photo"><img src={aircraftLanding} alt="Representative Piper PA-28 Cherokee landing" width="1600" height="1200" loading="lazy" decoding="async" /><figcaption>Representative aircraft in operation</figcaption></figure>
-          <figure class="gallery-photo aircraft-detail-crop"><img src={aircraftExterior} alt="Close crop of a representative Piper PA-28 Cherokee" width="4259" height="2842" loading="lazy" decoding="async" /><figcaption>Exterior detail</figcaption></figure>
+          <figure class="gallery-photo wide founder-gallery-feature"><img src={photo("tyler-hutzell-airport.jpg")} alt="Tyler Hutzell standing in front of Hutzell Aviation's red-and-white Piper Cherokee" width="1024" height="1536" loading="lazy" decoding="async" /><figcaption>Tyler Hutzell · Founder</figcaption></figure>
+          <figure class="gallery-photo"><img src={photo("n8491f-front-quarter.jpg")} alt="Front three-quarter view of the Piper Cherokee N8491F parked on the airport ramp" width="1536" height="1024" loading="lazy" decoding="async" /><figcaption>The Cherokee at KWDR</figcaption></figure>
+          <figure class="gallery-photo"><img src={photo("n8491f-side-profile.jpg")} alt="Side view of N8491F, showing the Piper Cherokee fuselage, wings, and distinctive registration" width="1536" height="1024" loading="lazy" decoding="async" /><figcaption>Aircraft side profile</figcaption></figure>
+          <figure class="gallery-photo"><img src={photo("n8491f-rear-quarter.jpg")} alt="N8491F photographed from behind with the tail and red-and-white paint visible" width="1536" height="1024" loading="lazy" decoding="async" /><figcaption>Rear three-quarter view</figcaption></figure>
+          <figure class="gallery-photo"><img src={photo("n8491f-hero.jpg")} alt="N8491F front three-quarter view showing the wings, nose, and landing gear" width="1536" height="1024" loading="lazy" decoding="async" /><figcaption>Ready for the next flight</figcaption></figure>
         </div>
       </div>
     </section>

@@ -7,9 +7,8 @@ import CallToAction from '../components/CallToAction.astro';
 import Icon from '../components/Icon.astro';
 import { aircraftSpecs } from '../data/site';
 import '../styles/global.css';
-const aircraftExterior = 'https://upload.wikimedia.org/wikipedia/commons/8/8b/Piper_PA-28_Cherokee_-_G-BCPG_-_2_October_2025.jpg';
-const aircraftCockpit = 'https://upload.wikimedia.org/wikipedia/commons/2/29/Cockpit_of_Piper_PA-28-151_%28G-BOYH%29_at_Bristol_Airport%2C_England_15May2016_arp.jpg';
-const aircraftLanding = 'https://upload.wikimedia.org/wikipedia/commons/2/24/Piper_PA-28_Cherokee_Landing_03.JPG';
+const base = import.meta.env.BASE_URL;
+const photo = (name: string) => `${base}images/${name}`;
 ---
 <BaseLayout title="1974 Piper PA-28-140 N8491F | Hutzell Aviation" description="Explore the 1974 Piper PA-28-140 N8491F planned for wet rental at KWDR Barrow County Airport in Winder, Georgia.">
   <Header />
@@ -19,9 +18,9 @@ const aircraftLanding = 'https://upload.wikimedia.org/wikipedia/commons/2/24/Pip
     <section class="section aircraft-detail-section">
       <div class="container aircraft-detail-grid">
         <figure class="aircraft-showcase reveal">
-          <div class="aircraft-showcase-head"><span>PIPER PA-28-140</span><span class="draft-pill">Representative photo</span></div>
-          <img class="aircraft-showcase-photo" src={aircraftExterior} alt="Representative Piper PA-28 Cherokee parked on an airfield" width="4259" height="2842" decoding="async" />
-          <figcaption>This is representative Piper PA-28 photography. Photos of N8491F will replace it after the aircraft is acquired.</figcaption>
+          <div class="aircraft-showcase-head"><span>PIPER PA-28-140</span><span class="draft-pill">N8491F · KWDR</span></div>
+          <img class="aircraft-showcase-photo" src={photo("n8491f-rear-quarter.jpg")} alt="N8491F Piper Cherokee seen from the rear quarter, with its red and white livery and registration visible" width="1536" height="1024" decoding="async" />
+          <figcaption>N8491F photographed on the ramp, showing its distinctive red-and-white paint and registration.</figcaption>
         </figure>
         <div class="aircraft-detail-copy reveal reveal-delay"><p class="eyebrow"><span></span> RENTAL PLATFORM</p><h2>Useful performance with a modernized panel.</h2><p class="lead">N8491F is a 1974 Piper PA-28-140 powered by a 160 HP Lycoming O-320-E2A. It offers three seats, a 950-pound useful load, 50 gallons of fuel, and an approximately 115-knot cruise speed.</p><div class="spec-grid">{aircraftSpecs.map((spec) => <div><span>{spec.label}</span><strong>{spec.value}</strong></div>)}</div></div>
       </div>
@@ -44,13 +43,13 @@ const aircraftLanding = 'https://upload.wikimedia.org/wikipedia/commons/2/24/Pip
 
     <section class="section gallery-section">
       <div class="container">
-        <div class="section-heading reveal"><p class="eyebrow"><span></span> AIRCRAFT GALLERY</p><h2>Representative Piper Cherokee photography.</h2><p>These public-domain images show the aircraft type and will be replaced with photographs of N8491F after acquisition.</p></div>
+        <div class="section-heading reveal"><p class="eyebrow"><span></span> AIRCRAFT GALLERY</p><h2>A closer look at N8491F.</h2><p>Explore the actual Cherokee, from its red-and-white exterior to the cockpit and instrument panel.</p></div>
         <div class="gallery-grid">
-          <figure class="gallery-photo wide"><img src={aircraftExterior} alt="Representative Piper PA-28 Cherokee exterior" width="4259" height="2842" loading="lazy" decoding="async" /><figcaption>Representative exterior profile</figcaption></figure>
-          <figure class="gallery-photo"><img src={aircraftCockpit} alt="Representative Piper PA-28 cockpit" width="3852" height="2564" loading="lazy" decoding="async" /><figcaption>Representative panel</figcaption></figure>
-          <figure class="gallery-photo"><img src={aircraftLanding} alt="Representative Piper PA-28 Cherokee landing" width="1600" height="1200" loading="lazy" decoding="async" /><figcaption>Representative aircraft in operation</figcaption></figure>
-          <figure class="gallery-photo aircraft-detail-crop"><img src={aircraftExterior} alt="Representative Piper Cherokee fuselage and wing detail" width="4259" height="2842" loading="lazy" decoding="async" /><figcaption>Fuselage and wing detail</figcaption></figure>
-          <figure class="gallery-photo cockpit-detail-crop"><img src={aircraftCockpit} alt="Representative Piper PA-28 instrument detail" width="3852" height="2564" loading="lazy" decoding="async" /><figcaption>Instrument detail</figcaption></figure>
+          <figure class="gallery-photo wide aircraft-gallery-feature"><img src={photo("n8491f-rear-portrait.jpg")} alt="Rear-side view of N8491F on the ramp, showing its red tail and registration" width="1024" height="1536" loading="lazy" decoding="async" /><figcaption>Red-and-white exterior · N8491F</figcaption></figure>
+          <figure class="gallery-photo"><img src={photo("n8491f-cockpit.jpg")} alt="The actual N8491F cockpit with Piper yokes, flight instruments, and Garmin equipment" width="1536" height="1024" loading="lazy" decoding="async" /><figcaption>Cockpit and instrument panel</figcaption></figure>
+          <figure class="gallery-photo"><img src={photo("n8491f-front-view.jpg")} alt="N8491F photographed straight-on with its wings and propeller visible" width="1536" height="1024" loading="lazy" decoding="async" /><figcaption>Front view and wingspan</figcaption></figure>
+          <figure class="gallery-photo"><img src={photo("n8491f-registration-detail.jpg")} alt="Close-up of the red fuselage paint and N8491F registration" width="600" height="500" loading="lazy" decoding="async" /><figcaption>Fuselage and registration</figcaption></figure>
+          <figure class="gallery-photo"><img src={photo("n8491f-avionics-detail.jpg")} alt="Close-up of N8491F flight instruments and avionics with displays powered off" width="880" height="670" loading="lazy" decoding="async" /><figcaption>Avionics detail</figcaption></figure>
         </div>
       </div>
     </section>

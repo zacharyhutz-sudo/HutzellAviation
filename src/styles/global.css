@@ -1585,3 +1585,11 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); outline: 
 /* Keep the mobile workspace bar clear of the open navigation menu. */
 body.nav-open .portal-nav { visibility: hidden; }
 .portal-workspace .auth-message { margin-bottom: 22px; }
+
+/* Photography update: keep the owner and registration in frame across layouts. */
+.gallery-photo.founder-gallery-feature img { object-position: center 38%; }
+.gallery-photo.aircraft-gallery-feature img { object-position: center 54%; }
+@media (max-width: 680px) {
+  .gallery-photo.founder-gallery-feature img { object-position: center 35%; }
+  .gallery-photo.aircraft-gallery-feature img { object-position: center 55%; }
+}
