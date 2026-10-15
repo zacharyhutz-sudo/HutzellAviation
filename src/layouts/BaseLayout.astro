@@ -1,13 +1,36 @@
 ---
+import { site } from '../data/site';
 interface Props { title?: string; description?: string; noindex?: boolean; }
 const {
-  title = 'Hutzell Aviation | Piper PA-28-140 Rental at KWDR',
-  description = 'Planned wet-rate 1974 Piper PA-28-140 aircraft rental for approved pilots and time builders at KWDR in Winder, Georgia.',
+  title = 'Aircraft Rental in Winder, GA | Hutzell Aviation',
+  description = 'Piper Cherokee aircraft rental planned at Winder–Barrow Airport (KWDR). Wet rates and time-building blocks for Northeast Georgia pilots from Atlanta to Athens.',
   noindex = false,
 } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
-const ogImage = new URL(`${base}images/og-image.png`, Astro.site ?? Astro.url.origin);
+const ogImage = new URL(`${base}images/n8491f-hero.jpg`, Astro.site ?? Astro.url.origin);
+const home = new URL(base, Astro.site ?? Astro.url.origin).toString();
+const businessId = `${home}#business`;
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization', '@id': businessId, name: site.name,
+      url: home, telephone: site.phoneHref, email: site.email,
+      logo: new URL(`${base}images/logo-full.png`, home).toString(),
+      image: ogImage.toString(), sameAs: [site.instagram],
+      location: { '@type': 'Place', name: 'Winder–Barrow Airport (KWDR)',
+        address: { '@type': 'PostalAddress', addressLocality: 'Winder', addressRegion: 'GA', addressCountry: 'US' } },
+      areaServed: ['Northeast Georgia', 'Winder, GA', 'Atlanta, GA', 'Athens, GA', 'Lawrenceville, GA', 'Dacula, GA', 'Buford, GA', 'Jefferson, GA', 'Monroe, GA'].map(name => ({ '@type': 'Place', name })),
+    },
+    { '@type': 'WebSite', '@id': `${home}#website`, url: home, name: site.shortName, publisher: { '@id': businessId } },
+    { '@type': 'WebPage', '@id': `${canonical}#webpage`, url: canonical.toString(), name: title,
+      description, isPartOf: { '@id': `${home}#website` }, about: { '@id': businessId } },
+    ...(Astro.url.pathname === base ? [{ '@type': 'Service', name: 'Piper PA-28-140 aircraft rental at KWDR',
+      description: 'Planned wet-rate aircraft rental and prepaid time-building blocks for approved pilots at Winder–Barrow Airport in Winder, Georgia.',
+      serviceType: 'Aircraft rental', provider: { '@id': businessId }, url: home }] : []),
+  ],
+};
 ---
 <!doctype html>
 <html lang="en">
@@ -15,10 +38,13 @@ const ogImage = new URL(`${base}images/og-image.png`, Astro.site ?? Astro.url.or
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <meta name="theme-color" content="#082B45" />
     <link rel="icon" type="image/png" href={`${base}favicon.png`} />
     <link rel="canonical" href={canonical.toString()} />
+    <meta property="og:url" content={canonical.toString()} />
+    <meta property="og:site_name" content={site.shortName} />
+    <meta property="og:image:alt" content="Hutzell Aviation Piper Cherokee N8491F" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -29,6 +55,8 @@ const ogImage = new URL(`${base}images/og-image.png`, Astro.site ?? Astro.url.or
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage.toString()} />
     <title>{title}</title>
+    {!noindex && <script type="application/ld+json" set:html={JSON.stringify(structuredData).replace(/</g, '\\u003c')} />}
+    <noscript><style>.reveal { opacity: 1 !important; transform: none !important; }</style></noscript>
     <script is:inline src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.0/dist/umd/supabase.js"></script>
   </head>
   <body>
