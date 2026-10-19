@@ -90,18 +90,38 @@ The database accepts reservations lasting up to seven days, but the current cale
 
 ## Required Supabase authentication setup
 
-1. Go to **Authentication → URL Configuration**.
-2. Set the site URL to:
+**This dashboard change is required in addition to deploying the website patch.**
 
-```text
-https://zacharyhutz-sudo.github.io/HutzellAviation/
-```
+1. Open **Supabase → Authentication → URL Configuration** for the Hutzell Aviation project.
+2. Set **Site URL** to `https://hutzellaviation.com` (replace any localhost or old GitHub Pages URL).
+3. Under **Redirect URLs**, add this **exact** URL:
 
-3. Add this redirect URL:
+   ```text
+   https://hutzellaviation.com/auth/confirm/?flow=signup
+   ```
 
-```text
-https://zacharyhutz-sudo.github.io/HutzellAviation/**
-```
+   This is the callback used by the `Create Account` form. If you also want to use
+   a custom token-hash email template or admin invitations, add
+   `https://hutzellaviation.com/auth/confirm/` as another allowed URL.
+4. Go to **Authentication → Email Templates → Confirm sign up**. The verification
+   button should use `{{ .ConfirmationURL }}` so Supabase verifies the user and
+   respects the `emailRedirectTo` destination. Remove hard-coded localhost or
+   old GitHub Pages links in custom email templates. Do **not** replace
+   `{{ .ConfirmationURL }}` with a direct link to the success page: doing so
+   skips verification.
+5. If sending **Supabase administrator invitations**, also review the **Invite user**
+   template. Dashboard invitations without an explicit redirect use the **Site URL**
+   as their fallback. They will now land on the live site, but they will not
+   automatically use the branded confirmation page unless the invitation
+   specifies an allowed redirect or the template is customized appropriately.
+6. Deploy the site and test with a **new, unverified email address**. Open the
+   verification email, confirm that the browser opens
+   `https://hutzellaviation.com/auth/confirm/`, and verify that the success
+   page leads to the renter account. Also test an expired/invalid link.
+
+The callback accepts Supabase's normal fragment/PKCE response and also supports
+`token_hash` links from a deliberately customized verification email template.
+It does not mark an account as verified based on a URL flag alone.
 
 ## Required GitHub repository variables
 
@@ -110,10 +130,9 @@ Under **Settings → Secrets and variables → Actions → Variables**, add:
 ```text
 PUBLIC_SUPABASE_URL=https://svcrlkpyudmksrnvgrsj.supabase.co
 PUBLIC_SUPABASE_PUBLISHABLE_KEY=your publishable key
-PUBLIC_SITE_URL=https://zacharyhutz-sudo.github.io/HutzellAviation/
 ```
 
-These are repository **variables**, not secrets. Never place a Supabase secret/service-role key in this static site.
+These are repository **variables**, not secrets. The authentication callback now uses the visitor’s current website origin, so an old `PUBLIC_SITE_URL` variable is **not required** and should be removed if it points at GitHub Pages or localhost. Never place a Supabase secret/service-role key in this static site.
 
 ## Deploy
 

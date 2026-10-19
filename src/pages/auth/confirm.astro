@@ -1,0 +1,137 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Icon from '../../components/Icon.astro';
+import '../../styles/global.css';
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout title="Confirm Your Email | Hutzell Aviation" description="Verify your email address and return to your Hutzell Aviation renter account." noindex>
+  <Header />
+  <main class="confirmation-page" id="main-content">
+    <section class="container confirmation-wrap" aria-labelledby="confirmation-title">
+      <div class="confirmation-card" data-confirm-card>
+        <img class="confirmation-logo" src={`${base}images/logo-full.png`} alt="Hutzell Aviation" width="1358" height="1224" />
+        <div class="confirmation-indicator" data-confirm-indicator aria-hidden="true">
+          <span data-confirm-icon="checking"><Icon name="mail" size={33} /></span>
+          <span data-confirm-icon="success" hidden><Icon name="check" size={33} /></span>
+          <span data-confirm-icon="error" hidden><Icon name="shield" size={33} /></span>
+        </div>
+        <p class="eyebrow confirmation-eyebrow">RENTER ACCOUNT</p>
+        <h1 id="confirmation-title" data-confirm-title>Verifying your email…</h1>
+        <p class="confirmation-description" data-confirm-description role="status" aria-live="polite">We’re securely checking your confirmation link.</p>
+        <div class="confirmation-actions" data-confirm-actions hidden>
+          <a class="button" href={`${base}account/`} data-confirm-primary><span data-confirm-primary-text>Continue to Your Account</span> <Icon name="arrow" size={18} /></a>
+        </div>
+        <p class="confirmation-footnote">Renting an aircraft requires a separate application and approval by Hutzell Aviation.</p>
+      </div>
+    </section>
+    <noscript><div class="container confirmation-noscript" role="alert">JavaScript is required to finish signing in. Please enable JavaScript and reopen your verification link.</div></noscript>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+
+  const title = document.querySelector<HTMLElement>('[data-confirm-title]')!;
+  const description = document.querySelector<HTMLElement>('[data-confirm-description]')!;
+  const card = document.querySelector<HTMLElement>('[data-confirm-card]')!;
+  const actions = document.querySelector<HTMLElement>('[data-confirm-actions]')!;
+  const primaryText = document.querySelector<HTMLElement>('[data-confirm-primary-text]')!;
+
+  function showResult(kind: 'success' | 'error' | 'neutral', heading: string, details: string, action = 'Go to Sign In') {
+    card.dataset.status = kind;
+    title.textContent = heading;
+    description.textContent = details;
+    document.querySelectorAll<HTMLElement>('[data-confirm-icon]').forEach((icon) => {
+      icon.hidden = icon.dataset.confirmIcon !== (kind === 'neutral' ? 'checking' : kind);
+    });
+    actions.hidden = false;
+    primaryText.textContent = kind === 'success' ? 'Continue to Your Account' : action;
+  }
+
+  async function confirmEmail() {
+    const query = new URLSearchParams(window.location.search);
+    const fragment = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const errorCode = fragment.get('error_code') || query.get('error_code');
+    const redirectError = fragment.get('error') || query.get('error');
+    const hasCallback = ['signup', 'invite'].includes(query.get('flow') || '')
+      || ['signup', 'invite', 'email'].includes(fragment.get('type') || '')
+      || query.has('code') || query.has('token_hash');
+
+    try {
+      if (redirectError || errorCode) {
+        showResult('error', 'Verification link unavailable',
+          'This verification link has expired or could not be used. If you already verified your email, try signing in. Otherwise, please contact Hutzell Aviation for help.');
+        return;
+      }
+
+      // Supports custom email templates that link directly here with a token hash.
+      // Standard Supabase ConfirmationURL links instead establish the session
+      // via the URL fragment (or PKCE code) handled by supabase-js automatically.
+      const tokenHash = query.get('token_hash');
+      if (tokenHash) {
+        const otpType = query.get('type');
+        if (!['email', 'signup', 'invite'].includes(otpType || '')) {
+          showResult('error', 'Invalid verification link', 'Please use the verification link from your Hutzell Aviation email.');
+          return;
+        }
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: (otpType === 'signup' ? 'email' : otpType) as 'email' | 'invite',
+        });
+        if (error) throw error;
+      }
+
+      // getUser validates the current session with Supabase; a URL parameter
+      // alone must never be enough to display a successful verification.
+      const { data, error } = await supabase.auth.getUser();
+      if (error && hasCallback) throw error;
+      const user = data?.user;
+      if (hasCallback && user?.email_confirmed_at) {
+        showResult('success', 'Your email is verified!',
+          'Your Hutzell Aviation account is confirmed. Continue to your account to complete your renter application or check its status.');
+      } else if (!hasCallback && user) {
+        showResult('neutral', 'You’re already signed in',
+          'Open your renter account to continue your application or manage your flights.', 'Continue to Your Account');
+      } else if (!hasCallback) {
+        showResult('neutral', 'Check your email to verify',
+          'Open the confirmation link in your Hutzell Aviation email to finish creating your account.');
+      } else {
+        showResult('error', 'We couldn’t confirm your email',
+          'Your confirmation could not be completed. The link may have expired. Try signing in if you’ve already verified, or contact Hutzell Aviation for assistance.');
+      }
+    } catch {
+      showResult('error', 'We couldn’t confirm your email',
+        'This link could not be verified. It may have expired or there may be a connection problem. Try signing in or contact Hutzell Aviation for help.');
+    } finally {
+      // Do not leave access tokens, codes, or OTP hashes in browser history.
+      if (window.location.search || window.location.hash) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    }
+  }
+
+  void confirmEmail();
+</script>
+
+<style>
+  .confirmation-page { min-height: 64vh; display: grid; align-items: center; background: linear-gradient(150deg, #f6f8f9, #eaf2f6); padding: 70px 0 90px; }
+  .confirmation-wrap { display: flex; justify-content: center; }
+  .confirmation-card { width: min(100%, 600px); padding: clamp(30px, 6vw, 65px); border: 1px solid var(--line); border-radius: 22px; background: #fff; box-shadow: var(--shadow-soft); text-align: center; }
+  .confirmation-logo { width: 122px; height: 110px; object-fit: contain; margin: 0 auto 27px; }
+  .confirmation-indicator { display: grid; place-items: center; margin: 0 auto 23px; width: 76px; height: 76px; color: var(--blue); background: var(--blue-light); border-radius: 50%; }
+  .confirmation-indicator span[hidden] { display: none; }
+  [data-status="success"] .confirmation-indicator { color: #206d4b; background: #e7f5ed; }
+  [data-status="error"] .confirmation-indicator { color: #963c3c; background: #fff1f1; }
+  .confirmation-eyebrow { justify-content: center; margin-bottom: 16px; }
+  .confirmation-card h1 { font-size: clamp(2.2rem, 5vw, 3.2rem); margin-bottom: 18px; }
+  .confirmation-description { max-width: 460px; margin: 0 auto; line-height: 1.75; }
+  .confirmation-actions { display: flex; flex-direction: column; align-items: center; gap: 18px; margin-top: 32px; }
+  .confirmation-actions[hidden] { display: none; }
+  .confirmation-actions .button { text-align: center; }
+  .confirmation-footnote { margin: 34px 0 0; padding-top: 21px; border-top: 1px solid var(--line); font-size: .8rem; line-height: 1.6; }
+  .confirmation-noscript { padding: 20px 0; }
+  @media (max-width: 520px) { .confirmation-page { padding: 32px 0 50px; } .confirmation-card { border-radius: 16px; } .confirmation-actions .button { width: 100%; } }
+</style>

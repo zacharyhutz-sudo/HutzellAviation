@@ -134,7 +134,7 @@ const base = import.meta.env.BASE_URL;
       try {
         const data = new FormData(form);
         const credentials = { email: String(data.get('email')).trim(), password: String(data.get('password')) };
-        const result = kind === 'signin' ? await supabase.auth.signInWithPassword(credentials) : await supabase.auth.signUp({ ...credentials, options: { data: { full_name: String(data.get('fullName')).trim(), phone: String(data.get('phone')).trim() }, emailRedirectTo: `${resolveSiteUrl(base)}account/` } });
+        const result = kind === 'signin' ? await supabase.auth.signInWithPassword(credentials) : await supabase.auth.signUp({ ...credentials, options: { data: { full_name: String(data.get('fullName')).trim(), phone: String(data.get('phone')).trim() }, emailRedirectTo: `${resolveSiteUrl(base)}auth/confirm/?flow=signup` } });
         if (result.error) throw result.error;
         if (kind === 'register' && !result.data.session) showMessage('Account created. Check your email for a confirmation link, then return to sign in.', true);
         await refreshSession();

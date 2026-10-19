@@ -19,7 +19,6 @@ export const supabase = browserFactory.createClient(supabaseUrl, supabaseKey || 
   },
 });
 
-export const siteUrl = import.meta.env.PUBLIC_SITE_URL || ''; 
 export const aircraftId = '00000000-0000-0000-0000-000000000001';
 export const aviationTimeZone = 'America/New_York';
 
@@ -53,7 +52,8 @@ export async function getCurrentProfile(): Promise<Profile | null> {
   return data as Profile;
 }
 
+// Redirect authentication emails back to the actual website the visitor used.
+// An older PUBLIC_SITE_URL GitHub variable may still point at a preview/localhost site.
 export function resolveSiteUrl(base: string): string {
-  if (siteUrl) return siteUrl.endsWith('/') ? siteUrl : `${siteUrl}/`;
-  return `${window.location.origin}${base}`;
+  return new URL(base, window.location.origin).toString();
 }
