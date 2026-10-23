@@ -1,0 +1,89 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import PortalNav from '../components/PortalNav.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../data/site';
+import '../styles/global.css';
+
+const base = import.meta.env.BASE_URL;
+const passengerReleasePdf = `${base}documents/passenger-liability-release.pdf`;
+const rentalAgreementPdf = `${base}documents/aircraft-rental-agreement.pdf`;
+---
+<BaseLayout title="Forms & Agreements | Hutzell Aviation" description="Review Hutzell Aviation rental and passenger documents before your flight. Tyler provides printed copies for signing in person.">
+  <Header />
+  <main id="main-content">
+    <div class="container operations-nav"><PortalNav active="forms" /></div>
+    <PageHero eyebrow="BEFORE YOUR FLIGHT" title="Forms & agreements." description="Please review the applicable documents before your flight. Tyler will provide printed copies for you to sign in person." />
+
+    <section class="section forms-section" aria-label="Documents for review">
+      <div class="container">
+        <div class="forms-notice">
+          <Icon name="document" size={26} />
+          <div><strong>Review here. Sign in person.</strong><p>You do not need to sign or submit anything online. Bring any questions to Tyler before signing.</p></div>
+        </div>
+
+        <div class="forms-grid">
+          <article class="document-card" aria-labelledby="rental-agreement-heading">
+            <div class="document-card-top"><span class="feature-icon"><Icon name="document" size={28} /></span><span class="document-audience">FOR RENTERS</span></div>
+            <h2 id="rental-agreement-heading">Aircraft Rental Agreement</h2>
+            <p>Review the agreement covering your aircraft rental before signing the printed copy with Tyler.</p>
+            <p class="document-format">PDF · Opens in a new tab</p>
+              <div class="document-actions">
+                <a class="button" href={rentalAgreementPdf} target="_blank" rel="noopener noreferrer" aria-label="View Aircraft Rental Agreement PDF (opens in a new tab)">View PDF <Icon name="arrow" size={18} /></a>
+                <a class="text-link" href={rentalAgreementPdf} download="Hutzell-Aviation-Aircraft-Rental-Agreement.pdf">Download PDF</a>
+              </div>
+          </article>
+
+          <article class="document-card" aria-labelledby="passenger-release-heading">
+            <div class="document-card-top"><span class="feature-icon"><Icon name="shield" size={28} /></span><span class="document-audience">FOR PASSENGERS</span></div>
+            <h2 id="passenger-release-heading">Passenger Liability Release</h2>
+            <p>Review the Passenger Assumption of Risk and Liability Release before accompanying an approved renter. The PDF also includes a separate Minor Passenger Consent form.</p>
+            <p class="document-format">PDF · Opens in a new tab</p>
+            <div class="document-actions">
+              <a class="button" href={passengerReleasePdf} target="_blank" rel="noopener noreferrer" aria-label="View Passenger Liability Release PDF (opens in a new tab)">View PDF <Icon name="arrow" size={18} /></a>
+              <a class="text-link" href={passengerReleasePdf} download="Hutzell-Aviation-Passenger-Liability-Release.pdf">Download PDF</a>
+            </div>
+          </article>
+        </div>
+
+        <aside class="forms-help" aria-labelledby="forms-help-heading">
+          <div><h2 id="forms-help-heading">Questions before you fly?</h2><p>Contact Tyler with any questions about the documents before signing in person.</p></div>
+          <a class="button button-outline" href={`tel:${site.phoneHref}`}>Call Tyler · {site.phoneDisplay}</a>
+        </aside>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .forms-section { background: var(--cloud); }
+  .forms-notice { display: flex; align-items: flex-start; gap: 16px; padding: 24px; margin-bottom: 30px; border: 1px solid var(--line); border-radius: 16px; background: var(--blue-light); }
+  .forms-notice > svg { flex: 0 0 auto; margin-top: 3px; color: var(--navy); }
+  .forms-notice strong { color: var(--navy); }
+  .forms-notice p { margin: 4px 0 0; color: var(--text); }
+  .forms-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px; }
+  .document-card { display: flex; flex-direction: column; padding: 34px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--white); box-shadow: var(--shadow-soft); }
+  .document-card-top { display: flex; align-items: center; gap: 18px; margin-bottom: 24px; }
+  .document-card-top .feature-icon { margin: 0; flex: 0 0 auto; }
+  .document-audience { color: var(--blue); font-size: .75rem; font-weight: 900; letter-spacing: .12em; }
+  .document-card h2 { font-size: clamp(1.9rem, 3vw, 2.6rem); line-height: 1.12; }
+  .document-format { font-size: .85rem; }
+  .document-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; padding-top: 14px; margin-top: auto; }
+  .forms-help { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; padding-top: 42px; }
+  .forms-help > div { max-width: 610px; }
+  .forms-help h2 { margin-bottom: 10px; font-size: 1.8rem; }
+  .forms-help p { margin: 0; }
+  .document-actions a:focus-visible, .forms-help a:focus-visible { outline: 3px solid var(--blue); outline-offset: 5px; }
+  @media (max-width: 700px) {
+    .forms-section { padding-block: 48px; }
+    .forms-grid { grid-template-columns: 1fr; }
+    .document-card { padding: 26px; }
+    .forms-notice { padding: 20px; }
+    .forms-help { align-items: flex-start; }
+    .forms-help > a { max-width: 100%; white-space: normal; text-align: center; }
+  }
+</style>
